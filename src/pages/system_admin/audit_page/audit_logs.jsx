@@ -2,9 +2,11 @@ import React, { useEffect, useState } from "react";
 import SystemAdminLayout from "../../../layouts/system_admin_layout";
 import { getAdminAuditLogs } from "../../../services/systemAdminService";
 import toast from "react-hot-toast";
+import { SysAdminTableSkeleton } from "../../../components/common/Skeleton";
 
 export default function SystemAdminAuditLogsPage() {
   const [logs, setLogs] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
@@ -12,9 +14,19 @@ export default function SystemAdminAuditLogsPage() {
         setLogs(await getAdminAuditLogs({ limit: 200 }));
       } catch {
         toast.error("Failed to load audit logs");
+      } finally {
+        setLoading(false);
       }
     })();
   }, []);
+
+  if (loading) {
+    return (
+      <SystemAdminLayout>
+        <SysAdminTableSkeleton rows={10} cols={5} title />
+      </SystemAdminLayout>
+    );
+  }
 
   return (
     <SystemAdminLayout>

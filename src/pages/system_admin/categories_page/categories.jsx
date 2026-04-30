@@ -9,6 +9,7 @@ import {
   updateAdminExpenseCategory,
 } from "../../../services/systemAdminService";
 import toast from "react-hot-toast";
+import { SysAdminCategoryGridSkeleton } from "../../../components/common/Skeleton";
 
 function CategorySection({ title, items, onCreate, onToggle }) {
   const [value, setValue] = useState("");
@@ -69,6 +70,7 @@ function CategorySection({ title, items, onCreate, onToggle }) {
 export default function SystemAdminCategoriesPage() {
   const [donations, setDonations] = useState([]);
   const [expenses, setExpenses] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const load = async () => {
     try {
@@ -80,12 +82,22 @@ export default function SystemAdminCategoriesPage() {
       setExpenses(expenseData);
     } catch {
       toast.error("Failed to load categories");
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
     load();
   }, []);
+
+  if (loading) {
+    return (
+      <SystemAdminLayout>
+        <SysAdminCategoryGridSkeleton />
+      </SystemAdminLayout>
+    );
+  }
 
   return (
     <SystemAdminLayout>

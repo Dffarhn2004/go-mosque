@@ -14,6 +14,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import axiosInstance from "../../../api/axiosInstance";
 import toast from "react-hot-toast";
+import { TakmirPageHeaderSkeleton, FacilityCardsSkeleton } from "../../../components/common/Skeleton";
 
 const FasilitasMasjidPage = () => {
   const [facilities, setFacilities] = useState([]);
@@ -210,11 +211,9 @@ const FasilitasMasjidPage = () => {
   if (loading) {
     return (
       <TakmirLayout>
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100 flex items-center justify-center">
-          <div className="flex items-center gap-3">
-            <Loader2 className="w-6 h-6 animate-spin text-teal-600" />
-            <span className="text-gray-600">Memuat data fasilitas...</span>
-          </div>
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100 p-6 lg:p-8 space-y-6">
+          <TakmirPageHeaderSkeleton showActions />
+          <FacilityCardsSkeleton count={6} />
         </div>
       </TakmirLayout>
     );

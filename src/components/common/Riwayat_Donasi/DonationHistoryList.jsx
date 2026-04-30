@@ -11,6 +11,7 @@ import {
   Calendar,
   TrendingUp,
 } from "lucide-react";
+import { HistoryListSkeleton, StatStripSkeleton } from "../Skeleton";
 
 const statusConfig = {
   Sukses: {
@@ -79,14 +80,17 @@ export default function DonationHistoryList() {
             "linear-gradient(135deg, rgba(12, 104, 57, 0.1) 0%, rgba(17, 130, 75, 0.1) 50%, rgba(10, 79, 46, 0.1) 100%)",
         }}
       >
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="flex justify-center items-center py-20">
-            <div className="relative">
-              <div className="animate-spin rounded-full h-16 w-16 border-4 border-green-200"></div>
-              <div className="animate-spin rounded-full h-16 w-16 border-4 border-green-600 border-t-transparent absolute top-0 left-0"></div>
-              <Heart className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-6 h-6 text-green-600 animate-pulse" />
-            </div>
+        <div className="max-w-6xl mx-auto px-4 space-y-6">
+          {/* Header placeholder */}
+          <div className="text-center py-8 space-y-3">
+            <div className="bg-gray-200 animate-pulse rounded-2xl h-16 w-16 mx-auto" />
+            <div className="bg-gray-200 animate-pulse rounded h-7 w-56 mx-auto" />
+            <div className="bg-gray-200 animate-pulse rounded h-4 w-72 mx-auto" />
           </div>
+          {/* Stat strip */}
+          <StatStripSkeleton count={3} />
+          {/* List items */}
+          <HistoryListSkeleton count={5} />
         </div>
       </div>
     );

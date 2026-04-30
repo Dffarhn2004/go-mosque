@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
 import DonationCard from "../../../components/common/Dashboard_Takmir/DonationCardTakmir";
 import TakmirLayout from "../../../layouts/takmir_layout";
+import { StatCardsSkeleton, CampaignListSkeleton } from "../../../components/common/Skeleton";
 import {
   Plus,
   Download,
@@ -127,11 +128,25 @@ const DonationTakmir = () => {
   if (loading) {
     return (
       <TakmirLayout>
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Memuat data donasi...</p>
+        <div className="space-y-6">
+          {/* Header skeleton */}
+          <div className="bg-white rounded-xl p-6 flex justify-between items-center">
+            <div className="space-y-2">
+              <div className="bg-gray-200 animate-pulse rounded h-7 w-44" />
+              <div className="bg-gray-200 animate-pulse rounded h-4 w-32" />
+            </div>
+            <div className="flex gap-2">
+              <div className="bg-gray-200 animate-pulse rounded-lg h-10 w-36" />
+              <div className="bg-gray-200 animate-pulse rounded-lg h-10 w-24" />
+            </div>
           </div>
+          <StatCardsSkeleton count={4} />
+          {/* Search bar skeleton */}
+          <div className="bg-white rounded-xl p-4 flex gap-3">
+            <div className="bg-gray-200 animate-pulse rounded-lg h-10 flex-1" />
+            <div className="bg-gray-200 animate-pulse rounded-lg h-10 w-28" />
+          </div>
+          <CampaignListSkeleton count={5} />
         </div>
       </TakmirLayout>
     );

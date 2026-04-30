@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import axiosInstance from "../../../api/axiosInstance";
 import { useNavigate } from "react-router-dom";
+import { MasjidListSkeleton } from "../../../components/common/Skeleton";
 
 const MasjidTerdaftarPage = () => {
   const [masjidList, setMasjidList] = useState([]);
@@ -76,22 +77,7 @@ const MasjidTerdaftarPage = () => {
               : null
           }
         />
-        <div
-          className="min-h-screen py-12"
-          style={{
-            background:
-              "linear-gradient(135deg, rgba(12, 104, 57, 0.1) 0%, rgba(17, 130, 75, 0.1) 50%, rgba(10, 79, 46, 0.1) 100%)",
-          }}
-        >
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-center items-center py-20">
-              <div className="text-center">
-                <Loader2 className="w-12 h-12 text-green-600 animate-spin mx-auto mb-4" />
-                <p className="text-gray-600">Memuat data masjid...</p>
-              </div>
-            </div>
-          </div>
-        </div>
+        <MasjidListSkeleton />
         <Footer />
       </>
     );

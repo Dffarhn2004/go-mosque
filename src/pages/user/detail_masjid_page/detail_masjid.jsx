@@ -2,6 +2,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import Navbar from "../../../components/common/LandingPage/Navbar";
 import MetaData from "../../../components/common/MetaData";
 import Footer from "../../../components/common/LandingPage/Footer";
+import { DetailMasjidSkeleton } from "../../../components/common/Skeleton";
 import MosqueCardSection from "../../../components/common/Home/MosqueCardSection";
 import { useEffect, useState } from "react";
 import axiosInstance from "../../../api/axiosInstance";
@@ -490,12 +491,11 @@ function DetailMasjid() {
 
   if (loading)
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-green-600 mx-auto mb-4"></div>
-          <p className="text-lg text-gray-600">Memuat data masjid...</p>
-        </div>
-      </div>
+      <>
+        <Navbar position="static" />
+        <DetailMasjidSkeleton />
+        <Footer />
+      </>
     );
 
   if (!masjidData)

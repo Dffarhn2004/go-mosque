@@ -5,21 +5,33 @@ import {
   getAdminDefaultAccounts,
 } from "../../../services/systemAdminService";
 import toast from "react-hot-toast";
+import { SysAdminTableSkeleton } from "../../../components/common/Skeleton";
 
 export default function SystemAdminCoaPage() {
   const [accounts, setAccounts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const load = async () => {
     try {
       setAccounts(await getAdminDefaultAccounts({ includeInactive: true }));
     } catch {
       toast.error("Failed to load default COA");
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
     load();
   }, []);
+
+  if (loading) {
+    return (
+      <SystemAdminLayout>
+        <SysAdminTableSkeleton rows={10} cols={5} title />
+      </SystemAdminLayout>
+    );
+  }
 
   return (
     <SystemAdminLayout>

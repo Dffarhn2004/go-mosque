@@ -1,5 +1,5 @@
 // App.jsx
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Landing from "./pages/landing_pages";
 import AuthPage from "./pages/user/auth_page/auth";
 import AdminAuthPage from "./pages/takmir/auth_page/auth";
@@ -28,7 +28,6 @@ import LaporanKeuanganJurnalPage from "./pages/takmir/laporan_keuangan_jurnal_pa
 import LaporanKeuanganUserPage from "./pages/user/laporan_keuangan_page/laporan_keuangan";
 import MasjidTerdaftarPage from "./pages/user/masjid_terdaftar_page/masjid_terdaftar";
 import BukuBesarPage from "./pages/takmir/buku_besar_page/buku_besar";
-import SystemAdminAuthPage from "./pages/system_admin/auth_page/auth";
 import SystemAdminDashboardPage from "./pages/system_admin/dashboard_page/dashboard";
 import SystemAdminUsersPage from "./pages/system_admin/users_page/users";
 import SystemAdminMasjidsPage from "./pages/system_admin/masjids_page/masjids";
@@ -45,7 +44,7 @@ function App() {
         <Route path="/" element={<Landing />} />
         <Route path="/auth" element={<AuthPage />} />
         <Route path="/auth/admin" element={<AdminAuthPage />} />
-        <Route path="/auth/system-admin" element={<SystemAdminAuthPage />} />
+        <Route path="/auth/system-admin" element={<Navigate to="/auth/admin" replace />} />
         <Route path="/riwayat" element={<RiwayatDonasiPage />} />
         <Route path="/masjid-terdaftar" element={<MasjidTerdaftarPage />} />
         <Route path="/home" element={<HomeUser />} />

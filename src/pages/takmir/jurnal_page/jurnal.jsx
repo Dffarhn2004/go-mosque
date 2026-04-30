@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import TakmirLayout from "../../../layouts/takmir_layout";
 import JurnalTable from "../../../components/common/JurnalTable";
+import { StatStripSkeleton, TableSkeleton } from "../../../components/common/Skeleton";
 import { getAllAccounts } from "../../../services/coaService";
 import {
   getAllJurnals,
@@ -11,7 +12,7 @@ import {
 import { transformAccounts, transformJurnals } from "../../../utils/dataTransform";
 import formatCurrency from "../../../utils/formatCurrency";
 import toast from "react-hot-toast";
-import { Plus, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
+import { Plus, CheckCircle2, AlertCircle } from "lucide-react";
 
 const JurnalPage = () => {
   const navigate = useNavigate();
@@ -145,9 +146,11 @@ const JurnalPage = () => {
         </div>
 
         {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="w-8 h-8 animate-spin text-green-600" />
-            <span className="ml-2 text-gray-600">Memuat data...</span>
+          <div className="space-y-4">
+            {/* 3 summary cards */}
+            <StatStripSkeleton count={3} />
+            {/* Table */}
+            <TableSkeleton rows={8} cols={6} />
           </div>
         ) : (
           <>

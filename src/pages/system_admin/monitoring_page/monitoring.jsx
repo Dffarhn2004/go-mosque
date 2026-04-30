@@ -6,11 +6,13 @@ import {
   getAdminMonitoringSummary,
 } from "../../../services/systemAdminService";
 import toast from "react-hot-toast";
+import { SysAdminMonitoringSkeleton } from "../../../components/common/Skeleton";
 
 export default function SystemAdminMonitoringPage() {
   const [summary, setSummary] = useState(null);
   const [campaigns, setCampaigns] = useState([]);
   const [expenses, setExpenses] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
@@ -25,9 +27,19 @@ export default function SystemAdminMonitoringPage() {
         setExpenses(expenseData);
       } catch {
         toast.error("Failed to load monitoring data");
+      } finally {
+        setLoading(false);
       }
     })();
   }, []);
+
+  if (loading) {
+    return (
+      <SystemAdminLayout>
+        <SysAdminMonitoringSkeleton />
+      </SystemAdminLayout>
+    );
+  }
 
   return (
     <SystemAdminLayout>

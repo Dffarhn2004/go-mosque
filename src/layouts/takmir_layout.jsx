@@ -337,9 +337,9 @@ export default function TakmirLayout({ children }) {
                 className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200"
               >
                 <img
-                  src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face"
+                  src="/man_profile.png"
                   className="w-8 h-8 rounded-full object-cover"
-                  alt="User Avatar"
+                  alt="Takmir profile picture"
                 />
                 <div className="hidden md:block text-left">
                   <p className="text-sm font-medium text-gray-800">

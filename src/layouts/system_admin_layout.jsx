@@ -38,7 +38,7 @@ export default function SystemAdminLayout({ children }) {
   }, []);
 
   if (!user || user?.role?.Nama !== "Admin") {
-    navigate("/auth/system-admin", { replace: true });
+    navigate("/auth/admin", { replace: true });
     return null;
   }
 
@@ -100,7 +100,7 @@ export default function SystemAdminLayout({ children }) {
         <button
           onClick={() => {
             localStorage.clear();
-            navigate("/auth/system-admin", { replace: true });
+            navigate("/auth/admin", { replace: true });
           }}
           className="mt-8 flex w-full items-center gap-3 rounded-xl border border-[#d1c7b3] px-4 py-3 text-sm text-[#7b2e2e] hover:bg-[#f5e5e5]"
         >

@@ -24,6 +24,7 @@ import formatCurrency from "../../../utils/formatCurrency";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../../api/axiosInstance";
 import StatCard from "./StatCards";
+import { DashboardSkeleton } from "../Skeleton";
 
 const Dashboard = () => {
   const [selectedPeriod, setSelectedPeriod] = useState("week");
@@ -111,7 +112,7 @@ const Dashboard = () => {
     fetchDonatur();
   }, []);
 
-  if (loading) return <p className="text-center">Loading campaigns...</p>;
+  if (loading) return <DashboardSkeleton />;
 
   // const donationCampaigns = [
   //   {

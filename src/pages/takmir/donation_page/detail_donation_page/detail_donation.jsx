@@ -4,6 +4,7 @@ import TakmirLayout from "../../../../layouts/takmir_layout";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axiosInstance from "../../../../api/axiosInstance";
+import { Sk, StatCardsSkeleton, CampaignListSkeleton } from "../../../../components/common/Skeleton";
 
 const DonationDetailTakmir = () => {
   // const donation = dummyData[0];
@@ -28,7 +29,24 @@ const DonationDetailTakmir = () => {
     fetchDonation();
   }, []);
 
-  if (loading) return <p className="text-center">Loading campaigns...</p>;
+  if (loading) {
+    return (
+      <TakmirLayout>
+        <div className="p-6 space-y-6">
+          <Sk className="h-9 w-36 rounded-lg" />
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div className="space-y-2">
+              <Sk className="h-8 w-72" />
+              <Sk className="h-4 w-48" />
+            </div>
+            <Sk className="h-10 w-32 rounded-lg" />
+          </div>
+          <StatCardsSkeleton count={4} />
+          <CampaignListSkeleton count={3} />
+        </div>
+      </TakmirLayout>
+    );
+  }
   const handleBack = () => {
     navigate(-1); // Go back to previous page
     // Alternative: navigate to specific route

@@ -9,6 +9,7 @@ import {
 } from "../../../services/systemAdminService";
 import axiosInstance from "../../../api/axiosInstance";
 import toast from "react-hot-toast";
+import { SysAdminTableSkeleton } from "../../../components/common/Skeleton";
 
 export default function SystemAdminUsersPage() {
   const defaultForm = {
@@ -25,6 +26,7 @@ export default function SystemAdminUsersPage() {
   const [search, setSearch] = useState("");
   const [accountType, setAccountType] = useState("takmir");
   const [form, setForm] = useState(defaultForm);
+  const [loading, setLoading] = useState(true);
 
   const loadData = async () => {
     try {
@@ -36,6 +38,8 @@ export default function SystemAdminUsersPage() {
       setRoles(roleRes.data.data);
     } catch (error) {
       toast.error("Failed to load users");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -67,6 +71,14 @@ export default function SystemAdminUsersPage() {
       );
     }
   };
+
+  if (loading) {
+    return (
+      <SystemAdminLayout>
+        <SysAdminTableSkeleton rows={8} cols={5} title />
+      </SystemAdminLayout>
+    );
+  }
 
   return (
     <SystemAdminLayout>

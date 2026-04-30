@@ -20,7 +20,7 @@ import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../../api/axiosInstance";
 
-// Admin Input Component
+// Auth Input Component
 const AdminInputField = ({
   label,
   type,
@@ -71,7 +71,7 @@ const AdminInputField = ({
   );
 };
 
-// Admin Error Alert Component
+// Auth Error Alert Component
 const AdminErrorAlert = ({ message }) => {
   if (!message) return null;
 
@@ -91,7 +91,7 @@ const AdminErrorAlert = ({ message }) => {
   );
 };
 
-// Admin Success Alert Component
+// Auth Success Alert Component
 const AdminSuccessAlert = ({ message }) => {
   if (!message) return null;
 
@@ -111,7 +111,7 @@ const AdminSuccessAlert = ({ message }) => {
   );
 };
 
-// Admin Submit Button Component
+// Auth Submit Button Component
 const AdminSubmitButton = ({ loading = false, onClick, isLogin = true }) => {
   return (
     <button
@@ -149,7 +149,7 @@ const AdminSubmitButton = ({ loading = false, onClick, isLogin = true }) => {
           {isLogin ? (
             <>
               <Shield className="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-white" />
-              Access Admin Panel
+              Login to Dashboard
             </>
           ) : (
             <>
@@ -163,7 +163,7 @@ const AdminSubmitButton = ({ loading = false, onClick, isLogin = true }) => {
   );
 };
 
-// Admin Header Component
+// Auth Header Component
 const AdminAuthHeader = ({ isLogin = true }) => {
   return (
     <div className="text-center mb-6 sm:mb-8">
@@ -177,11 +177,11 @@ const AdminAuthHeader = ({ isLogin = true }) => {
         </div>
       </div>
       <h1 className="text-2xl sm:text-4xl font-bold text-gray-900 mb-2 sm:mb-3">
-        {isLogin ? "Admin Portal" : "Takmir Registration"}
+        {isLogin ? "Dashboard Portal" : "Takmir Registration"}
       </h1>
       <p className="text-gray-600 text-sm sm:text-lg px-4">
         {isLogin
-          ? "Mosque Donation Management System"
+          ? "Login untuk Takmir dan System Admin Goqu"
           : "Create New Takmir Account"}
       </p>
       <div className="mt-3 sm:mt-4 h-1 w-16 sm:w-24 bg-[#0C6839] mx-auto rounded-full"></div>
@@ -235,7 +235,7 @@ const ModeToggle = ({ isLogin, onToggle }) => {
   );
 };
 
-// Main Admin Auth Component
+// Main Auth Component
 const AdminAuthPage = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
@@ -275,7 +275,7 @@ const AdminAuthPage = () => {
     }
 
     if (loginForm.password.length < 8) {
-      setError("Admin password must be at least 8 characters long.");
+      setError("Password must be at least 8 characters long.");
       return false;
     }
 
@@ -431,7 +431,7 @@ const AdminAuthPage = () => {
                 // Login Form
                 <>
                   <AdminInputField
-                    label="Admin Email"
+                    label="Email"
                     type="email"
                     name="email"
                     value={loginForm.email}
@@ -549,7 +549,7 @@ const AdminAuthPage = () => {
       <div className="mt-6 sm:mt-8 text-center px-4">
         <p className="text-xs sm:text-xs text-[#0C6839] mb-1 sm:mb-2">
           {isLogin
-            ? "Admin Portal - Authorized Personnel Only"
+            ? "Unified login for Takmir and System Admin"
             : "Takmir Registration - Create Your Account"}
         </p>
         <p className="text-xs text-gray-400">

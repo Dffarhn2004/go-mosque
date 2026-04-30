@@ -32,6 +32,7 @@ import {
   CheckCircle2,
   Calendar,
 } from "lucide-react";
+import { JurnalFormSkeleton } from "../../../components/common/Skeleton";
 
 const JurnalFormPage = () => {
   const navigate = useNavigate();
@@ -625,10 +626,7 @@ const JurnalFormPage = () => {
   if (loading) {
     return (
       <TakmirLayout>
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="w-8 h-8 animate-spin text-green-600" />
-          <span className="ml-2 text-gray-600">Memuat data...</span>
-        </div>
+        <JurnalFormSkeleton />
       </TakmirLayout>
     );
   }

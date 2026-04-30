@@ -5,7 +5,7 @@ import { getAllAccounts, createAccount, updateAccount, deleteAccount, getNextAcc
 import { transformAccounts, transformAccount, transformAccountForBackend } from "../../../utils/dataTransform";
 import { getDetailAccounts } from "../../../utils/accountUtils";
 import toast from "react-hot-toast";
-import { Loader2 } from "lucide-react";
+import { TableSkeleton } from "../../../components/common/Skeleton";
 
 const COAPage = () => {
   const masjid = JSON.parse(localStorage.getItem("masjid") || "{}");
@@ -131,12 +131,8 @@ const COAPage = () => {
           </div>
         </div>
 
-        {/* Loading State */}
         {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="w-8 h-8 animate-spin text-green-600" />
-            <span className="ml-2 text-gray-600">Memuat data akun...</span>
-          </div>
+          <TableSkeleton rows={8} cols={5} />
         ) : (
           /* COA Table */
           <COATable

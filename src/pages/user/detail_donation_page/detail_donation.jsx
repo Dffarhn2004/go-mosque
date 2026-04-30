@@ -6,6 +6,7 @@ import MosqueCardSection from "../../../components/common/Home/MosqueCardSection
 import { useEffect, useState } from "react";
 import axiosInstance from "../../../api/axiosInstance";
 import formatCurrency from "../../../utils/formatCurrency";
+import { DonationDetailSkeleton } from "../../../components/common/Skeleton";
 
 // SVG component for the decorative curve
 const TopCurve = () => (
@@ -44,7 +45,13 @@ function DetailDonation() {
     fetchDonation();
   }, [id]);
 
-  if (loading) return <p className="text-center">Loading campaigns...</p>;
+  if (loading) return (
+    <>
+      <Navbar position="static" />
+      <DonationDetailSkeleton />
+      <Footer />
+    </>
+  );
   if (!donation) return <p className="text-center">Donasi tidak ditemukan</p>;
 
   const currentDonation = donation.UangDonasiTerkumpul;

@@ -9,7 +9,8 @@ import {
   generatePerubahanEkuitas as generatePerubahanEkuitasAPI,
 } from "../../../services/laporanService";
 import { exportToPDF, exportToExcel } from "../../../utils/exportUtils";
-import { Calendar, Download, Loader2, FileText, FileSpreadsheet, ChevronDown } from "lucide-react";
+import { Calendar, Download, FileText, FileSpreadsheet, ChevronDown } from "lucide-react";
+import { TableSkeleton } from "../../../components/common/Skeleton";
 import toast from "react-hot-toast";
 import axiosInstance from "../../../api/axiosInstance";
 import { debounce } from "../../../utils/debounce";
@@ -657,10 +658,7 @@ const LaporanKeuanganJurnalPage = () => {
           {/* Content */}
           <div className="p-6">
             {loading ? (
-              <div className="flex items-center justify-center py-12">
-                <Loader2 className="w-8 h-8 animate-spin text-green-600" />
-                <span className="ml-2 text-gray-600">Memuat laporan...</span>
-              </div>
+              <TableSkeleton rows={6} cols={4} />
             ) : laporanData ? (
               <>
                 {activeTab === "neraca" && <LaporanNeraca data={laporanData} />}

@@ -7,6 +7,7 @@ import formatCurrency from "../../../utils/formatCurrency";
 import { hitungSaldoAkun } from "../../../utils/jurnalUtils";
 import { exportBukuBesarToPDF, exportBukuBesarToExcel } from "../../../utils/exportUtils";
 import { Calendar, Loader2, Download, FileText, FileSpreadsheet, ChevronDown } from "lucide-react";
+import { TableSkeleton } from "../../../components/common/Skeleton";
 import toast from "react-hot-toast";
 import axiosInstance from "../../../api/axiosInstance";
 
@@ -279,12 +280,7 @@ const BukuBesarPage = () => {
         {/* Tabel Buku Besar Semua Akun */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200">
           {loading ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="w-8 h-8 animate-spin text-green-600" />
-              <span className="ml-2 text-gray-600">
-                Memuat data buku besar...
-              </span>
-            </div>
+            <TableSkeleton rows={10} cols={6} />
           ) : (
             <>
               <div className="px-6 py-4 border-b border-gray-200 flex flex-col md:flex-row md:items-center md:justify-between gap-3">

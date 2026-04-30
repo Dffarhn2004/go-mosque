@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import axiosInstance from "../../../api/axiosInstance";
 import toast from "react-hot-toast";
+import { TakmirPageHeaderSkeleton, LaporanBlockSkeleton } from "../../../components/common/Skeleton";
 
 // Enum mapping for API
 const JENIS_LAPORAN_ENUM = {
@@ -289,11 +290,9 @@ const LaporanKeuanganPage = () => {
   if (loading) {
     return (
       <TakmirLayout>
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100 flex items-center justify-center">
-          <div className="text-center">
-            <Loader2 className="w-8 h-8 animate-spin text-teal-600 mx-auto mb-4" />
-            <p className="text-gray-600">Memuat data laporan...</p>
-          </div>
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100 p-6 lg:p-8 space-y-6">
+          <TakmirPageHeaderSkeleton showActions />
+          <LaporanBlockSkeleton />
         </div>
       </TakmirLayout>
     );

@@ -5,6 +5,7 @@ import TakmirLayout from "../../../layouts/takmir_layout";
 import axiosInstance from "../../../api/axiosInstance";
 import toast from "react-hot-toast";
 import formatCurrency from "../../../utils/formatCurrency";
+import { ExpenseFormSkeleton } from "../../../components/common/Skeleton";
 
 export default function DonationExpenseFormPage() {
   const navigate = useNavigate();
@@ -126,12 +127,7 @@ export default function DonationExpenseFormPage() {
   if (loading) {
     return (
       <TakmirLayout>
-        <div className="flex min-h-[60vh] items-center justify-center">
-          <div className="flex items-center gap-3 text-gray-600">
-            <Loader2 className="h-6 w-6 animate-spin" />
-            <span>Memuat form pengeluaran...</span>
-          </div>
-        </div>
+        <ExpenseFormSkeleton />
       </TakmirLayout>
     );
   }

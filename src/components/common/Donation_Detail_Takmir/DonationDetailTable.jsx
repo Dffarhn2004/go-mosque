@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import formatCurrency from "../../../utils/formatCurrency";
+import { TableSkeleton } from "../Skeleton";
 
 // Enhanced Sort Icon with better animations
 const SortIcon = ({ direction }) => (
@@ -226,9 +227,8 @@ const DonationTable = ({ title, data = [], loading = false }) => {
       {/* Table Container - Flexible height */}
       <div className="flex-1 text-black mx-4 mb-4 bg-white/80 backdrop-blur-sm rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
         {loading ? (
-          <div className="flex-1 flex flex-col justify-center items-center gap-3">
-            <div className="animate-spin rounded-full h-8 w-8 border-3 border-blue-500 border-t-transparent"></div>
-            <p className="text-gray-500 text-sm">Memuat...</p>
+          <div className="p-4">
+            <TableSkeleton rows={5} cols={2} />
           </div>
         ) : processedData.length === 0 ? (
           <div className="flex-1 flex flex-col justify-center items-center gap-3">
