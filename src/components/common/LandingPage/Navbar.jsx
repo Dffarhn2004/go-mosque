@@ -41,15 +41,14 @@ const Navbar = ({ position = "fixed", user = null }) => {
   const toggleUserDropdown = () => setIsUserDropdownOpen(!isUserDropdownOpen);
 
   const handleLogout = () => {
-    // Add logout logic here
-    console.log("Logout clicked");
-    setIsUserDropdownOpen(false);
+    localStorage.clear();
+    navigate("/");
   };
 
   return (
     <>
       <nav
-        className={`static md:${position} top-0 left-0 w-full z-[120] isolate transition-all duration-500 ease-in-out`}
+        className={`static lg:${position} top-0 left-0 w-full z-[120] isolate transition-all duration-500 ease-in-out`}
         style={{
           background: isScrolled 
             ? "linear-gradient(135deg, rgba(12, 104, 57, 0.98) 0%, rgba(17, 130, 75, 0.98) 50%, rgba(10, 79, 46, 0.98) 100%)"
@@ -65,7 +64,7 @@ const Navbar = ({ position = "fixed", user = null }) => {
         aria-label="Main navigation"
       >
         <div className="mx-auto px-4 sm:px-6 lg:px-32">
-          <div className="flex items-center justify-between h-16 md:h-20">
+          <div className="flex items-center justify-between h-16 lg:h-20">
             {/* Enhanced Logo with Glow Effect */}
             <div 
               className="flex items-center cursor-pointer group" 
@@ -90,7 +89,7 @@ const Navbar = ({ position = "fixed", user = null }) => {
             </div>
 
             {/* Enhanced Desktop Menu */}
-            <div className="hidden md:flex items-center space-x-2 lg:space-x-4">
+            <div className="hidden lg:flex items-center space-x-2 lg:space-x-4">
               {user ? (
                 // Enhanced Authenticated view
                 <>
@@ -160,7 +159,7 @@ const Navbar = ({ position = "fixed", user = null }) => {
             </div>
 
             {/* Enhanced Mobile menu button */}
-            <div className="md:hidden">
+            <div className="lg:hidden">
               <button
                 onClick={toggleMenu}
                 onKeyDown={(e) => handleKeyDown(e, toggleMenu)}
@@ -198,7 +197,7 @@ const Navbar = ({ position = "fixed", user = null }) => {
 
           {/* Enhanced Mobile Menu */}
           {isMenuOpen && (
-            <div className="md:hidden border-t border-white/20 py-4 animate-slideDown backdrop-blur-xl">
+            <div className="lg:hidden border-t border-white/20 py-4 animate-slideDown backdrop-blur-xl">
               {user ? (
                 <div className="space-y-2">
                   <MobileNavLink text="🏠 Dashboard" onClick={() => navigate("/home")} />

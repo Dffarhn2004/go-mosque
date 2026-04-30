@@ -25,6 +25,7 @@ function DetailDonation() {
   const { id } = useParams(); // get the id from route param
   const [donation, setDonation] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [selectedExpense, setSelectedExpense] = useState(null);
 
   const navigate = useNavigate();
   useEffect(() => {
@@ -54,10 +55,13 @@ function DetailDonation() {
   const usageProgress = currentDonation > 0 ? (usedDonation / currentDonation) * 100 : 0;
   
   const progressData = donation.pengeluaran_donasi_masjid.map((item) => ({
+    id: item.id,
     image: item.FotoPengeluaran,
     title: item.TujuanPengeluaran,
     description: item.DeskripsiPengeluaran,
     amount: item.UangPengeluaran,
+    category: item.kategori_pengeluaran?.Nama || "-",
+    createdAt: item.CreatedAt,
   }));
 
   return (
@@ -269,20 +273,20 @@ function DetailDonation() {
               <h2 className="text-3xl font-bold text-gray-900">
                 Progress Penggunaan Dana
               </h2>
-              <button className="bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold px-4 py-2 rounded-lg transition duration-300 border border-gray-300">
-                Export
-              </button>
             </div>
 
             {progressData && progressData.length > 0 ? (
               <div className="flex space-x-6 overflow-x-auto pb-4 -mx-6 px-6">
                 {progressData.map((item, index) => (
                   <div
-                    key={index}
+                    key={item.id || index}
                     className="flex-shrink-0 w-80 bg-white rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300"
                   >
                     <img
-                      src={item.image}
+                      src={
+                        item.image ||
+                        "https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=1200&q=80"
+                      }
                       alt={item.title}
                       className="w-full h-40 object-cover rounded-t-2xl"
                     />
@@ -290,14 +294,30 @@ function DetailDonation() {
                       <h4 className="text-lg font-semibold text-gray-900">
                         {item.title}
                       </h4>
-                      <p className="text-base text-gray-600 mt-1 leading-relaxed flex-grow">
-                        {item.description}
+                      <p className="mt-1 text-sm text-gray-500">
+                        {item.createdAt
+                          ? new Date(item.createdAt).toLocaleDateString("id-ID", {
+                              day: "numeric",
+                              month: "long",
+                              year: "numeric",
+                            })
+                          : "Tanggal belum tersedia"}
+                      </p>
+                      <p className="mt-3 flex-grow text-base leading-relaxed text-gray-600 line-clamp-3">
+                        {item.description || "Belum ada deskripsi pengeluaran."}
                       </p>
                       <div className="mt-4">
                         <span className="bg-purple-100 text-purple-700 font-semibold text-base px-4 py-1.5 rounded-md inline-block shadow-sm">
                           {formatCurrency(item.amount)}
                         </span>
                       </div>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedExpense(item)}
+                        className="mt-4 rounded-lg border border-green-200 bg-green-50 px-4 py-2 text-sm font-semibold text-green-700 transition hover:bg-green-100"
+                      >
+                        Lihat Detail Pengeluaran
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -351,6 +371,72 @@ function DetailDonation() {
           </div>
         </section>
       </main>
+
+      {selectedExpense && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+          <div className="relative max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-3xl bg-white shadow-2xl">
+            <button
+              type="button"
+              onClick={() => setSelectedExpense(null)}
+              className="absolute right-4 top-4 rounded-full bg-white/90 px-3 py-1 text-sm font-semibold text-gray-700 shadow transition hover:bg-gray-100"
+            >
+              Tutup
+            </button>
+
+            <img
+              src={
+                selectedExpense.image ||
+                "https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=1200&q=80"
+              }
+              alt={selectedExpense.title}
+              className="h-64 w-full rounded-t-3xl object-cover"
+            />
+
+            <div className="space-y-6 p-6">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-green-600">
+                  Detail Pengeluaran
+                </p>
+                <h3 className="mt-2 text-2xl font-bold text-gray-900">
+                  {selectedExpense.title}
+                </h3>
+                <p className="mt-2 text-sm text-gray-500">
+                  {selectedExpense.createdAt
+                    ? new Date(selectedExpense.createdAt).toLocaleDateString("id-ID", {
+                        weekday: "long",
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                      })
+                    : "Tanggal belum tersedia"}
+                </p>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="rounded-2xl bg-green-50 p-4">
+                  <p className="text-sm text-green-800">Jumlah Pengeluaran</p>
+                  <p className="mt-1 text-2xl font-bold text-green-700">
+                    {formatCurrency(selectedExpense.amount)}
+                  </p>
+                </div>
+                <div className="rounded-2xl bg-gray-50 p-4">
+                  <p className="text-sm text-gray-600">Kategori</p>
+                  <p className="mt-1 text-lg font-semibold text-gray-900">
+                    {selectedExpense.category}
+                  </p>
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-gray-200 p-5">
+                <p className="text-sm font-semibold text-gray-700">Deskripsi</p>
+                <p className="mt-3 whitespace-pre-line leading-relaxed text-gray-600">
+                  {selectedExpense.description || "Belum ada deskripsi pengeluaran."}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <Footer />
     </>
