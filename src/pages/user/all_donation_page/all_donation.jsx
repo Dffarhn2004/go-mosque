@@ -11,7 +11,12 @@ function AllDonationUser() {
 
   return (
     <>
-      <MetaData />
+      <MetaData
+        title="Semua Donasi Masjid"
+        description="Jelajahi semua kampanye donasi masjid yang aktif. Pilih masjid yang ingin Anda dukung untuk pembangunan, renovasi, dan kegiatan keislaman."
+        keywords="donasi masjid aktif, kampanye donasi, wakaf online, sedekah masjid"
+        url="/donation"
+      />
       <Navbar
         position="static"
         user={{

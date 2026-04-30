@@ -64,9 +64,40 @@ function DetailDonation() {
     createdAt: item.CreatedAt,
   }));
 
+  const donationJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'FundraiserCampaign',
+    name: donation.Nama,
+    description: donation.Deskripsi || `Kampanye donasi untuk ${donation.masjid?.Nama}`,
+    url: `https://goqu.vercel.app/home/donation/${id}`,
+    organizer: {
+      '@type': 'Place',
+      name: donation.masjid?.Nama,
+      address: donation.masjid?.Alamat,
+    },
+    financialIncentive: {
+      '@type': 'MonetaryAmount',
+      currency: 'IDR',
+      value: donation.TargetUangDonasi,
+    },
+    ...(donation.FotoThumbnailDonasi && { image: donation.FotoThumbnailDonasi }),
+  };
+
   return (
     <>
-      <MetaData />
+      <MetaData
+        title={donation.Nama}
+        description={
+          donation.Deskripsi
+            ? `${donation.Deskripsi.slice(0, 140)}...`
+            : `Donasikan untuk ${donation.Nama} — ${donation.masjid?.Nama}. Target Rp${Number(donation.TargetUangDonasi).toLocaleString('id-ID')}.`
+        }
+        keywords={`donasi ${donation.masjid?.Nama}, ${donation.Nama}, GoQu, wakaf masjid`}
+        image={donation.FotoThumbnailDonasi}
+        url={`/home/donation/${id}`}
+        type="website"
+        jsonLd={donationJsonLd}
+      />
       <Navbar
         position="static"
         user={{

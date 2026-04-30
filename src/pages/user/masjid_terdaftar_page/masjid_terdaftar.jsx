@@ -56,7 +56,12 @@ const MasjidTerdaftarPage = () => {
   if (loading) {
     return (
       <>
-        <MetaData title="Masjid Terdaftar - GoQu" />
+        <MetaData
+          title="Masjid Terdaftar"
+          description="Daftar masjid yang terdaftar di GoQu. Temukan masjid yang membutuhkan dukungan donasi untuk pembangunan dan renovasi di seluruh Indonesia."
+          keywords="daftar masjid, masjid terdaftar, masjid butuh donasi, GoQu"
+          url="/masjid-terdaftar"
+        />
         <Navbar
           position="static"
           user={
@@ -95,7 +100,12 @@ const MasjidTerdaftarPage = () => {
   if (error) {
     return (
       <>
-        <MetaData title="Masjid Terdaftar - GoQu" />
+        <MetaData
+          title="Masjid Terdaftar"
+          description="Daftar masjid yang terdaftar di GoQu. Temukan masjid yang membutuhkan dukungan donasi untuk pembangunan dan renovasi di seluruh Indonesia."
+          keywords="daftar masjid, masjid terdaftar, masjid butuh donasi, GoQu"
+          url="/masjid-terdaftar"
+        />
         <Navbar
           position="static"
           user={
@@ -130,7 +140,12 @@ const MasjidTerdaftarPage = () => {
 
   return (
     <>
-      <MetaData title="Masjid Terdaftar - GoQu" />
+      <MetaData
+          title="Masjid Terdaftar"
+          description="Daftar masjid yang terdaftar di GoQu. Temukan masjid yang membutuhkan dukungan donasi untuk pembangunan dan renovasi di seluruh Indonesia."
+          keywords="daftar masjid, masjid terdaftar, masjid butuh donasi, GoQu"
+          url="/masjid-terdaftar"
+        />
       <Navbar
         position="static"
         user={

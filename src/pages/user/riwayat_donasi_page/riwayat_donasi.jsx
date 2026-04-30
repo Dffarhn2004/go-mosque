@@ -6,7 +6,12 @@ import DonationHistoryList from "../../../components/common/Riwayat_Donasi/Donat
 function RiwayatDonasiPage() {
   return (
     <>
-      <MetaData />
+      <MetaData
+        title="Riwayat Donasi Saya"
+        description="Lihat riwayat donasi Anda ke berbagai masjid di Indonesia melalui platform GoQu."
+        url="/riwayat"
+        noIndex={true}
+      />
       <Navbar
         position="static"
         user={{

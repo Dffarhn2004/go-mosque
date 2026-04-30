@@ -8,7 +8,11 @@ import MetaData from "../../../components/common/MetaData";
 function HomeUser() {
   return (
     <>
-      <MetaData />
+      <MetaData
+        title="Beranda"
+        description="Temukan masjid di sekitarmu dan donasikan untuk pembangunan serta renovasi. GoQu menghubungkan donatur dengan masjid yang membutuhkan."
+        url="/home"
+      />
       <Navbar
         position="static"
         user={{

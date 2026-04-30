@@ -1,0 +1,16 @@
+User-agent: *
+Allow: /
+Allow: /masjid/
+Allow: /home/donation/
+Allow: /donation
+Allow: /masjid-terdaftar
+
+# Blokir halaman admin & authenticated-only
+Disallow: /admin/
+Disallow: /auth/
+Disallow: /riwayat
+Disallow: /home/donation/*/checkout
+Disallow: /system-admin/
+
+# Sitemap
+Sitemap: https://goqu.vercel.app/sitemap.xml

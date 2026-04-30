@@ -507,9 +507,36 @@ function DetailMasjid() {
       </div>
     );
 
+  const masjidJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Place',
+    name: masjidData.Nama,
+    description: masjidData.Deskripsi || `Informasi lengkap tentang ${masjidData.Nama}`,
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: masjidData.Alamat,
+      addressCountry: 'ID',
+    },
+    telephone: masjidData.NomorTelepon,
+    url: `https://goqu.vercel.app/masjid/${id}`,
+    ...(masjidData.FotoLuarMasjid?.[0] && { image: masjidData.FotoLuarMasjid[0] }),
+  };
+
   return (
     <>
-      <MetaData title={`${masjidData.Nama} - Detail Masjid`} />
+      <MetaData
+        title={masjidData.Nama}
+        description={
+          masjidData.Deskripsi
+            ? `${masjidData.Deskripsi.slice(0, 140)}...`
+            : `Donasikan untuk ${masjidData.Nama} di ${masjidData.Alamat}. Lihat laporan keuangan transparan dan fasilitas masjid.`
+        }
+        keywords={`${masjidData.Nama}, donasi masjid ${masjidData.Alamat}, wakaf, GoQu`}
+        image={masjidData.FotoLuarMasjid?.[0]}
+        url={`/masjid/${id}`}
+        type="place"
+        jsonLd={masjidJsonLd}
+      />
       <Navbar
         position="static"
         user={{

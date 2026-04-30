@@ -21,9 +21,40 @@ function Landing() {
       window.removeEventListener("popstate", handlePopState);
     };
   }, []);
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Organization',
+        '@id': 'https://goqu.vercel.app/#organization',
+        name: 'GoQu',
+        url: 'https://goqu.vercel.app',
+        logo: 'https://goqu.vercel.app/logo.svg',
+        description: 'Platform donasi digital untuk pembangunan dan renovasi masjid yang akuntabel dan transparan di seluruh Indonesia.',
+        sameAs: [],
+      },
+      {
+        '@type': 'WebSite',
+        '@id': 'https://goqu.vercel.app/#website',
+        url: 'https://goqu.vercel.app',
+        name: 'GoQu',
+        publisher: { '@id': 'https://goqu.vercel.app/#organization' },
+        potentialAction: {
+          '@type': 'SearchAction',
+          target: 'https://goqu.vercel.app/masjid-terdaftar?search={search_term_string}',
+          'query-input': 'required name=search_term_string',
+        },
+      },
+    ],
+  };
+
   return (
     <>
-      <MetaData />
+      <MetaData
+        url="/"
+        type="website"
+        jsonLd={jsonLd}
+      />
       <Navbar />
       <Hero />
       <FeaturedMosques />
