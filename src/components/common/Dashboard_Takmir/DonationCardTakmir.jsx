@@ -1,12 +1,11 @@
 import PropTypes from "prop-types";
-import { MapPin, MoreVertical, Award, Plus, Eye } from "lucide-react";
+import { MapPin, Award, Plus, Eye } from "lucide-react";
 import getProgressPercentage from "../../../utils/progressPercentage";
 import formatCurrency from "../../../utils/formatCurrency";
-import { useState } from "react";
-import ExpenseDialog from "../Donation_Detail_Takmir/PengeluaranDialogDonasi";
+import { useNavigate } from "react-router-dom";
 
 const DonationCard = ({ campaign, onViewDetail }) => {
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const navigate = useNavigate();
 
   const progress = getProgressPercentage(
     campaign.UangDonasiTerkumpul,
@@ -23,16 +22,6 @@ const DonationCard = ({ campaign, onViewDetail }) => {
           className="w-full h-48 sm:w-24 sm:h-20 rounded-lg object-cover"
         />
       </div>
-
-      {isDialogOpen && (
-        <ExpenseDialog
-          isOpen={isDialogOpen}
-          onClose={() => setIsDialogOpen(false)}
-          id_donasi_masjid={campaign.id}
-          kategori_donasi_id={campaign.kategori_donasi.id}
-          masjid_id={campaign.masjid.id}
-        />
-      )}
 
       {/* Content Section */}
       <div className="flex-1 min-w-0">
@@ -61,7 +50,7 @@ const DonationCard = ({ campaign, onViewDetail }) => {
           <div className="flex flex-col sm:flex-row gap-2 sm:gap-2 sm:ml-4 w-full sm:w-auto">
             <button
               onClick={() => {
-                setIsDialogOpen(true);
+                navigate(`/admin/donation/${campaign.id}/pengeluaran/tambah`);
               }}
               className="flex items-center justify-center gap-2 px-4 py-3 sm:px-3 sm:py-1.5 text-sm sm:text-xs font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 active:bg-gray-200 rounded-md border border-gray-200 transition-colors touch-manipulation"
             >
@@ -124,7 +113,6 @@ DonationCard.propTypes = {
     UangDonasiTerkumpul: PropTypes.string.isRequired,
     donasi: PropTypes.array,
   }).isRequired,
-  onAddExpense: PropTypes.func,
   onViewDetail: PropTypes.func,
 };
 

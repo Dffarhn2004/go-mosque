@@ -32,11 +32,6 @@ const navItems = [
     to: "/admin/donatur",
   },
   {
-    label: "Laporan Keuangan",
-    icon: <FileText className="w-5 h-5" />,
-    to: "/admin/laporan",
-  },
-  {
     label: "Sistem Jurnal",
     icon: <FileText className="w-5 h-5" />,
     to: "/admin/jurnal",
@@ -67,13 +62,38 @@ export default function TakmirLayout({ children }) {
   const location = useLocation();
   const navigate = useNavigate();
 
+  const parseStorageItem = (key) => {
+    try {
+      return JSON.parse(localStorage.getItem(key) || "null");
+    } catch {
+      return null;
+    }
+  };
+
   if (!localStorage.getItem("user")) {
     navigate("/", { replace: true });
     return null; // Prevent rendering if user is not logged in
   }
 
-  const user = JSON.parse(localStorage.getItem("user"));
-  const masjid = JSON.parse(localStorage.getItem("masjid"));
+  const user = parseStorageItem("user");
+  let masjid = parseStorageItem("masjid");
+
+  if ((!masjid?.Nama || masjid?.Email) && user?.masjid?.Nama) {
+    masjid = user.masjid;
+    localStorage.setItem("masjid", JSON.stringify(user.masjid));
+  }
+
+  const masjidName = masjid?.Nama || user?.masjid?.Nama || "Masjid";
+
+  if (user?.role?.Nama === "Admin") {
+    navigate("/system-admin/dashboard", { replace: true });
+    return null;
+  }
+
+  if (!masjid) {
+    navigate("/auth/admin", { replace: true });
+    return null;
+  }
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
   const toggleProfileDropdown = () =>
@@ -122,7 +142,7 @@ export default function TakmirLayout({ children }) {
             </div>
             <div>
               <h3 className="text-2xl font-bold text-gray-800">
-                {masjid.Nama}
+                {masjidName}
               </h3>
               <p className="text-xs text-gray-500">Management System</p>
             </div>

@@ -647,7 +647,7 @@ const JurnalFormPage = () => {
             </button>
             <div>
               <h1 className="text-3xl font-bold text-gray-800">
-                {isEditMode ? "Edit Jurnal" : "Input Jurnal"}
+                {isEditMode ? "Edit Jurnal" : "Tambah Jurnal"}
               </h1>
               <p className="text-gray-600 mt-1">
                 {isEditMode
@@ -704,7 +704,7 @@ const JurnalFormPage = () => {
                       tanggalInputRef.current.showPicker?.();
                     }
                   }}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-gray-500 hover:text-gray-700 pointer-events-auto z-10"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md border border-gray-200 bg-white p-1 text-gray-600 shadow-sm hover:text-gray-800 pointer-events-auto z-10"
                   tabIndex={-1}
                 >
                   <Calendar className="w-5 h-5" />
@@ -1218,7 +1218,7 @@ const JurnalFormPage = () => {
             {/* Add Entry Button */}
             <button
               onClick={addEntry}
-              className="w-full mt-4 flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-gray-300 text-gray-600 rounded-lg hover:border-green-500 hover:text-green-600 hover:bg-green-50 transition-colors"
+              className="w-full mt-4 flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-gray-400 bg-white text-gray-800 rounded-lg hover:border-green-600 hover:text-green-700 hover:bg-green-50 transition-colors font-medium"
             >
               <Plus className="w-5 h-5" />
               Tambah Entri
@@ -1231,7 +1231,7 @@ const JurnalFormPage = () => {
           <div className="flex gap-3">
             <button
               onClick={handleBack}
-              className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+              className="flex-1 px-6 py-3 border border-gray-400 bg-white text-gray-800 rounded-lg hover:bg-gray-50 transition-colors font-medium"
             >
               Batal
             </button>
@@ -1415,4 +1415,3 @@ const JurnalFormPage = () => {
 };
 
 export default JurnalFormPage;
-

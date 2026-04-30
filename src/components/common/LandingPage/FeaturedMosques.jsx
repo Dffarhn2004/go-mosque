@@ -29,33 +29,6 @@ const FeaturedMosques = () => {
       currentAmount: 10000000,
       targetAmount: 20000000,
     },
-        {
-      id: 1,
-      image: "/Masjid1.jpg",
-      title: "Pembangunan Teras Masjid",
-      name: "Masjid An-nur",
-      description: "Pembangunan teras masjid untuk kenyamanan jamaah saat beribadah",
-      currentAmount: 25000000,
-      targetAmount: 27000000,
-    },
-    {
-      id: 2,
-      image: "/Masjid2.jpg",
-      title: "Renovasi Kubah Masjid",
-      name: "Masjid Al-Ikhlas",
-      description: "Renovasi kubah masjid yang telah rusak akibat cuaca ekstrem",
-      currentAmount: 15000000,
-      targetAmount: 30000000,
-    },
-    {
-      id: 3,
-      image: "/Masjid3.jpg",
-      title: "Pembangunan Tempat Wudhu",
-      name: "Masjid Al-Hidayah",
-      description: "Pembangunan tempat wudhu yang lebih luas untuk jamaah",
-      currentAmount: 10000000,
-      targetAmount: 20000000,
-    },
   ];
 
   return (

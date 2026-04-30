@@ -92,7 +92,7 @@ function CheckoutDonation() {
         Nama: formData.donorName,
         Email: formData.email,
         NoTelepon: formData.phone,
-        Keterangan: "Semoga pembangunan masjidnya lancar", // Default message
+        Keterangan: formData.keterangan,
         JumlahDonasi: getSelectedAmount(),
         StatusDonasi: "Sukses",
         id_donasi_masjid: id, // Use id from useParams

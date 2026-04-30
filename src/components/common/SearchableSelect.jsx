@@ -134,7 +134,9 @@ const SearchableSelect = ({
           error ? "border-red-500" : "border-gray-300"
         } ${isOpen ? "ring-2 ring-green-500 border-transparent" : ""}`}
       >
-        <span className="truncate text-gray-900">
+        <span
+          className={`truncate ${selectedOption ? "text-gray-900" : "text-gray-500"}`}
+        >
           {selectedOption
             ? getOptionLabel(selectedOption)
             : placeholder}

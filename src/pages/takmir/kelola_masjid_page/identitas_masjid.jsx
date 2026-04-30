@@ -94,36 +94,43 @@ const KelolaIdentitasMasjidPage = () => {
     try {
       setLoading(true);
 
-      // Validate form data
-      if (
-        !formData.namaMasjid ||
-        !formData.alamatMasjid ||
-        !formData.nomorTelponMasjid ||
-        !formData.tahunBerdiri ||
-        !formData.statusKepemilikan ||
-        !formData.luasTanah ||
-        !formData.kapasitasMasjid ||
-        !formData.deskripsiMasjid ||
-        !formData.visi ||
-        !formData.misi
-      ) {
-        alert("Mohon lengkapi semua field sebelum menyimpan.");
-        return;
+      const updatedData = {};
+
+      if (formData.namaMasjid.trim()) {
+        updatedData.Nama = formData.namaMasjid.trim();
+      }
+      if (formData.alamatMasjid.trim()) {
+        updatedData.Alamat = formData.alamatMasjid.trim();
+      }
+      if (formData.nomorTelponMasjid.trim()) {
+        updatedData.NomorTelepon = formData.nomorTelponMasjid.trim();
+      }
+      if (formData.tahunBerdiri) {
+        updatedData.TanggalBerdiri = formData.tahunBerdiri;
+      }
+      if (formData.statusKepemilikan) {
+        updatedData.StatusKepemilikan = formData.statusKepemilikan;
+      }
+      if (formData.luasTanah !== "" && !Number.isNaN(parseFloat(formData.luasTanah))) {
+        updatedData.LuasTanah = parseFloat(formData.luasTanah);
+      }
+      if (formData.kapasitasMasjid !== "" && !Number.isNaN(parseInt(formData.kapasitasMasjid, 10))) {
+        updatedData.Kapasitas_Jamaah = parseInt(formData.kapasitasMasjid, 10);
+      }
+      if (formData.deskripsiMasjid.trim()) {
+        updatedData.Deskripsi = formData.deskripsiMasjid.trim();
+      }
+      if (formData.visi.trim()) {
+        updatedData.Visi = formData.visi.trim();
+      }
+      if (formData.misi.trim()) {
+        updatedData.Misi = formData.misi.trim();
       }
 
-      // Prepare data for submission
-      const updatedData = {
-        Nama: formData.namaMasjid,
-        Alamat: formData.alamatMasjid,
-        NomorTelepon: formData.nomorTelponMasjid,
-        TanggalBerdiri: formData.tahunBerdiri,
-        StatusKepemilikan: formData.statusKepemilikan,
-        LuasTanah: parseFloat(formData.luasTanah),
-        Kapasitas_Jamaah: formData.kapasitasMasjid,
-        Deskripsi: formData.deskripsiMasjid,
-        Visi: formData.visi,
-        Misi: formData.misi,
-      };
+      if (Object.keys(updatedData).length === 0) {
+        toast.error("Tidak ada perubahan yang bisa disimpan.");
+        return;
+      }
 
       // Submit updated data back to API
       const response = await axiosInstance.patch("/masjid", updatedData);
@@ -137,7 +144,9 @@ const KelolaIdentitasMasjidPage = () => {
       const existingData = JSON.parse(localStorage.getItem("masjid") || "{}");
 
       // Update just the Nama property
-      existingData.Nama = updatedData.Nama;
+      if (updatedData.Nama) {
+        existingData.Nama = updatedData.Nama;
+      }
 
       // Save the updated object back to localStorage
       localStorage.setItem("masjid", JSON.stringify(existingData));

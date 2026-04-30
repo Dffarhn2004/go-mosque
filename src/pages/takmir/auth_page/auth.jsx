@@ -339,13 +339,22 @@ const AdminAuthPage = () => {
         password: loginForm.password,
       });
 
-      const token = res.data.data.token;
+      const { token, user } = res.data.data;
       localStorage.setItem("accessToken", token);
-      localStorage.setItem("user", JSON.stringify(res.data.data.user));
-      localStorage.setItem("masjid", JSON.stringify(res.data.data.user.masjid));
+      localStorage.setItem("user", JSON.stringify(user));
+
+      if (user?.masjid) {
+        localStorage.setItem("masjid", JSON.stringify(user.masjid));
+      } else {
+        localStorage.removeItem("masjid");
+      }
 
       toast.success("Authenticated! Redirecting...");
-      navigate("/admin/dashboard");
+      if (user?.role?.Nama === "Admin") {
+        navigate("/system-admin/dashboard");
+      } else {
+        navigate("/admin/dashboard");
+      }
     } catch (err) {
       setError(err.response?.data?.message || "Login failed.");
       toast.error(err.response?.data?.message || "Login failed.");

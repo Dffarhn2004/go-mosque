@@ -67,9 +67,6 @@ const DonationDetailTakmir = () => {
 
         <DonationDetailContent
           donation={donation}
-          onSavePengeluaran={() => {
-            fetchDonation(); // Refresh data after saving expense
-          }}
         />
       </div>
     </TakmirLayout>

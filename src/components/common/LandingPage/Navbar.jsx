@@ -49,7 +49,7 @@ const Navbar = ({ position = "fixed", user = null }) => {
   return (
     <>
       <nav
-        className={`static md:${position} top-0 left-0 w-full z-50 transition-all duration-500 ease-in-out`}
+        className={`static md:${position} top-0 left-0 w-full z-[120] isolate transition-all duration-500 ease-in-out`}
         style={{
           background: isScrolled 
             ? "linear-gradient(135deg, rgba(12, 104, 57, 0.98) 0%, rgba(17, 130, 75, 0.98) 50%, rgba(10, 79, 46, 0.98) 100%)"
@@ -110,69 +110,29 @@ const Navbar = ({ position = "fixed", user = null }) => {
                     icon="🕌"
                   />
                   
-                  {/* Enhanced User Profile Dropdown */}
-                  <div className="relative" ref={dropdownRef}>
-                    <div 
-                      className="flex items-center space-x-3 cursor-pointer group p-3 rounded-xl hover:bg-white/10 transition-all duration-300 border border-transparent hover:border-white/20 backdrop-blur-sm"
-                      onClick={toggleUserDropdown}
-                      onKeyDown={(e) => handleKeyDown(e, toggleUserDropdown)}
-                      tabIndex={0}
-                      role="button"
-                      aria-expanded={isUserDropdownOpen}
-                      aria-haspopup="true"
-                      aria-label="User menu"
-                    >
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center space-x-3 rounded-xl border border-white/30 bg-white/5 p-3 backdrop-blur-sm">
                       <div className="relative">
                         <img
                           src={user.avatar || "https://source.unsplash.com/40x40/?face"}
                           alt={`${user.name} profile picture`}
-                          className="h-10 w-10 rounded-full border-2 border-white/20 group-hover:border-white/50 transition-all duration-300 shadow-lg"
+                          className="h-10 w-10 rounded-full border-2 border-white/20 shadow-lg"
                         />
-                        <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-400 rounded-full border-2 border-white animate-pulse"></div>
+                        <div className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-2 border-white bg-emerald-400 animate-pulse"></div>
                       </div>
-                      <div className="text-white text-sm leading-tight">
-                        <div className="font-semibold group-hover:text-emerald-100 transition-colors">
-                          {user.name}
-                        </div>
-                        <div className="text-xs opacity-70 group-hover:opacity-90 transition-opacity">
+                      <div className="text-sm leading-tight text-white">
+                        <div className="font-semibold">{user.name}</div>
+                        <div className="text-xs opacity-80">
                           {user.role || "Donatur"}
                         </div>
                       </div>
-                      <svg 
-                        className={`w-4 h-4 text-white/70 transition-transform duration-300 ${isUserDropdownOpen ? 'rotate-180' : ''}`}
-                        fill="none" 
-                        stroke="currentColor" 
-                        viewBox="0 0 24 24"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
                     </div>
-
-                    {/* Enhanced Dropdown Menu */}
-                    {isUserDropdownOpen && (
-                      <div className="absolute right-0 mt-3 w-64 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 py-2 animate-fadeInUp z-50">
-                        <div className="px-4 py-3 border-b border-gray-200/50">
-                          <div className="flex items-center space-x-3">
-                            <img
-                              src={user.avatar || "https://source.unsplash.com/40x40/?face"}
-                              alt={user.name}
-                              className="h-12 w-12 rounded-full"
-                            />
-                            <div>
-                              <div className="font-semibold text-gray-900">{user.name}</div>
-                              <div className="text-sm text-gray-600">{user.email || "user@example.com"}</div>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="border-t border-gray-200/50 mt-2 pt-2">
-                          <DropdownItem 
-                            text="🚪 Keluar" 
-                            onClick={handleLogout}
-                            className="text-red-600 hover:bg-red-50 hover:text-red-700"
-                          />
-                        </div>
-                      </div>
-                    )}
+                    <button
+                      onClick={handleLogout}
+                      className="rounded-xl bg-red-500/90 px-4 py-2.5 font-semibold text-white shadow-lg transition-all duration-300 hover:bg-red-600 hover:shadow-xl"
+                    >
+                      Keluar
+                    </button>
                   </div>
                 </>
               ) : (
