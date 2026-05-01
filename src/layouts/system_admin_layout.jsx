@@ -56,11 +56,15 @@ export default function SystemAdminLayout({ children }) {
         }`}
       >
         <div className="mb-8 flex items-center justify-between">
-          <div>
-            <p className="text-xs uppercase tracking-[0.24em] text-[#8a7550]">
-              Goqu
-            </p>
-            <h1 className="font-serif text-2xl font-semibold">System Admin</h1>
+          <div className="flex items-center gap-3">
+            <div>
+              <img
+                src="/Logo_With_Text.png"
+                alt="GoQu"
+                className="h-8 w-auto max-w-[160px] object-contain"
+              />
+              <h1 className="font-serif text-2xl font-semibold">System Admin</h1>
+            </div>
           </div>
           <button className="lg:hidden" onClick={() => setOpen(false)}>
             <X className="h-5 w-5" />

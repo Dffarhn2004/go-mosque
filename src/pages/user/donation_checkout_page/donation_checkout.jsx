@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useParams } from "react-router-dom"; // Add this import
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import {
   ArrowLeft,
   Heart,
@@ -18,7 +18,8 @@ import axiosInstance from "../../../api/axiosInstance";
 import formatCurrency from "../../../utils/formatCurrency";
 
 function CheckoutDonation() {
-  const { id } = useParams(); // get the id from route param
+  const { campaignId, masjidId } = useParams();
+  const isGeneralDonation = Boolean(masjidId);
   const [formData, setFormData] = useState({
     donorName: "",
     email: "",
@@ -31,7 +32,8 @@ function CheckoutDonation() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-  const [error, setError] = useState(""); // Add error state
+  const [error, setError] = useState("");
+  const [donationTarget, setDonationTarget] = useState(null);
 
   const predefinedAmounts = [
     { value: 50000, label: "Rp. 50.000" },
@@ -95,7 +97,10 @@ function CheckoutDonation() {
         Keterangan: formData.keterangan,
         JumlahDonasi: getSelectedAmount(),
         StatusDonasi: "Sukses",
-        id_donasi_masjid: id, // Use id from useParams
+        DonationChannel: isGeneralDonation ? "GENERAL" : "CAMPAIGN",
+        ...(isGeneralDonation
+          ? { masjidId }
+          : { id_donasi_masjid: campaignId }),
       };
 
       // Make API call to backend
@@ -126,6 +131,22 @@ function CheckoutDonation() {
       ? parseInt(formData.customAmount)
       : formData.selectedAmount;
   };
+
+  useEffect(() => {
+    const fetchTarget = async () => {
+      try {
+        const response = isGeneralDonation
+          ? await axiosInstance.get(`/masjid/${masjidId}`)
+          : await axiosInstance.get(`/donasi-masjid/${campaignId}`);
+
+        setDonationTarget(response.data.data || null);
+      } catch (fetchError) {
+        console.error("Error fetching donation target:", fetchError);
+      }
+    };
+
+    fetchTarget();
+  }, [campaignId, isGeneralDonation, masjidId]);
 
   if (showSuccess) {
     return (
@@ -180,6 +201,9 @@ function CheckoutDonation() {
               <ArrowLeft className="w-7 h-7" />
             </button>
             <p className="text-2xl lg:text-3xl font-bold">Kotak Donasi</p>
+            <div className="ml-4 hidden rounded-full bg-emerald-100 px-4 py-2 text-sm font-semibold text-emerald-700 md:block">
+              {isGeneralDonation ? "Donasi Umum Masjid" : "Campaign Khusus"}
+            </div>
           </div>
         </div>
 
@@ -196,6 +220,31 @@ function CheckoutDonation() {
                   <div className="text-gray-600 text-base lg:text-lg">
                     Al-Baqarah - Ayat 261
                   </div>
+                </div>
+
+                <div className="mb-8 rounded-2xl border border-emerald-100 bg-emerald-50 p-5 text-left">
+                  <p className="text-sm font-semibold uppercase tracking-[0.18em] text-emerald-700">
+                    Tujuan Donasi
+                  </p>
+                  <h3 className="mt-2 text-xl font-bold text-gray-900">
+                    {isGeneralDonation
+                      ? donationTarget?.GeneralDonationTitle ||
+                        `Donasi untuk ${donationTarget?.Nama || "Masjid"}`
+                      : donationTarget?.Nama || "Campaign Donasi"}
+                  </h3>
+                  <p className="mt-1 text-sm text-gray-600">
+                    {isGeneralDonation
+                      ? donationTarget?.Nama || "Masjid"
+                      : donationTarget?.masjid?.Nama || "Masjid"}
+                  </p>
+                  <p className="mt-3 text-sm leading-relaxed text-gray-700">
+                    {isGeneralDonation
+                      ? donationTarget?.GeneralDonationDescription ||
+                        donationTarget?.Deskripsi ||
+                        "Donasi umum ini akan membantu operasional dan kebutuhan rutin masjid."
+                      : donationTarget?.Deskripsi ||
+                        "Donasi Anda akan disalurkan ke campaign yang sedang dibuka."}
+                  </p>
                 </div>
 
                 <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-2xl p-6 lg:p-8 mb-6">

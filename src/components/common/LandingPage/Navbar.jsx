@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from "react";
-import Logo from "../../../assets/logo.svg";
 import { useNavigate } from "react-router-dom";
 
 const Navbar = ({ position = "fixed", user = null }) => {
@@ -75,17 +74,13 @@ const Navbar = ({ position = "fixed", user = null }) => {
               aria-label="Go to homepage"
             >
               <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-teal-400 rounded-full opacity-0 group-hover:opacity-30 blur-lg transition-all duration-500 transform group-hover:scale-125"></div>
+                <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-teal-400 opacity-0 blur-xl transition-all duration-500 group-hover:opacity-25 group-hover:scale-105"></div>
                 <img
-                  src={Logo}
-                  alt="Goqu Logo"
-                  className="h-10 w-10 md:h-12 md:w-12 mr-3 transition-all duration-500 group-hover:scale-110 relative z-10"
+                  src="/Logo_With_Text.png"
+                  alt="GoQu"
+                  className="relative z-10 h-8 w-auto object-contain transition-all duration-300 group-hover:scale-[1.02] md:h-10"
                 />
-                <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 rounded-full transition-all duration-300 backdrop-blur-sm"></div>
               </div>
-              <span className="text-xl md:text-3xl font-bold bg-gradient-to-r from-white to-gray-100 bg-clip-text text-transparent group-hover:from-emerald-100 group-hover:to-white transition-all duration-300">
-                GoQu
-              </span>
             </div>
 
             {/* Enhanced Desktop Menu */}
@@ -137,8 +132,12 @@ const Navbar = ({ position = "fixed", user = null }) => {
               ) : (
                 // Enhanced Landing page view
                 <>
-                  <NavLink text="Beranda" href="#beranda" icon="🏠" />
-                  <NavLink text="Tentang Kami" href="#tentang" icon="ℹ️" />
+                  <NavLink text="Beranda" onClick={() => navigate("/")} icon="🏠" />
+                  <NavLink
+                    text="Tentang Kami"
+                    onClick={() => navigate("/tentang-kami")}
+                    icon="ℹ️"
+                  />
                   
                   <div className="flex items-center space-x-3">
                     <PrimaryButton
@@ -233,8 +232,20 @@ const Navbar = ({ position = "fixed", user = null }) => {
                 </div>
               ) : (
                 <div className="space-y-2">
-                  <MobileNavLink text="🏠 Beranda" href="#beranda" />
-                  <MobileNavLink text="ℹ️ Tentang Kami" href="#tentang" />
+                  <MobileNavLink
+                    text="🏠 Beranda"
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      navigate("/");
+                    }}
+                  />
+                  <MobileNavLink
+                    text="ℹ️ Tentang Kami"
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      navigate("/tentang-kami");
+                    }}
+                  />
                   
                   <div className="space-y-3 px-4 pt-4">
                     <PrimaryButton

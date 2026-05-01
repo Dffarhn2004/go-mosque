@@ -1,5 +1,5 @@
 // src/layouts/MainLayout.jsx
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   LogOut,
   Users,
@@ -14,8 +14,9 @@ import {
   User,
 } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import axiosInstance from "../api/axiosInstance";
 
-const navItems = [
+const createNavItems = (unreadCount = 0) => [
   {
     label: "Dashboard",
     icon: <Home className="w-5 h-5" />,
@@ -30,6 +31,12 @@ const navItems = [
     label: "Donatur",
     icon: <Users className="w-5 h-5" />,
     to: "/admin/donatur",
+  },
+  {
+    label: "Notifications",
+    icon: <Bell className="w-5 h-5" />,
+    to: "/admin/notifications",
+    badge: unreadCount > 0 ? unreadCount : null,
   },
   {
     label: "Sistem Jurnal",
@@ -59,6 +66,8 @@ export default function TakmirLayout({ children }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -98,7 +107,7 @@ export default function TakmirLayout({ children }) {
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
   const toggleProfileDropdown = () =>
     setIsProfileDropdownOpen(!isProfileDropdownOpen);
-  const toggleNotification = () => setIsNotificationOpen(!isNotificationOpen);
+  const navItems = createNavItems(unreadCount);
 
   const isActiveRoute = (path) => location.pathname === path;
 
@@ -107,12 +116,64 @@ export default function TakmirLayout({ children }) {
     return currentItem ? currentItem.label : "Dashboard";
   };
 
-  const [openMenus, setOpenMenus] = useState({});
+  const [openMenus, setOpenMenus] = useState(() =>
+    navItems.reduce((acc, item) => {
+      if (item.children) {
+        acc[item.label] = true;
+      }
+      return acc;
+    }, {})
+  );
   const toggleMenu = (label) => {
     setOpenMenus((prev) => ({
       ...prev,
       [label]: !prev[label],
     }));
+  };
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchNotifications = async () => {
+      try {
+        const [notificationsResponse, unreadResponse] = await Promise.all([
+          axiosInstance.get("/notifications"),
+          axiosInstance.get("/notifications/unread-count"),
+        ]);
+
+        if (!isMounted) return;
+
+        setNotifications(notificationsResponse.data.data || []);
+        setUnreadCount(unreadResponse.data.data?.count || 0);
+      } catch (error) {
+        console.error("Error fetching notifications:", error);
+      }
+    };
+
+    fetchNotifications();
+    const intervalId = window.setInterval(fetchNotifications, 10000);
+
+    return () => {
+      isMounted = false;
+      window.clearInterval(intervalId);
+    };
+  }, []);
+
+  const handleOpenNotifications = async () => {
+    const nextOpen = !isNotificationOpen;
+    setIsNotificationOpen(nextOpen);
+
+    if (!nextOpen || unreadCount === 0) {
+      return;
+    }
+
+    try {
+      const response = await axiosInstance.patch("/notifications/read-all");
+      setNotifications(response.data.data || []);
+      setUnreadCount(0);
+    } catch (error) {
+      console.error("Error marking notifications as read:", error);
+    }
   };
 
   return (
@@ -137,13 +198,13 @@ export default function TakmirLayout({ children }) {
         {/* Sidebar Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <div className="flex items-center gap-3">
-            <div className="w-20 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center">
-              <Home className="w-6 h-6 text-white" />
-            </div>
             <div>
-              <h3 className="text-2xl font-bold text-gray-800">
-                {masjidName}
-              </h3>
+              <img
+                src="/Logo_With_Text.png"
+                alt="GoQu"
+                className="h-8 w-auto max-w-[160px] object-contain"
+              />
+              <h3 className="mt-1 text-lg font-bold text-gray-800">{masjidName}</h3>
               <p className="text-xs text-gray-500">Management System</p>
             </div>
           </div>
@@ -188,6 +249,17 @@ export default function TakmirLayout({ children }) {
                     </span>
                     {item.label}
                   </div>
+                  {item.badge ? (
+                    <span
+                      className={`ml-auto inline-flex min-w-5 items-center justify-center rounded-full px-1.5 py-0.5 text-xs font-semibold ${
+                        isActive
+                          ? "bg-white/20 text-white"
+                          : "bg-red-500 text-white"
+                      }`}
+                    >
+                      {item.badge > 99 ? "99+" : item.badge}
+                    </span>
+                  ) : null}
                   {item.children && (
                     <ChevronDown
                       className={`w-4 h-4 transition-transform duration-200 ${
@@ -278,13 +350,15 @@ export default function TakmirLayout({ children }) {
             {/* Notifications */}
             <div className="relative">
               <button
-                onClick={toggleNotification}
+                onClick={handleOpenNotifications}
                 className="relative p-2 rounded-full hover:bg-gray-100 transition-colors duration-200"
               >
                 <Bell className="w-5 h-5 text-gray-600" />
-                <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                  3
-                </span>
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 min-w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center px-1">
+                    {unreadCount > 99 ? "99+" : unreadCount}
+                  </span>
+                )}
               </button>
 
               {/* Notification Dropdown */}
@@ -296,33 +370,38 @@ export default function TakmirLayout({ children }) {
                     </h3>
                   </div>
                   <div className="max-h-64 overflow-y-auto">
-                    <div className="p-3 hover:bg-gray-50 border-b border-gray-100">
-                      <p className="text-sm font-medium text-gray-800">
-                        New donation received
-                      </p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        Rp 500,000 from Ahmad Fauzi
-                      </p>
-                    </div>
-                    <div className="p-3 hover:bg-gray-50 border-b border-gray-100">
-                      <p className="text-sm font-medium text-gray-800">
-                        Monthly report ready
-                      </p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        Financial report for March 2024
-                      </p>
-                    </div>
-                    <div className="p-3 hover:bg-gray-50">
-                      <p className="text-sm font-medium text-gray-800">
-                        New donor registered
-                      </p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        Siti Aminah joined the system
-                      </p>
-                    </div>
+                    {notifications.length === 0 ? (
+                      <div className="p-4 text-sm text-gray-500">
+                        Belum ada notifikasi donasi.
+                      </div>
+                    ) : (
+                      notifications.slice(0, 8).map((notification, index) => (
+                        <div
+                          key={notification.id}
+                          className={`p-3 hover:bg-gray-50 ${
+                            index !== notifications.slice(0, 8).length - 1
+                              ? "border-b border-gray-100"
+                              : ""
+                          }`}
+                        >
+                          <p className="text-sm font-medium text-gray-800">
+                            {notification.title}
+                          </p>
+                          <p className="mt-1 text-xs text-gray-500">
+                            {notification.message}
+                          </p>
+                        </div>
+                      ))
+                    )}
                   </div>
                   <div className="p-3 border-t border-gray-200">
-                    <button className="text-sm text-green-600 hover:text-green-700 font-medium">
+                    <button
+                      className="text-sm text-green-600 hover:text-green-700 font-medium"
+                      onClick={() => {
+                        setIsNotificationOpen(false);
+                        navigate("/admin/notifications");
+                      }}
+                    >
                       View all notifications
                     </button>
                   </div>

@@ -29,7 +29,7 @@ function Landing() {
         '@id': 'https://goqu.vercel.app/#organization',
         name: 'GoQu',
         url: 'https://goqu.vercel.app',
-        logo: 'https://goqu.vercel.app/logo.svg',
+        logo: 'https://goqu.vercel.app/Logo_With_Text.png',
         description: 'Platform donasi digital untuk pembangunan dan renovasi masjid yang akuntabel dan transparan di seluruh Indonesia.',
         sameAs: [],
       },

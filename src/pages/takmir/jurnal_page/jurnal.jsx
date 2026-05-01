@@ -149,7 +149,11 @@ const JurnalPage = () => {
       source: "donasi-approval",
       donationId: donation.id,
       campaignId: donation.donasi_masjid?.id || "",
-      campaignName: donation.donasi_masjid?.Nama || "",
+      campaignName:
+        donation.DonationChannel === "GENERAL"
+          ? donation.masjid?.GeneralDonationTitle ||
+            `Donasi Umum ${donation.masjid?.Nama || ""}`.trim()
+          : donation.donasi_masjid?.Nama || "",
       donorName: donation.Nama || donation.user?.NamaLengkap || "",
       amount: String(donation.JumlahDonasi || ""),
       date: donation.CreatedAt || "",
@@ -240,7 +244,11 @@ const JurnalPage = () => {
                           {donation.Nama || donation.user?.NamaLengkap || "Donatur"}
                         </p>
                         <p className="text-sm text-gray-600 mt-1">
-                          {donation.donasi_masjid?.Nama || "Campaign donasi"} •{" "}
+                          {donation.DonationChannel === "GENERAL"
+                            ? donation.masjid?.GeneralDonationTitle ||
+                              `Donasi Umum ${donation.masjid?.Nama || ""}`.trim()
+                            : donation.donasi_masjid?.Nama || "Campaign donasi"}{" "}
+                          •{" "}
                           {new Date(donation.CreatedAt).toLocaleDateString("id-ID", {
                             day: "2-digit",
                             month: "long",

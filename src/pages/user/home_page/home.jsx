@@ -1,4 +1,5 @@
 import MosqueCardSection from "../../../components/common/Home/MosqueCardSection";
+import GeneralDonationSection from "../../../components/common/Home/GeneralDonationSection";
 import CallToAction from "../../../components/common/LandingPage/CallToAction";
 import Footer from "../../../components/common/LandingPage/Footer";
 import Hero from "../../../components/common/LandingPage/Hero";
@@ -23,6 +24,7 @@ function HomeUser() {
         }}
       />
       <Hero isHome={true} />
+      <GeneralDonationSection />
       <MosqueCardSection />
 
       <MosqueCardSection 

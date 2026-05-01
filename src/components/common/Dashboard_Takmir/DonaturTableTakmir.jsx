@@ -29,6 +29,14 @@ const DonaturTableTakmir = ({ recentDonors, formatCurrency }) => {
     setIsDialogOpen(true);
   };
 
+  const getDonationTargetLabel = (donor) => {
+    if (donor.DonationChannel === "GENERAL") {
+      return donor.masjid?.GeneralDonationTitle || `Donasi Umum ${donor.masjid?.Nama || ""}`.trim();
+    }
+
+    return donor.donasi_masjid?.Nama || "N/A";
+  };
+
   const closeDialog = () => {
     setIsDialogOpen(false);
     setSelectedDonor(null);
@@ -118,7 +126,7 @@ const DonaturTableTakmir = ({ recentDonors, formatCurrency }) => {
                   {/* Tujuan Column */}
                   <td className="px-3 sm:px-6 py-3 sm:py-4 text-center">
                     <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 max-w-full truncate">
-                      {donor.donasi_masjid?.Nama || "N/A"}
+                      {getDonationTargetLabel(donor)}
                     </span>
                   </td>
 
@@ -255,6 +263,14 @@ const DonaturTableTakmir = ({ recentDonors, formatCurrency }) => {
                       {selectedDonor.StatusDonasi || "Sukses"}
                     </span>
                   </div>
+                  <div>
+                    <label className="text-sm text-gray-600">Jenis Donasi</label>
+                    <p className="font-medium text-gray-900">
+                      {selectedDonor.DonationChannel === "GENERAL"
+                        ? "Donasi Umum Masjid"
+                        : "Campaign Khusus"}
+                    </p>
+                  </div>
                   {selectedDonor.Keterangan && (
                     <div>
                       <label className="text-sm text-gray-600 flex items-center gap-1">
@@ -270,7 +286,29 @@ const DonaturTableTakmir = ({ recentDonors, formatCurrency }) => {
               </div>
 
               {/* Campaign Information */}
-              {selectedDonor.donasi_masjid && (
+              {selectedDonor.DonationChannel === "GENERAL" && selectedDonor.masjid && (
+                <div className="bg-blue-50 rounded-lg p-4">
+                  <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                    <Target className="w-4 h-4 text-blue-600" />
+                    Masjid Penerima Donasi
+                  </h4>
+                  <div className="space-y-4">
+                    <div>
+                      <h5 className="font-semibold text-gray-900 mb-1">
+                        {selectedDonor.masjid.Nama}
+                      </h5>
+                      <p className="text-gray-700 text-sm">
+                        {selectedDonor.masjid.GeneralDonationDescription ||
+                          selectedDonor.masjid.Deskripsi ||
+                          "Donasi umum ini disalurkan untuk operasional dan kebutuhan masjid."}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {selectedDonor.DonationChannel !== "GENERAL" &&
+                selectedDonor.donasi_masjid && (
                 <div className="bg-blue-50 rounded-lg p-4">
                   <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
                     <Target className="w-4 h-4 text-blue-600" />

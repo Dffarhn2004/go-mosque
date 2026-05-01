@@ -36,12 +36,16 @@ import SystemAdminCoaPage from "./pages/system_admin/coa_page/coa";
 import SystemAdminMonitoringPage from "./pages/system_admin/monitoring_page/monitoring";
 import SystemAdminAuditLogsPage from "./pages/system_admin/audit_page/audit_logs";
 import SystemAdminSettingsPage from "./pages/system_admin/settings_page/settings";
+import NotificationsTakmir from "./pages/takmir/notification_page/notifications";
+import DonationVerificationPage from "./pages/takmir/donation_verification_page/donation_verification";
+import AboutPage from "./pages/about_page";
 
 function App() {
   return (
     <Router>
       <Routes>
         <Route path="/" element={<Landing />} />
+        <Route path="/tentang-kami" element={<AboutPage />} />
         <Route path="/auth" element={<AuthPage />} />
         <Route path="/auth/admin" element={<AdminAuthPage />} />
         <Route path="/auth/system-admin" element={<Navigate to="/auth/admin" replace />} />
@@ -49,15 +53,21 @@ function App() {
         <Route path="/masjid-terdaftar" element={<MasjidTerdaftarPage />} />
         <Route path="/home" element={<HomeUser />} />
         <Route path="/masjid/:id" element={<DetailMasjid />} />
+        <Route path="/masjid/:masjidId/checkout" element={<CheckoutDonation />} />
         <Route path="/masjid/:id/laporan-keuangan" element={<LaporanKeuanganUserPage />} />
         <Route path="/donation" element={<AllDonationUser />} />
         <Route path="/home/donation/:id" element={<DetailDonation />} />
         <Route
-          path="/home/donation/:id/checkout"
+          path="/home/donation/:campaignId/checkout"
           element={<CheckoutDonation />}
         />
         <Route path="/admin/dashboard" element={<DashboardTakmir />} />
+        <Route path="/admin/notifications" element={<NotificationsTakmir />} />
         <Route path="/admin/donation" element={<DonationTakmir />} />
+        <Route
+          path="/admin/donation/verifikasi"
+          element={<DonationVerificationPage />}
+        />
         <Route path="/admin/add/donation" element={<AddDonationTakmirPage />} />
         <Route path="/admin/donation/:id" element={<DonationDetailTakmir />} />
         <Route path="/admin/donation/:id/pengeluaran/tambah" element={<DonationExpenseFormPage />} />

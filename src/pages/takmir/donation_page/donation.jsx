@@ -13,6 +13,7 @@ import {
   Users,
   DollarSign,
   X,
+  FileCheck2,
 } from "lucide-react";
 import axiosInstance from "../../../api/axiosInstance";
 import { useNavigate } from "react-router-dom";
@@ -25,15 +26,35 @@ const DonationTakmir = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all"); // all, active, completed
   const [sortBy, setSortBy] = useState("latest"); // latest, name, progress, amount
+  const [pendingVerificationCount, setPendingVerificationCount] = useState(0);
 
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchCampaigns = async () => {
       try {
-        const res = await axiosInstance.get("/donasi-masjid/takmir");
-        setDonationCampaigns(res.data.data);
-        console.log("Fetched donation campaigns:", res.data.data);
+        const [campaignRes, donorRes, jurnalRes] = await Promise.all([
+          axiosInstance.get("/donasi-masjid/takmir"),
+          axiosInstance.get("/donasi/donatur"),
+          axiosInstance.get("/jurnal"),
+        ]);
+        setDonationCampaigns(campaignRes.data.data);
+
+        const existingReferences = new Set(
+          (jurnalRes.data?.data || [])
+            .map((transaction) => transaction.referensi)
+            .filter(Boolean)
+        );
+
+        setPendingVerificationCount(
+          (donorRes.data.data || []).filter(
+            (donation) =>
+              donation.StatusDonasi === "Sukses" &&
+              donation.JurnalApprovalStatus === "PENDING" &&
+              !existingReferences.has(`DONASI:${donation.id}`)
+          ).length
+        );
+        console.log("Fetched donation campaigns:", campaignRes.data.data);
       } catch (error) {
         console.error("Error fetching donation campaigns:", error);
       } finally {
@@ -173,6 +194,20 @@ const DonationTakmir = () => {
               </p>
             </div>
             <div className="flex items-center gap-3">
+              <button
+                className="relative flex items-center gap-2 px-4 py-2 bg-amber-50 text-amber-700 border border-amber-300 rounded-lg hover:bg-amber-100 transition-colors font-medium"
+                onClick={() => navigate("/admin/donation/verifikasi")}
+              >
+                <FileCheck2 className="w-4 h-4" />
+                Verifikasi Donasi
+                {pendingVerificationCount > 0 && (
+                  <span className="ml-1 inline-flex min-w-5 items-center justify-center rounded-full bg-amber-600 px-1.5 py-0.5 text-xs font-semibold text-white">
+                    {pendingVerificationCount > 99
+                      ? "99+"
+                      : pendingVerificationCount}
+                  </span>
+                )}
+              </button>
               <button
                 className="flex items-center gap-2 px-4 py-2 bg-white text-green-600 border border-green-600 rounded-lg hover:bg-green-50 transition-colors font-medium"
                 onClick={() => navigate("/admin/add/donation")}

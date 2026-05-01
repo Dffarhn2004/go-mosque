@@ -1,169 +1,81 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
-  TrendingUp,
-  Users,
-  DollarSign,
-  Target,
   Calendar,
   Download,
-  Eye,
-  MoreVertical,
-  MapPin,
-  Clock,
-  Award,
-  ArrowUpRight,
-  Filter,
-  Search,
   ArrowDownCircle,
   ArrowUpCircle,
   Banknote,
+  HeartHandshake,
+  Target,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import DonationCard from "./DonationCardTakmir";
 import DonaturTableTakmir from "./DonaturTableTakmir";
-import formatCurrency from "../../../utils/formatCurrency";
-import { useNavigate } from "react-router-dom";
-import axiosInstance from "../../../api/axiosInstance";
 import StatCard from "./StatCards";
 import { DashboardSkeleton } from "../Skeleton";
+import formatCurrency from "../../../utils/formatCurrency";
+import axiosInstance from "../../../api/axiosInstance";
 
 const Dashboard = () => {
-  const [selectedPeriod, setSelectedPeriod] = useState("week");
-  const [searchTerm, setSearchTerm] = useState("");
+  const [loading, setLoading] = useState(true);
   const [donationCampaigns, setDonationCampaigns] = useState([]);
   const [donatur, setDonatur] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  const navigate = useNavigate();
-
+  const [masjid, setMasjid] = useState(null);
   const [stats, setStats] = useState({
     cashIn: { total: 0 },
     cashOut: { total: 0 },
     transactions: { total: 0 },
+    generalDonations: { total: 0, count: 0 },
+    campaignDonations: { total: 0, count: 0 },
   });
+
+  const navigate = useNavigate();
+
   useEffect(() => {
-    const fetchStats = async () => {
+    const fetchDashboard = async () => {
       try {
         const raw = localStorage.getItem("masjid");
-        if (!raw) {
-          console.warn("No masjid data found in localStorage");
-          return;
-        }
+        const parsedMasjid = raw ? JSON.parse(raw) : null;
+        const masjidId = parsedMasjid?.id;
 
-        const masjid = JSON.parse(raw);
-        const masjidId = masjid?.id;
         if (!masjidId) {
-          console.warn("masjid.id not found");
+          setLoading(false);
           return;
         }
 
-        const res = await axiosInstance.get(`/statistik/${masjidId}`);
-        const data = res.data.data;
+        const [statsResponse, campaignResponse, donorResponse, masjidResponse] =
+          await Promise.all([
+            axiosInstance.get(`/statistik/${masjidId}`),
+            axiosInstance.get("/donasi-masjid/takmir?limit=3"),
+            axiosInstance.get("/donasi/donatur"),
+            axiosInstance.get("/masjid/takmir"),
+          ]);
 
-        setStats({
-          cashIn: {
-            total: data.cashIn.total,
-          },
-          cashOut: {
-            total: data.cashOut.total,
-          },
-          transactions: {
-            total: data.transactions.total,
-          },
-        });
+        setStats(statsResponse.data.data);
+        setDonationCampaigns(campaignResponse.data.data || []);
+        setDonatur(donorResponse.data.data || []);
+        setMasjid(masjidResponse.data.data || null);
       } catch (error) {
-        console.error("Error fetching stats:", error);
+        console.error("Error fetching dashboard:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchStats();
-  }, []);
-
-  useEffect(() => {
-    const fetchCampaigns = async () => {
-      try {
-        const res = await axiosInstance.get("/donasi-masjid/takmir?limit=3");
-        setDonationCampaigns(res.data.data); // sesuaikan struktur response lo
-        console.log("Fetched donation campaigns:", res.data.data);
-      } catch (error) {
-        console.error("Error fetching donation campaigns:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchCampaigns();
-  }, []);
-
-  useEffect(() => {
-    const fetchDonatur = async () => {
-      try {
-        const res = await axiosInstance.get("/donasi/donatur");
-        setDonatur(res.data.data); // sesuaikan struktur response lo
-        console.log("Fetched donation campaigns:", res.data.data);
-      } catch (error) {
-        console.error("Error fetching donation campaigns:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchDonatur();
+    fetchDashboard();
   }, []);
 
   if (loading) return <DashboardSkeleton />;
 
-  // const donationCampaigns = [
-  //   {
-  //     id: "asbcsacascas",
-  //     title: "Pembangunan Teras Masjid",
-  //     description:
-  //       "Renovasi dan perluasan teras masjid untuk kenyamanan jamaah",
-  //     image:
-  //       "https://images.unsplash.com/photo-1564769662533-4f00a87b4056?w=200&h=150&fit=crop",
-  //     raised: 25000000,
-  //     target: 50000000,
-  //     donors: 156,
-  //     daysLeft: 45,
-  //     category: "Infrastruktur",
-  //   },
-  //   {
-  //     id: "ascsacascas",
-  //     title: "Renovasi Toilet Masjid",
-  //     description: "Perbaikan dan modernisasi fasilitas toilet untuk jamaah",
-  //     image:
-  //       "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=200&h=150&fit=crop",
-  //     raised: 8500000,
-  //     target: 15000000,
-  //     donors: 89,
-  //     daysLeft: 30,
-  //     category: "Fasilitas",
-  //   },
-  //   {
-  //     id: "asjcbjasbc",
-  //     title: "Program Santunan Yatim",
-  //     description: "Bantuan pendidikan dan kebutuhan sehari-hari anak yatim",
-  //     image:
-  //       "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=200&h=150&fit=crop",
-  //     raised: 12000000,
-  //     target: 20000000,
-  //     donors: 203,
-  //     daysLeft: 60,
-  //     category: "Sosial",
-  //   },
-  // ];
-
   return (
-    <div className=" p-6 space-y-6">
-      {/* Header Section */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+    <div className="space-y-6 p-6">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">
             Dashboard Overview
           </h1>
-          <p className="text-gray-600 flex items-center gap-2 mt-1">
-            <Calendar className="w-4 h-4" />
+          <p className="mt-1 flex items-center gap-2 text-gray-600">
+            <Calendar className="h-4 w-4" />
             {new Date().toLocaleDateString("id-ID", {
               weekday: "long",
               year: "numeric",
@@ -172,77 +84,139 @@ const Dashboard = () => {
             })}
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 px-4 py-2 bg-white text-green-600 border border-green-600 rounded-lg hover:bg-green-50 transition-colors">
-            <Download className="w-4 h-4" />
-            Export
-          </button>
-        </div>
+        <button className="flex items-center gap-2 rounded-lg border border-green-600 bg-white px-4 py-2 text-green-600 transition-colors hover:bg-green-50">
+          <Download className="h-4 w-4" />
+          Export
+        </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
           title="Arus Kas Masuk"
           count={formatCurrency(stats.cashIn.total)}
           icon={ArrowDownCircle}
           color="bg-green-500"
         />
-
         <StatCard
           title="Arus Kas Keluar"
           count={formatCurrency(stats.cashOut.total)}
           icon={ArrowUpCircle}
           color="bg-red-500"
         />
-
         <StatCard
           title="Total Transaksi"
           count={stats.transactions.total}
           icon={Banknote}
           color="bg-yellow-500"
         />
+        <StatCard
+          title="Donasi Umum"
+          count={formatCurrency(stats.generalDonations.total)}
+          icon={HeartHandshake}
+          color="bg-blue-500"
+        />
       </div>
 
-      {/* Donation Campaigns */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100">
-        <div className="p-6 border-b border-gray-200">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-xl font-semibold text-gray-900">
-                Campaign Donasi Aktif
-              </h2>
-              <p className="text-gray-600 text-sm mt-1">
-                Kelola dan pantau progress campaign
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1.3fr_1fr]">
+        <div className="rounded-xl border border-gray-100 bg-white shadow-sm">
+          <div className="border-b border-gray-200 p-6">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900">
+                  Donasi Umum Masjid
+                </h2>
+                <p className="mt-1 text-sm text-gray-600">
+                  Ringkasan penerimaan umum yang selalu terbuka untuk masjid.
+                </p>
+              </div>
+              <span
+                className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                  masjid?.isOpenForGeneralDonation
+                    ? "bg-emerald-100 text-emerald-700"
+                    : "bg-gray-100 text-gray-600"
+                }`}
+              >
+                {masjid?.isOpenForGeneralDonation ? "Aktif" : "Nonaktif"}
+              </span>
+            </div>
+          </div>
+
+          <div className="grid gap-4 p-6 md:grid-cols-2">
+            <div className="rounded-2xl bg-emerald-50 p-5">
+              <p className="text-sm font-medium text-emerald-800">
+                Total Donasi Umum
+              </p>
+              <p className="mt-2 text-2xl font-bold text-emerald-700">
+                {formatCurrency(stats.generalDonations.total)}
+              </p>
+              <p className="mt-2 text-sm text-emerald-900/70">
+                {stats.generalDonations.count} transaksi sukses
               </p>
             </div>
-            <div className="flex items-center gap-3">
-              <button
-                className="flex items-center gap-2 px-4 py-2 text-green-600 border border-green-300 rounded-lg hover:bg-green-50 transition-colors"
-                onClick={() => navigate("/admin/donation")}
-              >
-                Lihat Semua
-              </button>
+
+            <div className="rounded-2xl bg-sky-50 p-5">
+              <p className="text-sm font-medium text-sky-800">
+                Total Donasi Campaign
+              </p>
+              <p className="mt-2 text-2xl font-bold text-sky-700">
+                {formatCurrency(stats.campaignDonations.total)}
+              </p>
+              <p className="mt-2 text-sm text-sky-900/70">
+                {stats.campaignDonations.count} transaksi sukses
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-dashed border-gray-300 bg-gray-50 p-5 md:col-span-2">
+              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-500">
+                Headline Donasi Umum
+              </p>
+              <h3 className="mt-2 text-lg font-bold text-gray-900">
+                {masjid?.GeneralDonationTitle ||
+                  `Donasi umum untuk ${masjid?.Nama || "masjid ini"}`}
+              </h3>
+              <p className="mt-2 text-sm leading-relaxed text-gray-600">
+                {masjid?.GeneralDonationDescription ||
+                  "Gunakan area ini untuk menjelaskan bahwa masjid menerima donasi umum untuk operasional, perawatan, dan kebutuhan jamaah."}
+              </p>
             </div>
           </div>
         </div>
 
-        <div className="p-6 space-y-4">
-          {donationCampaigns.map((campaign) => (
-            <DonationCard
-              key={campaign.id}
-              campaign={campaign}
-              onViewDetail={() => {
-                navigate(`/admin/donation/${campaign.id}`); // <-- pass id di URL
-              }}
-            />
-          ))}
+        <div className="rounded-xl border border-gray-100 bg-white shadow-sm">
+          <div className="border-b border-gray-200 p-6">
+            <h2 className="text-xl font-semibold text-gray-900">
+              Campaign Donasi Aktif
+            </h2>
+            <p className="mt-1 text-sm text-gray-600">
+              Campaign khusus yang masih berjalan di dashboard takmir.
+            </p>
+          </div>
+
+          <div className="space-y-4 p-6">
+            {donationCampaigns.length === 0 ? (
+              <div className="rounded-2xl bg-gray-50 p-6 text-center">
+                <Target className="mx-auto h-10 w-10 text-gray-400" />
+                <p className="mt-3 text-sm text-gray-600">
+                  Belum ada campaign khusus yang dibuat.
+                </p>
+              </div>
+            ) : (
+              donationCampaigns.map((campaign) => (
+                <DonationCard
+                  key={campaign.id}
+                  campaign={campaign}
+                  onViewDetail={() => navigate(`/admin/donation/${campaign.id}`)}
+                />
+              ))
+            )}
+          </div>
         </div>
       </div>
 
       <DonaturTableTakmir
         recentDonors={donatur}
         formatCurrency={formatCurrency}
-      ></DonaturTableTakmir>
+      />
     </div>
   );
 };

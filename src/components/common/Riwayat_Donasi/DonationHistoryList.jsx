@@ -262,12 +262,20 @@ export default function DonationHistoryList() {
                       </div>
                       <div className="min-w-0 flex-1">
                         <h3 className="text-xl text-left font-bold text-gray-800 mb-2 truncate">
-                          {item.donasi_masjid?.Nama || "Donasi Masjid"}
+                          {item.DonationChannel === "GENERAL"
+                            ? item.masjid?.GeneralDonationTitle ||
+                              `Donasi Umum ${item.masjid?.Nama || ""}`.trim()
+                            : item.donasi_masjid?.Nama || "Donasi Masjid"}
                         </h3>
                         <div className="flex items-center gap-2 text-gray-500">
                           <Clock className="w-4 h-4 flex-shrink-0" />
                           <span className="text-sm">
                             {formatDateWIB(item.CreatedAt)}
+                          </span>
+                          <span className="rounded-full bg-blue-50 px-2 py-1 text-xs font-semibold text-blue-700">
+                            {item.DonationChannel === "GENERAL"
+                              ? "Donasi Umum"
+                              : "Campaign"}
                           </span>
                         </div>
                       </div>

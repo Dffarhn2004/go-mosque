@@ -586,6 +586,22 @@ function DetailMasjid() {
               <p className="text-xl text-gray-200 max-w-3xl mx-auto leading-relaxed">
                 {masjidData.Deskripsi}
               </p>
+              <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+                <button
+                  type="button"
+                  onClick={() => navigate(`/masjid/${id}/checkout`)}
+                  className="inline-flex items-center justify-center rounded-xl bg-white px-8 py-4 text-base font-bold text-green-700 shadow-lg transition-all duration-300 hover:scale-105 hover:bg-green-50 hover:shadow-xl"
+                >
+                  Donasi Umum Sekarang
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("laporankeuangan")}
+                  className="inline-flex items-center justify-center rounded-xl border border-white/30 bg-white/10 px-8 py-4 text-base font-semibold text-white backdrop-blur-sm transition-all duration-300 hover:bg-white/20"
+                >
+                  Lihat Laporan Keuangan
+                </button>
+              </div>
             </div>
 
             {/* Quick Info Cards - Enhanced */}
@@ -775,7 +791,7 @@ function DetailMasjid() {
                     <h3 className="font-bold text-lg text-gray-900">Aksi Cepat</h3>
                   </div>
                   <p className="text-sm text-gray-600 mb-4">
-                    Lihat detail lebih lengkap di tab di bawah
+                    Lihat detail lebih lengkap di tab yang tersedia
                   </p>
                   <button
                     onClick={() => setActiveTab("laporankeuangan")}
