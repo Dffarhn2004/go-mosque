@@ -1,12 +1,12 @@
-import React, { useEffect, useState, useRef, useMemo } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import TakmirLayout from "../../../layouts/takmir_layout";
 import { getAllAccounts } from "../../../services/coaService";
 import { getAllJurnals } from "../../../services/jurnalService";
 import { transformAccounts, transformJurnals } from "../../../utils/dataTransform";
 import formatCurrency from "../../../utils/formatCurrency";
 import { hitungSaldoAkun } from "../../../utils/jurnalUtils";
-import { exportBukuBesarToPDF, exportBukuBesarToExcel } from "../../../utils/exportUtils";
-import { Calendar, Loader2, Download, FileText, FileSpreadsheet, ChevronDown } from "lucide-react";
+import { exportBukuBesarToPDF } from "../../../utils/exportUtils";
+import { Calendar, Loader2, Download } from "lucide-react";
 import { TableSkeleton } from "../../../components/common/Skeleton";
 import toast from "react-hot-toast";
 import axiosInstance from "../../../api/axiosInstance";
@@ -15,7 +15,6 @@ const BukuBesarPage = () => {
   const [coaList, setCoaList] = useState([]);
   const [jurnalList, setJurnalList] = useState([]);
   const [masjidData, setMasjidData] = useState(null);
-  const [showExportMenu, setShowExportMenu] = useState(false);
   const [tanggalAwal, setTanggalAwal] = useState(
     new Date(new Date().setMonth(new Date().getMonth() - 1))
       .toISOString()
@@ -26,7 +25,6 @@ const BukuBesarPage = () => {
   );
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const exportMenuRef = useRef(null);
   const itemsPerPage = 50;
 
   // Fetch masjid data
@@ -40,19 +38,6 @@ const BukuBesarPage = () => {
       }
     };
     fetchMasjidData();
-  }, []);
-
-  // Close export menu when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (exportMenuRef.current && !exportMenuRef.current.contains(event.target)) {
-        setShowExportMenu(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
   }, []);
 
   useEffect(() => {
@@ -159,29 +144,9 @@ const BukuBesarPage = () => {
     try {
       exportBukuBesarToPDF(sortedEntries, masjidName, periode, totalDebit, totalKredit);
       toast.success("Buku besar berhasil di-export ke PDF");
-      setShowExportMenu(false);
     } catch (error) {
       console.error("Error exporting PDF:", error);
       toast.error(`Gagal export ke PDF: ${error.message || "Unknown error"}`);
-    }
-  };
-
-  const handleExportExcel = () => {
-    if (sortedEntries.length === 0) {
-      toast.error("Tidak ada data untuk di-export");
-      return;
-    }
-
-    const masjidName = masjidData?.Nama || masjidData?.namaMasjid || "Masjid";
-    const periode = { tanggalAwal, tanggalAkhir };
-
-    try {
-      exportBukuBesarToExcel(sortedEntries, masjidName, periode, totalDebit, totalKredit);
-      toast.success("Buku besar berhasil di-export ke Excel");
-      setShowExportMenu(false);
-    } catch (error) {
-      console.error("Error exporting Excel:", error);
-      toast.error(`Gagal export ke Excel: ${error.message || "Unknown error"}`);
     }
   };
 
@@ -237,41 +202,15 @@ const BukuBesarPage = () => {
                   </div>
                 </div>
               </div>
-              <div className="flex items-end relative" ref={exportMenuRef}>
+              <div className="flex items-end">
                 <button
-                  onClick={() => setShowExportMenu(!showExportMenu)}
+                  onClick={handleExportPDF}
                   disabled={sortedEntries.length === 0 || loading}
                   className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
                 >
                   <Download className="w-4 h-4" />
-                  Export
-                  <ChevronDown className="w-4 h-4" />
+                  Export PDF
                 </button>
-
-                {showExportMenu && (
-                  <div className="absolute right-0 bottom-full mb-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 z-50 overflow-hidden">
-                    <button
-                      onClick={handleExportPDF}
-                      className="w-full flex items-center gap-3 px-4 py-3 text-left text-gray-700 hover:bg-gray-50 transition-colors"
-                    >
-                      <FileText className="w-5 h-5 text-red-600 flex-shrink-0" />
-                      <div>
-                        <div className="font-medium text-sm">Export ke PDF</div>
-                        <div className="text-xs text-gray-500">Format dokumen untuk cetak</div>
-                      </div>
-                    </button>
-                    <button
-                      onClick={handleExportExcel}
-                      className="w-full flex items-center gap-3 px-4 py-3 text-left text-gray-700 hover:bg-gray-50 transition-colors border-t border-gray-200"
-                    >
-                      <FileSpreadsheet className="w-5 h-5 text-green-600 flex-shrink-0" />
-                      <div>
-                        <div className="font-medium text-sm">Export ke Excel</div>
-                        <div className="text-xs text-gray-500">Format spreadsheet untuk analisis</div>
-                      </div>
-                    </button>
-                  </div>
-                )}
               </div>
             </div>
           </div>
@@ -408,5 +347,4 @@ const BukuBesarPage = () => {
 };
 
 export default BukuBesarPage;
-
 

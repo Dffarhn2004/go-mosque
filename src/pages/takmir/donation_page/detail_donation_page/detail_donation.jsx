@@ -1,21 +1,29 @@
 import DonationDetailContent from "../../../../components/common/Donation_Detail_Takmir/DonationDetailContent";
-import { ArrowLeft, Calendar, Download } from "lucide-react";
+import { ArrowLeft, Calendar, FileCheck2, XCircle } from "lucide-react";
 import TakmirLayout from "../../../../layouts/takmir_layout";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axiosInstance from "../../../../api/axiosInstance";
 import { Sk, StatCardsSkeleton, CampaignListSkeleton } from "../../../../components/common/Skeleton";
+import { getAllJurnals } from "../../../../services/jurnalService";
+import formatCurrency from "../../../../utils/formatCurrency";
+import toast from "react-hot-toast";
 
 const DonationDetailTakmir = () => {
   // const donation = dummyData[0];
   const { id } = useParams(); // get the id from route param
   const [donation, setDonation] = useState(null);
+  const [jurnalList, setJurnalList] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const fetchDonation = async () => {
     try {
-      const res = await axiosInstance.get("/donasi-masjid/takmir/" + id);
+      const [res, jurnals] = await Promise.all([
+        axiosInstance.get("/donasi-masjid/takmir/" + id),
+        getAllJurnals({}),
+      ]);
       setDonation(res.data.data); // sesuaikan struktur response lo
+      setJurnalList(jurnals);
       // console.log("Fetched donation campaigns:", res.data.data);
     } catch (error) {
       console.error("Error fetching donation campaigns:", error);
@@ -52,6 +60,55 @@ const DonationDetailTakmir = () => {
     // Alternative: navigate to specific route
     // navigate('/takmir/donations');
   };
+
+  const approvedReferences = new Set(
+    jurnalList.map((transaction) => transaction.referensi).filter(Boolean)
+  );
+
+  const pendingDonations = (donation?.donasi || []).filter(
+    (item) =>
+      item.StatusDonasi === "Sukses" &&
+      item.JurnalApprovalStatus === "PENDING" &&
+      !approvedReferences.has(`DONASI:${item.id}`)
+  );
+
+  const handleApproveDonation = (item) => {
+    const params = new URLSearchParams({
+      source: "donasi-approval",
+      donationId: item.id,
+      campaignId: donation.id,
+      campaignName: donation.Nama || "",
+      donorName: item.Nama || "",
+      amount: String(item.JumlahDonasi || ""),
+      date: item.CreatedAt || "",
+      returnTo: `/admin/donation/${donation.id}`,
+    });
+
+    navigate(`/admin/jurnal/tambah?${params.toString()}`);
+  };
+
+  const handleRejectDonation = async (item) => {
+    const reason = window.prompt(
+      "Alasan penolakan donasi ini (opsional):",
+      item.JurnalApprovalReason || ""
+    );
+
+    if (reason === null) {
+      return;
+    }
+
+    try {
+      await axiosInstance.patch(`/donasi/${item.id}/jurnal-approval`, {
+        status: "REJECTED",
+        reason,
+      });
+      toast.success("Donasi berhasil ditolak untuk masuk jurnal");
+      await fetchDonation();
+    } catch (error) {
+      console.error("Error rejecting donation approval:", error);
+      toast.error(error.response?.data?.message || "Gagal menolak donasi");
+    }
+  };
   return (
     <TakmirLayout>
       <div className="p-6 space-y-6">
@@ -77,11 +134,64 @@ const DonationDetailTakmir = () => {
               })}
             </p>
           </div>
-          <button className="flex items-center gap-2 px-4 py-2 bg-white text-green-600 border border-green-600 rounded-lg hover:bg-green-50 transition-colors">
-            <Download className="w-4 h-4" />
-            Export
-          </button>
+          {pendingDonations.length > 0 && (
+            <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-medium text-amber-700">
+              {pendingDonations.length} donasi masuk menunggu approval jurnal
+            </div>
+          )}
         </div>
+
+        {pendingDonations.length > 0 && (
+          <div className="rounded-xl border border-amber-200 bg-white p-5 shadow-sm">
+            <div className="mb-4">
+              <h2 className="text-lg font-semibold text-gray-900">
+                Approval Donasi Masuk
+              </h2>
+              <p className="text-sm text-gray-600 mt-1">
+                Setujui donasi sukses berikut agar langsung diproses ke form jurnal dengan
+                referensi transaksi otomatis.
+              </p>
+            </div>
+            <div className="space-y-3">
+              {pendingDonations.map((item) => (
+                <div
+                  key={item.id}
+                  className="flex flex-col gap-3 rounded-lg border border-amber-100 bg-amber-50/60 p-4 lg:flex-row lg:items-center lg:justify-between"
+                >
+                  <div>
+                    <p className="font-medium text-gray-900">{item.Nama || "Donatur"}</p>
+                    <p className="text-sm text-gray-600 mt-1">
+                      {new Date(item.CreatedAt).toLocaleDateString("id-ID", {
+                        day: "2-digit",
+                        month: "long",
+                        year: "numeric",
+                      })}
+                    </p>
+                    <p className="text-sm font-semibold text-emerald-700 mt-2">
+                      {formatCurrency(parseFloat(item.JumlahDonasi) || 0)}
+                    </p>
+                  </div>
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <button
+                      onClick={() => handleRejectDonation(item)}
+                      className="inline-flex items-center justify-center gap-2 rounded-lg border border-rose-200 bg-white px-4 py-2 text-sm font-medium text-rose-700 hover:bg-rose-50 transition-colors"
+                    >
+                      <XCircle className="w-4 h-4" />
+                      Tolak
+                    </button>
+                    <button
+                      onClick={() => handleApproveDonation(item)}
+                      className="inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 transition-colors"
+                    >
+                      <FileCheck2 className="w-4 h-4" />
+                      Approve ke Jurnal
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         <DonationDetailContent
           donation={donation}

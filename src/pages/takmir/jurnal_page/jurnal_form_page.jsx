@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import TakmirLayout from "../../../layouts/takmir_layout";
 import { getAllAccounts } from "../../../services/coaService";
 import {
@@ -10,6 +10,7 @@ import {
 import { transformAccounts, transformJurnal, transformJurnalForBackend } from "../../../utils/dataTransform";
 import { getNormalBalance, isNormalBalance, getNormalBalanceLabel } from "../../../utils/accountUtils";
 import formatCurrency from "../../../utils/formatCurrency";
+import axiosInstance from "../../../api/axiosInstance";
 import {
   buildEntriesFromTransactionType,
   getAsetKasBank,
@@ -36,14 +37,25 @@ import { JurnalFormSkeleton } from "../../../components/common/Skeleton";
 
 const JurnalFormPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { id } = useParams();
   const isEditMode = !!id;
+  const approvalParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
+  const approvalDonationId = approvalParams.get("donationId") || "";
+  const approvalCampaignName = approvalParams.get("campaignName") || "";
+  const approvalDonorName = approvalParams.get("donorName") || "";
+  const approvalAmount = approvalParams.get("amount") || "";
+  const approvalDate = approvalParams.get("date") || "";
+  const approvalReturnTo = approvalParams.get("returnTo") || "";
+  const isDonationApprovalMode =
+    !isEditMode && approvalParams.get("source") === "donasi-approval";
   
   const [coaList, setCoaList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [tanggal, setTanggal] = useState(new Date().toISOString().split("T")[0]);
+  const [referensi, setReferensi] = useState("");
   const tanggalInputRef = React.useRef(null);
   const [transactionType, setTransactionType] = useState("PEMASUKAN");
   const [templateForm, setTemplateForm] = useState({
@@ -82,11 +94,38 @@ const JurnalFormPage = () => {
       );
       setCoaList(detailAccounts);
 
+      if (isDonationApprovalMode) {
+        const pendapatanOptions = getPendapatanAccounts(detailAccounts).filter(
+          (acc) => acc.restriction !== "DENGAN_PEMBATASAN"
+        );
+        const kasBankOptions = getAsetKasBank(detailAccounts).filter(
+          (acc) => acc.restriction !== "DENGAN_PEMBATASAN"
+        );
+
+        setTransactionType("PEMASUKAN");
+        setTanggal(
+          approvalDate
+            ? new Date(approvalDate).toISOString().split("T")[0]
+            : new Date().toISOString().split("T")[0]
+        );
+        setReferensi(approvalDonationId ? `DONASI:${approvalDonationId}` : "");
+        setTemplateForm({
+          akunSatuId: pendapatanOptions[0]?.id || "",
+          akunDuaId: kasBankOptions[0]?.id || "",
+          nominal: approvalAmount || "",
+          keterangan: `Approval donasi masuk${
+            approvalDonorName ? ` dari ${approvalDonorName}` : ""
+          }${approvalCampaignName ? ` untuk campaign ${approvalCampaignName}` : ""}`,
+          hasRestriction: false,
+        });
+      }
+
       // Load existing jurnal transaction untuk edit mode
       if (isEditMode) {
         const transaction = await getJurnalById(id);
         const transformedTransaction = transformJurnal(transaction);
         setTanggal(transformedTransaction.tanggal.split("T")[0]);
+        setReferensi(transformedTransaction.referensi || "");
         setEntries(
           transformedTransaction.entries.map((entry) => ({
             id: entry.id || Date.now() + Math.random(),
@@ -337,6 +376,7 @@ const JurnalFormPage = () => {
         const transactionData = {
           tanggal,
           keterangan: "", // Keterangan sekarang di level entry
+          referensi,
           entries: entries.map((entry) => ({
             akunId: entry.akunId,
             tipe: entry.tipe,
@@ -352,7 +392,7 @@ const JurnalFormPage = () => {
         toast.success("Transaksi jurnal berhasil diupdate");
 
         // Navigate back
-        navigate("/admin/jurnal");
+        navigate(approvalReturnTo || "/admin/jurnal");
       } catch (error) {
         console.error("Error saving jurnal transaction:", error);
         toast.error(
@@ -388,21 +428,41 @@ const JurnalFormPage = () => {
       const transactionData = {
         tanggal,
         keterangan: templateForm.keterangan || "",
+        referensi,
         entries: builtEntries,
       };
 
       const backendData = transformJurnalForBackend(transactionData);
 
-      await createJurnal(backendData);
-      toast.success("Transaksi jurnal berhasil ditambahkan");
+      const createdTransaction = await createJurnal(backendData);
+
+      if (isDonationApprovalMode && approvalDonationId) {
+        try {
+          await axiosInstance.patch(`/donasi/${approvalDonationId}/jurnal-approval`, {
+            status: "APPROVED",
+            jurnalTransactionId: createdTransaction.id,
+          });
+          toast.success("Donasi berhasil di-approve dan masuk ke jurnal");
+        } catch (approvalError) {
+          console.error("Error updating donation approval status:", approvalError);
+          toast.error(
+            approvalError.response?.data?.message ||
+              "Jurnal berhasil dibuat, tapi status approval donasi gagal diperbarui"
+          );
+          navigate(approvalReturnTo || "/admin/jurnal");
+          return;
+        }
+      } else {
+        toast.success("Transaksi jurnal berhasil ditambahkan");
+      }
 
       // Navigate back
-      navigate("/admin/jurnal");
+      navigate(approvalReturnTo || "/admin/jurnal");
     } catch (error) {
       console.error("Error saving jurnal transaction:", error);
       toast.error(
-        error.message ||
-          error.response?.data?.message ||
+        error.response?.data?.message ||
+          error.message ||
           "Gagal menyimpan transaksi jurnal"
       );
     } finally {
@@ -412,7 +472,7 @@ const JurnalFormPage = () => {
   };
 
   const handleBack = () => {
-    navigate("/admin/jurnal");
+    navigate(approvalReturnTo || "/admin/jurnal");
   };
 
   // Calculate totals
@@ -664,6 +724,45 @@ const JurnalFormPage = () => {
             </button>
           </div>
         </div>
+
+        {isDonationApprovalMode && (
+          <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+            <div className="flex items-start gap-3">
+              <CheckCircle2 className="mt-0.5 h-5 w-5 text-emerald-600" />
+              <div>
+                <p className="text-sm font-semibold text-emerald-800">
+                  Approval donasi siap diproses ke jurnal
+                </p>
+                <p className="mt-1 text-sm text-emerald-700">
+                  Donasi ini dibawa langsung dari halaman takmir agar pencatatan jurnal
+                  benar-benar terkait dengan transaksi yang masuk.
+                </p>
+                <div className="mt-2 flex flex-wrap gap-2 text-xs text-emerald-800">
+                  {approvalCampaignName ? (
+                    <span className="rounded-full bg-white px-3 py-1">
+                      Campaign: {approvalCampaignName}
+                    </span>
+                  ) : null}
+                  {approvalDonorName ? (
+                    <span className="rounded-full bg-white px-3 py-1">
+                      Donatur: {approvalDonorName}
+                    </span>
+                  ) : null}
+                  {approvalAmount ? (
+                    <span className="rounded-full bg-white px-3 py-1">
+                      Nominal: {formatCurrency(parseFloat(approvalAmount) || 0)}
+                    </span>
+                  ) : null}
+                  {referensi ? (
+                    <span className="rounded-full bg-white px-3 py-1">
+                      Referensi: {referensi}
+                    </span>
+                  ) : null}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Step 1: Informasi Dasar */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">

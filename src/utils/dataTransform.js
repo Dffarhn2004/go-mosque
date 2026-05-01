@@ -205,6 +205,7 @@ export const transformJurnalForBackend = (transactionData) => {
   return {
     tanggal: transactionData.tanggal,
     keterangan: transactionData.keterangan || "", // Keterangan di transaction level (opsional)
+    referensi: transactionData.referensi || null,
     entries: transactionData.entries.map((entry) => ({
       akunId: entry.akunId,
       tipe: entry.tipe, // DEBIT or KREDIT
