@@ -39,28 +39,51 @@ import SystemAdminSettingsPage from "./pages/system_admin/settings_page/settings
 import NotificationsTakmir from "./pages/takmir/notification_page/notifications";
 import DonationVerificationPage from "./pages/takmir/donation_verification_page/donation_verification";
 import AboutPage from "./pages/about_page";
+import ScrollToTop from "./components/common/ScrollToTop";
+import { hasAuthSession } from "./utils/authStorage";
+
+function RequireDonorAuth({ children }) {
+  if (!hasAuthSession()) {
+    return <Navigate to="/auth" replace />;
+  }
+
+  return children;
+}
 
 function App() {
   return (
     <Router>
+      <ScrollToTop />
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/tentang-kami" element={<AboutPage />} />
         <Route path="/auth" element={<AuthPage />} />
         <Route path="/auth/admin" element={<AdminAuthPage />} />
         <Route path="/auth/system-admin" element={<Navigate to="/auth/admin" replace />} />
-        <Route path="/riwayat" element={<RiwayatDonasiPage />} />
+        <Route
+          path="/riwayat"
+          element={
+            <RequireDonorAuth>
+              <RiwayatDonasiPage />
+            </RequireDonorAuth>
+          }
+        />
         <Route path="/masjid-terdaftar" element={<MasjidTerdaftarPage />} />
-        <Route path="/home" element={<HomeUser />} />
+        <Route
+          path="/home"
+          element={
+            <RequireDonorAuth>
+              <HomeUser />
+            </RequireDonorAuth>
+          }
+        />
         <Route path="/masjid/:id" element={<DetailMasjid />} />
         <Route path="/masjid/:masjidId/checkout" element={<CheckoutDonation />} />
         <Route path="/masjid/:id/laporan-keuangan" element={<LaporanKeuanganUserPage />} />
-        <Route path="/donation" element={<AllDonationUser />} />
-        <Route path="/home/donation/:id" element={<DetailDonation />} />
-        <Route
-          path="/home/donation/:campaignId/checkout"
-          element={<CheckoutDonation />}
-        />
+        <Route path="/donation" element={<Navigate to="/masjid-terdaftar" replace />} />
+        <Route path="/campaign" element={<AllDonationUser />} />
+        <Route path="/campaign/:id" element={<DetailDonation />} />
+        <Route path="/campaign/:campaignId/checkout" element={<CheckoutDonation />} />
         <Route path="/admin/dashboard" element={<DashboardTakmir />} />
         <Route path="/admin/notifications" element={<NotificationsTakmir />} />
         <Route path="/admin/donation" element={<DonationTakmir />} />

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { logoutAndRedirect } from "../../../utils/authStorage";
 
 const Navbar = ({ position = "fixed", user = null }) => {
   const navigate = useNavigate();
@@ -40,8 +41,7 @@ const Navbar = ({ position = "fixed", user = null }) => {
   const toggleUserDropdown = () => setIsUserDropdownOpen(!isUserDropdownOpen);
 
   const handleLogout = () => {
-    localStorage.clear();
-    navigate("/");
+    logoutAndRedirect("/");
   };
 
   return (
@@ -141,8 +141,8 @@ const Navbar = ({ position = "fixed", user = null }) => {
                   
                   <div className="flex items-center space-x-3">
                     <PrimaryButton
-                      text="Ayoo Bantu Mesjid"
-                      onClick={() => navigate("/auth")}
+                      text="Mulai Donasi"
+                      onClick={() => navigate("/masjid-terdaftar")}
                       className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-xl"
                       icon="🤲"
                     />
@@ -249,8 +249,8 @@ const Navbar = ({ position = "fixed", user = null }) => {
                   
                   <div className="space-y-3 px-4 pt-4">
                     <PrimaryButton
-                      text="🤲 Ayoo Bantu Mesjid"
-                      onClick={() => navigate("/auth")}
+                      text="🤲 Mulai Donasi"
+                      onClick={() => navigate("/masjid-terdaftar")}
                       className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
                     />
                     <SecondaryButton

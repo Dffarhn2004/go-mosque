@@ -13,6 +13,7 @@ import {
   X,
 } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { logoutAndRedirect } from "../utils/authStorage";
 
 const navItems = [
   { to: "/system-admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -103,8 +104,7 @@ export default function SystemAdminLayout({ children }) {
 
         <button
           onClick={() => {
-            localStorage.clear();
-            navigate("/auth/admin", { replace: true });
+            logoutAndRedirect("/auth/admin");
           }}
           className="mt-8 flex w-full items-center gap-3 rounded-xl border border-[#d1c7b3] px-4 py-3 text-sm text-[#7b2e2e] hover:bg-[#f5e5e5]"
         >

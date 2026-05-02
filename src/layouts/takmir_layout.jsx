@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import axiosInstance from "../api/axiosInstance";
+import { logoutAndRedirect } from "../utils/authStorage";
 
 const createNavItems = (unreadCount = 0) => [
   {
@@ -315,8 +316,7 @@ export default function TakmirLayout({ children }) {
           <button
             className="flex items-center gap-3 w-full px-3 py-2.5 text-sm font-medium text-red-600 rounded-lg hover:bg-red-50 transition-colors duration-200"
             onClick={() => {
-              localStorage.clear();
-              navigate("/");
+              logoutAndRedirect("/");
             }}
           >
             <LogOut className="w-5 h-5" />
@@ -460,8 +460,7 @@ export default function TakmirLayout({ children }) {
                     <button
                       className="flex items-center gap-3 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
                       onClick={() => {
-                        localStorage.clear();
-                        navigate("/", { replace: true });
+                        logoutAndRedirect("/");
                       }}
                     >
                       <LogOut className="w-4 h-4" />

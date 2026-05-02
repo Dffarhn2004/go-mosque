@@ -36,7 +36,7 @@ const Footer = () => {
               Tentang Kami
             </button>
             <button
-              onClick={() => navigate("/auth")}
+              onClick={() => navigate("/masjid-terdaftar")}
               className="rounded-xl bg-blue-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-600"
             >
               Mulai Donasi

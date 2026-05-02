@@ -20,6 +20,7 @@ import formatCurrency from "../../../utils/formatCurrency";
 function CheckoutDonation() {
   const { campaignId, masjidId } = useParams();
   const isGeneralDonation = Boolean(masjidId);
+  const currentUser = JSON.parse(localStorage.getItem("user")) || null;
   const [formData, setFormData] = useState({
     donorName: "",
     email: "",
@@ -133,6 +134,16 @@ function CheckoutDonation() {
   };
 
   useEffect(() => {
+    if (currentUser) {
+      setFormData((prev) => ({
+        ...prev,
+        donorName: prev.donorName || currentUser.NamaLengkap || "",
+        email: prev.email || currentUser.Email || "",
+      }));
+    }
+  }, [currentUser]);
+
+  useEffect(() => {
     const fetchTarget = async () => {
       try {
         const response = isGeneralDonation
@@ -162,6 +173,10 @@ function CheckoutDonation() {
             Terima kasih atas kebaikan Anda. Semoga Allah membalas kebaikan
             Anda.
           </p>
+          <p className="mb-6 text-sm leading-6 text-gray-500">
+            Donasi Anda telah dicatat dan dapat ditinjau oleh takmir masjid
+            untuk proses verifikasi penyaluran.
+          </p>
           <div className="text-emerald-600 text-2xl font-bold">
             Rp. {getSelectedAmount()?.toLocaleString("id-ID")}
           </div>
@@ -182,12 +197,16 @@ function CheckoutDonation() {
       <MetaData></MetaData>
       <Navbar
         position="static"
-        user={{
-          name: JSON.parse(localStorage.getItem("user"))?.NamaLengkap || "User",
-          role: "Donatur",
-          avatar:
-            "https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg",
-        }}
+        user={
+          currentUser
+            ? {
+                name: currentUser.NamaLengkap || "User",
+                role: "Donatur",
+                avatar:
+                  "https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg",
+              }
+            : null
+        }
       />
 
       <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-50">
@@ -312,10 +331,19 @@ function CheckoutDonation() {
                     Profil Donatur
                   </h2>
                   <p className="text-gray-600 text-base lg:text-lg">
-                    Lengkapi informasi Anda
+                    {currentUser
+                      ? "Lengkapi data donasi Anda"
+                      : "Isi data singkat untuk melanjutkan donasi tanpa login"}
                   </p>
                 </div>
               </div>
+
+              {!currentUser && (
+                <div className="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm leading-6 text-emerald-800">
+                  Anda dapat berdonasi tanpa membuat akun. Donasi yang masuk
+                  akan tetap tercatat dan dapat diverifikasi oleh takmir masjid.
+                </div>
+              )}
 
               {/* Error Message */}
               {error && (
@@ -525,7 +553,7 @@ function CheckoutDonation() {
               <div className="mt-8 pt-8 border-t border-gray-100">
                 <div className="flex items-center justify-center text-base lg:text-lg text-gray-600">
                   <CheckCircle className="w-5 h-5 lg:w-6 lg:h-6 text-emerald-500 mr-3" />
-                  Donasi Anda aman dan tersalurkan dengan baik
+                  Donasi dicatat di sistem dan dapat diverifikasi oleh takmir
                 </div>
               </div>
             </div>

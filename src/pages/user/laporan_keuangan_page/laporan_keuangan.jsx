@@ -20,6 +20,7 @@ import { Calendar, Download, Loader2, FileText, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import axiosInstance from "../../../api/axiosInstance";
+import { getDonorNavbarUser } from "../../../utils/authStorage";
 
 const LaporanKeuanganUserPage = () => {
   const { id: masjidId } = useParams();
@@ -43,6 +44,7 @@ const LaporanKeuanganUserPage = () => {
   const [tanggalAkhir, setTanggalAkhir] = useState(
     new Date().toISOString().split("T")[0]
   );
+  const navbarUser = getDonorNavbarUser();
 
   // Load masjid data
   useEffect(() => {
@@ -395,12 +397,7 @@ const LaporanKeuanganUserPage = () => {
       <MetaData />
       <Navbar
         position="static"
-        user={{
-          name: JSON.parse(localStorage.getItem("user"))?.NamaLengkap || "User",
-          email: JSON.parse(localStorage.getItem("user"))?.Email,
-          role: "Donatur",
-          avatar: "https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg",
-        }}
+        user={navbarUser}
       />
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

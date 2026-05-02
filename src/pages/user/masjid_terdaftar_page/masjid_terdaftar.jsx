@@ -11,16 +11,23 @@ import {
   Loader2,
 } from "lucide-react";
 import axiosInstance from "../../../api/axiosInstance";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { MasjidListSkeleton } from "../../../components/common/Skeleton";
+import { getDonorNavbarUser } from "../../../utils/authStorage";
 
 const MasjidTerdaftarPage = () => {
   const [masjidList, setMasjidList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [error, setError] = useState(null);
+  const [searchParams] = useSearchParams();
+  const navbarUser = getDonorNavbarUser();
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    setSearchTerm(searchParams.get("search") || "");
+  }, [searchParams]);
 
   useEffect(() => {
     const fetchMasjid = async () => {
@@ -52,8 +59,6 @@ const MasjidTerdaftarPage = () => {
     navigate(`/masjid/${masjidId}`);
   };
 
-  const user = JSON.parse(localStorage.getItem("user")) || null;
-
   if (loading) {
     return (
       <>
@@ -65,17 +70,7 @@ const MasjidTerdaftarPage = () => {
         />
         <Navbar
           position="static"
-          user={
-            user
-              ? {
-                  name: user.NamaLengkap || "User",
-                  email: user.Email,
-                  role: "Donatur",
-                  avatar:
-                    "https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg",
-                }
-              : null
-          }
+          user={navbarUser}
         />
         <MasjidListSkeleton />
         <Footer />
@@ -94,17 +89,7 @@ const MasjidTerdaftarPage = () => {
         />
         <Navbar
           position="static"
-          user={
-            user
-              ? {
-                  name: user.NamaLengkap || "User",
-                  email: user.Email,
-                  role: "Donatur",
-                  avatar:
-                    "https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg",
-                }
-              : null
-          }
+          user={navbarUser}
         />
         <div
           className="min-h-screen py-12"
@@ -134,17 +119,7 @@ const MasjidTerdaftarPage = () => {
         />
       <Navbar
         position="static"
-        user={
-          user
-            ? {
-                name: user.NamaLengkap || "User",
-                email: user.Email,
-                role: "Donatur",
-                avatar:
-                  "https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg",
-              }
-            : null
-        }
+        user={navbarUser}
       />
       <div
         className="min-h-screen py-12"

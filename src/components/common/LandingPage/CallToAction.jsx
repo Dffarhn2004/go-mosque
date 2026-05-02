@@ -22,31 +22,31 @@ const CallToAction = ({ login = false }) => {
 
       <div className="max-w-4xl mx-auto text-center relative z-10">
         <span className="inline-block px-4 py-1 bg-blue-100 text-blue-800 font-medium rounded-full text-sm mb-6">
-          Bergabunglah Bersama Kami
+          Langkah Berikutnya
         </span>
 
         <h2 className="text-3xl md:text-5xl font-bold text-gray-800 mb-8 leading-tight">
-          Kebaikanmu, Hadir Dimanapun Kamu Berada
+          Mulai dari masjid yang ingin kamu dukung
         </h2>
 
         <div className="w-32 h-1 bg-gradient-to-r from-blue-400 to-blue-600 mx-auto mb-8 rounded-full"></div>
 
         <p className="text-gray-700 text-lg md:text-xl mb-12 max-w-3xl mx-auto leading-relaxed">
-          Dukung pembangunan masjid di seluruh Indonesia secara online, aman,
-          dan transparan.
+          Jelajahi masjid terdaftar, lihat transparansi kebutuhannya, lalu
+          pilih donasi umum atau campaign yang paling relevan.
           <span className="block mt-2">
-            Kapan pun dan di mana pun kamu berada.
+            Alurnya lebih jelas untuk donatur dan lebih kuat untuk masjid.
           </span>
         </p>
 
         {!login && (
           <div className="flex flex-col md:flex-row justify-center items-center gap-4">
             <button
-              onClick={() => navigate("/auth")}
+              onClick={() => navigate("/masjid-terdaftar")}
               className="bg-blue-600 hover:bg-blue-700 text-white px-10 py-4 rounded-lg font-bold text-lg transition duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center"
               style={{ backgroundColor: "#0473A8" }}
             >
-              Donasi Sekarang
+              Jelajahi Masjid
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-6 w-6 ml-2"
@@ -60,7 +60,12 @@ const CallToAction = ({ login = false }) => {
                 />
               </svg>
             </button>
-            =
+            <button
+              onClick={() => navigate("/auth/admin")}
+              className="border border-gray-300 bg-white text-gray-800 px-10 py-4 rounded-lg font-bold text-lg transition duration-300 hover:bg-gray-50 shadow-sm"
+            >
+              Daftarkan Masjid
+            </button>
           </div>
         )}
 
@@ -82,7 +87,7 @@ const CallToAction = ({ login = false }) => {
                 />
               </svg>
             </div>
-            <p className="text-gray-600 font-medium">100% Aman</p>
+            <p className="text-gray-600 font-medium">Akses Profil Masjid</p>
           </div>
 
           <div className="flex items-center">
@@ -102,7 +107,7 @@ const CallToAction = ({ login = false }) => {
                 />
               </svg>
             </div>
-            <p className="text-gray-600 font-medium">Transparan</p>
+            <p className="text-gray-600 font-medium">Donasi Lebih Transparan</p>
           </div>
 
           <div className="flex items-center">
@@ -122,7 +127,7 @@ const CallToAction = ({ login = false }) => {
                 />
               </svg>
             </div>
-            <p className="text-gray-600 font-medium">Cepat</p>
+            <p className="text-gray-600 font-medium">Checkout Tetap Cepat</p>
           </div>
         </div>
       </div>

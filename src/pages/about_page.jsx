@@ -67,48 +67,48 @@ function AboutPage() {
       <Navbar />
 
       <main className="bg-[#F5F8F6] text-slate-900">
-        <section className="relative overflow-hidden bg-[#0C6839] px-6 pb-20 pt-28 md:px-16 lg:px-24">
+        <section className="relative overflow-hidden bg-[#0C6839] px-5 pb-14 pt-20 sm:px-6 sm:pt-24 md:px-10 md:pb-20 lg:px-16 lg:pt-28 xl:px-24">
           <div className="absolute inset-0 opacity-25">
             <div className="absolute left-0 top-0 h-64 w-64 rounded-full bg-emerald-200 blur-3xl" />
             <div className="absolute bottom-0 right-0 h-80 w-80 rounded-full bg-teal-300 blur-3xl" />
           </div>
 
-          <div className="relative mx-auto grid max-w-7xl gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
+          <div className="relative mx-auto grid max-w-7xl gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-center lg:gap-10">
             <div>
               <span className="inline-flex rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-medium text-emerald-50">
                 Tentang GoQu
               </span>
-              <h1 className="mt-6 max-w-3xl text-4xl font-bold leading-tight text-white md:text-5xl lg:text-6xl">
+              <h1 className="mt-5 max-w-3xl text-3xl font-bold leading-tight text-white sm:text-4xl md:text-5xl lg:text-6xl">
                 Platform digital yang membuat donasi masjid terasa lebih jelas,
                 dekat, dan dapat dipertanggungjawabkan.
               </h1>
-              <p className="mt-6 max-w-2xl text-lg leading-8 text-emerald-50/90">
+              <p className="mt-5 max-w-2xl text-base leading-7 text-emerald-50/90 sm:text-lg sm:leading-8">
                 GoQu hadir untuk membantu takmir mengelola kebutuhan masjid
                 secara modern dan membantu donatur menyalurkan kontribusi dengan
                 rasa percaya yang lebih kuat.
               </p>
 
-              <div className="mt-8 flex flex-wrap gap-4">
+              <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-4">
                 <button
-                  onClick={() => navigate("/auth")}
-                  className="rounded-2xl bg-white px-6 py-3 font-semibold text-[#0C6839] transition hover:bg-emerald-50"
+                  onClick={() => navigate("/masjid-terdaftar")}
+                  className="w-full rounded-2xl bg-white px-6 py-3 font-semibold text-[#0C6839] transition hover:bg-emerald-50 sm:w-auto"
                 >
                   Mulai Berdonasi
                 </button>
                 <button
                   onClick={() => navigate("/auth/admin")}
-                  className="rounded-2xl border border-white/25 bg-white/10 px-6 py-3 font-semibold text-white transition hover:bg-white/15"
+                  className="w-full rounded-2xl border border-white/25 bg-white/10 px-6 py-3 font-semibold text-white transition hover:bg-white/15 sm:w-auto"
                 >
                   Daftarkan Masjid
                 </button>
               </div>
             </div>
 
-            <div className="grid gap-4">
+            <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-1">
               {highlights.map((item) => (
                 <div
                   key={item.value}
-                  className="rounded-3xl border border-white/10 bg-white/10 p-6 backdrop-blur-sm"
+                  className="rounded-3xl border border-white/10 bg-white/10 p-5 backdrop-blur-sm sm:p-6"
                 >
                   <div className="text-2xl font-bold text-white">{item.value}</div>
                   <p className="mt-2 text-sm leading-6 text-emerald-50/90">
@@ -120,7 +120,7 @@ function AboutPage() {
           </div>
         </section>
 
-        <section className="px-6 py-16 md:px-16 lg:px-24">
+        <section className="px-5 py-12 sm:px-6 md:px-10 md:py-16 lg:px-16 xl:px-24">
           <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[0.95fr_1.05fr]">
             <div className="rounded-[28px] border border-emerald-100 bg-white p-8 shadow-sm">
               <p className="text-sm font-semibold uppercase tracking-[0.24em] text-emerald-700">
@@ -162,7 +162,7 @@ function AboutPage() {
           </div>
         </section>
 
-        <section className="px-6 pb-16 md:px-16 lg:px-24">
+        <section className="px-5 pb-12 sm:px-6 md:px-10 md:pb-16 lg:px-16 xl:px-24">
           <div className="mx-auto max-w-7xl">
             <div className="mb-8 flex items-end justify-between gap-4">
               <div>
@@ -175,7 +175,7 @@ function AboutPage() {
               </div>
             </div>
 
-            <div className="grid gap-6 lg:grid-cols-3">
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {principles.map((item) => (
                 <article
                   key={item.title}
@@ -196,8 +196,8 @@ function AboutPage() {
           </div>
         </section>
 
-        <section className="px-6 pb-20 md:px-16 lg:px-24">
-          <div className="mx-auto max-w-7xl rounded-[32px] border border-emerald-100 bg-white p-8 shadow-sm md:p-10">
+        <section className="px-5 pb-16 sm:px-6 md:px-10 md:pb-20 lg:px-16 xl:px-24">
+          <div className="mx-auto max-w-7xl rounded-[32px] border border-emerald-100 bg-white p-6 shadow-sm md:p-10">
             <div className="grid gap-8 lg:grid-cols-[1fr_auto] lg:items-center">
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.24em] text-emerald-700">
@@ -214,16 +214,16 @@ function AboutPage() {
                 </p>
               </div>
 
-              <div className="flex flex-wrap gap-3 lg:justify-end">
+              <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap lg:justify-end">
                 <button
                   onClick={() => navigate("/masjid-terdaftar")}
-                  className="rounded-2xl border border-slate-200 px-5 py-3 font-semibold text-slate-800 transition hover:border-emerald-200 hover:bg-emerald-50"
+                  className="w-full rounded-2xl border border-slate-200 px-5 py-3 font-semibold text-slate-800 transition hover:border-emerald-200 hover:bg-emerald-50 sm:w-auto"
                 >
                   Lihat Masjid
                 </button>
                 <button
                   onClick={() => navigate("/")}
-                  className="rounded-2xl bg-[#0C6839] px-5 py-3 font-semibold text-white transition hover:bg-[#0A5A31]"
+                  className="w-full rounded-2xl bg-[#0C6839] px-5 py-3 font-semibold text-white transition hover:bg-[#0A5A31] sm:w-auto"
                 >
                   Kembali ke Beranda
                 </button>

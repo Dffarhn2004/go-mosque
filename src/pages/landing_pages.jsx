@@ -3,24 +3,12 @@ import MetaData from "../components/common/MetaData";
 import Navbar from "../components/common/LandingPage/Navbar";
 import Hero from "../components/common/LandingPage/Hero";
 import FeaturedMosques from "../components/common/LandingPage/FeaturedMosques";
+import TransparencyHighlights from "../components/common/LandingPage/TransparencyHighlights";
 import UIISupport from "../components/common/LandingPage/UIISupport";
 import CallToAction from "../components/common/LandingPage/CallToAction";
 import Footer from "../components/common/LandingPage/Footer";
-import { useEffect } from "react";
 
 function Landing() {
-  useEffect(() => {
-    const handlePopState = (e) => {
-      window.history.pushState(null, "", window.location.href);
-    };
-
-    window.history.pushState(null, "", window.location.href);
-    window.addEventListener("popstate", handlePopState);
-
-    return () => {
-      window.removeEventListener("popstate", handlePopState);
-    };
-  }, []);
   const jsonLd = {
     '@context': 'https://schema.org',
     '@graph': [
@@ -30,7 +18,7 @@ function Landing() {
         name: 'GoQu',
         url: 'https://goqu.vercel.app',
         logo: 'https://goqu.vercel.app/Logo_With_Text.png',
-        description: 'Platform donasi digital untuk pembangunan dan renovasi masjid yang akuntabel dan transparan di seluruh Indonesia.',
+        description: 'Platform donasi digital untuk masjid dengan profil masjid, donasi umum, campaign khusus, dan transparansi keuangan yang mudah diakses.',
         sameAs: [],
       },
       {
@@ -58,6 +46,7 @@ function Landing() {
       <Navbar />
       <Hero />
       <FeaturedMosques />
+      <TransparencyHighlights />
       <UIISupport />
       <CallToAction />
       <Footer />

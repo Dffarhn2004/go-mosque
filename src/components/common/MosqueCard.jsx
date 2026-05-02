@@ -1,5 +1,5 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { ArrowRight, MapPin } from "lucide-react";
 import formatCurrency from "../../utils/formatCurrency";
 
 const MosqueCard = ({
@@ -9,74 +9,93 @@ const MosqueCard = ({
   description,
   currentAmount,
   targetAmount,
-  onClick
+  onClick,
 }) => {
-  const navigate = useNavigate();
-  // Calculate percentage for progress bar
-  const percentage = Math.min(
-    Math.round((currentAmount / targetAmount) * 100),
-    100
-  );
+  const safeCurrentAmount = Number(currentAmount) || 0;
+  const safeTargetAmount = Number(targetAmount) || 0;
+  const percentage =
+    safeTargetAmount > 0
+      ? Math.min(Math.round((safeCurrentAmount / safeTargetAmount) * 100), 100)
+      : 0;
 
   return (
-    <div className="bg-white rounded-xl overflow-hidden shadow-2xl hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100">
+    <article className="group flex h-full flex-col overflow-hidden rounded-[28px] border border-slate-200/80 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl">
       <div className="relative">
-        <img src={image} alt={title} className="w-full h-52 object-cover" />
-        <div className="absolute top-0 right-0 bg-green-500 text-white px-3 py-1 m-2 rounded-full text-xs font-bold">
+        <img
+          src={image || "/Masjid1.jpg"}
+          alt={title}
+          className="h-56 w-full object-cover transition duration-500 group-hover:scale-[1.03]"
+        />
+        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-slate-950/55 to-transparent" />
+        <div className="absolute left-4 top-4 rounded-full bg-emerald-500 px-3 py-1.5 text-xs font-bold text-white shadow-lg">
           {percentage}% Terkumpul
+        </div>
+        <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between rounded-2xl border border-white/20 bg-white/15 px-4 py-3 text-white backdrop-blur-md">
+          <div>
+            <p className="text-[11px] uppercase tracking-[0.18em] text-white/75">
+              Campaign
+            </p>
+            <p className="mt-1 line-clamp-1 text-sm font-semibold">{name}</p>
+          </div>
+          <div className="rounded-full bg-white/20 px-3 py-1 text-xs font-semibold">
+            Aktif
+          </div>
         </div>
       </div>
 
-      <div className="p-6">
-        <h3 className="font-bold text-xl text-gray-800 mb-1">{title}</h3>
-        <p className="text-sm font-medium text-blue-600 mb-3">{name}</p>
-        <p className="text-sm text-gray-600 mb-5 line-clamp-2">{description}</p>
-
-        {/* Progress bar with enhanced styling */}
-        <div className="w-full bg-gray-100 rounded-full h-3 mb-3">
-          <div
-            className="bg-green-500 h-3 rounded-full shadow-inner transition-all duration-500 ease-out"
-            style={{ width: `${percentage}%` }}
-          ></div>
+      <div className="flex flex-1 flex-col p-6">
+        <div className="mb-5">
+          <h3 className="line-clamp-2 text-xl font-bold leading-snug text-slate-900">
+            {title}
+          </h3>
+          <div className="mt-2 inline-flex items-center gap-2 rounded-full bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-700">
+            <MapPin className="h-3.5 w-3.5" />
+            {name}
+          </div>
+          <p className="mt-4 line-clamp-3 text-sm leading-6 text-slate-600">
+            {description || "Campaign ini sedang menghimpun dukungan untuk kebutuhan masjid."}
+          </p>
         </div>
 
-        <div className="flex justify-between items-center mb-5">
-          <div>
-            <p className="text-xs text-gray-500">Terkumpul</p>
-            <p className="text-sm font-bold text-gray-800">
-              {formatCurrency(currentAmount)}
+        <div className="mb-3 flex items-center justify-between text-xs font-medium text-slate-500">
+          <span>Progress dana</span>
+          <span>{percentage}%</span>
+        </div>
+        <div className="mb-4 h-3 w-full overflow-hidden rounded-full bg-slate-100">
+          <div
+            className="h-3 rounded-full bg-gradient-to-r from-emerald-500 to-green-400 shadow-inner transition-all duration-500 ease-out"
+            style={{ width: `${percentage}%` }}
+          />
+        </div>
+
+        <div className="mb-6 grid grid-cols-2 gap-3 rounded-2xl bg-slate-50 p-4">
+          <div className="min-w-0">
+            <p className="text-xs uppercase tracking-[0.18em] text-slate-500">
+              Terkumpul
+            </p>
+            <p className="mt-2 truncate text-sm font-bold text-slate-900">
+              {formatCurrency(safeCurrentAmount)}
             </p>
           </div>
-          <div className="text-right">
-            <p className="text-xs text-gray-500">Target</p>
-            <p className="text-sm font-bold text-gray-800">
-              {formatCurrency(targetAmount)}
+          <div className="min-w-0 text-right">
+            <p className="text-xs uppercase tracking-[0.18em] text-slate-500">
+              Target
+            </p>
+            <p className="mt-2 truncate text-sm font-bold text-slate-900">
+              {formatCurrency(safeTargetAmount)}
             </p>
           </div>
         </div>
 
         <button
-          className="w-full bg-[#0473A8] hover:bg-blue-700 text-white py-3 px-4 rounded-lg flex items-center justify-center transition duration-300 font-medium shadow-md hover:shadow-lg"
-          onClick={
-            onClick
-          }
+          className="mt-auto flex w-full items-center justify-center gap-2 rounded-2xl bg-[#0473A8] px-4 py-3.5 font-semibold text-white transition duration-300 hover:bg-sky-700 hover:shadow-lg"
+          onClick={onClick}
         >
-          Ayo Bantu Masjid
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5 ml-2"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path
-              fillRule="evenodd"
-              d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z"
-              clipRule="evenodd"
-            />
-          </svg>
+          Lihat Campaign
+          <ArrowRight className="h-4 w-4" />
         </button>
       </div>
-    </div>
+    </article>
   );
 };
 

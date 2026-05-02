@@ -20,6 +20,7 @@ import {
   User,
 } from "lucide-react";
 import StatCard from "../../../components/common/Dashboard_Takmir/StatCards";
+import { getDonorNavbarUser } from "../../../utils/authStorage";
 
 // SVG component for the decorative curve
 const TopCurve = () => (
@@ -438,6 +439,7 @@ function DetailMasjid() {
   const [masjidData, setMasjidData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("laporankeuangan");
+  const navbarUser = getDonorNavbarUser();
 
   const [stats, setStats] = useState({
     cashIn: { total: 0 },
@@ -539,12 +541,7 @@ function DetailMasjid() {
       />
       <Navbar
         position="static"
-        user={{
-          name: JSON.parse(localStorage.getItem("user"))?.NamaLengkap || "User",
-          role: "Donatur",
-          avatar:
-            "https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg",
-        }}
+        user={navbarUser}
       />
 
       <main>

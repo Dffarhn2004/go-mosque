@@ -2,34 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import MosqueCard from "../MosqueCard";
 import axiosInstance from "../../../api/axiosInstance";
-import { Heart, Building2 } from "lucide-react";
-
-const dummyMosques = [
-  {
-    image: "/Masjid1.jpg",
-    title: "Perbaikan Atap Masjid",
-    name: "Masjid Al-Falah",
-    description: "Masjid ini sedang membutuhkan dana untuk renovasi atap.",
-    currentAmount: 15000000,
-    targetAmount: 25000000,
-  },
-  {
-    image: "/Masjid2.jpg",
-    title: "Pembangunan Tempat Wudhu",
-    name: "Masjid Al-Hikmah",
-    description: "Masjid ini sedang membangun tempat wudhu baru.",
-    currentAmount: 9000000,
-    targetAmount: 20000000,
-  },
-  {
-    image: "/Masjid3.jpg",
-    title: "Renovasi Interior",
-    name: "Masjid Raya Baiturrahman",
-    description: "Dukunganmu sangat berarti untuk renovasi interior.",
-    currentAmount: 23000000,
-    targetAmount: 30000000,
-  },
-];
+import { Heart, Building2, SearchX } from "lucide-react";
 
 // Loading Skeleton Component
 const MosqueCardSkeleton = () => {
@@ -109,11 +82,13 @@ const EnhancedLoadingScreen = ({ limit = 3 }) => {
 
 const MosqueCardSection = ({
   title = "Masjid Membutuhkan Kamu Segera",
+  subtitle = "Pilih campaign dari masjid terdaftar sesuai kebutuhan yang ingin Anda bantu.",
   seeMore = true,
-  seeMoreUrl = "/donation?search=Masjid Membutuhkan Kamu Segera",
+  seeMoreUrl = "/campaign",
   position = "px-6 md:px-20 mt-12",
   limit = 3,
   showEmptyState = true,
+  searchTerm = "",
 }) => {
   const [donationCampaigns, setDonationCampaigns] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -133,9 +108,21 @@ const MosqueCardSection = ({
     };
 
     fetchCampaigns();
-  }, []);
+  }, [limit]);
 
-  // if (loading) return <p className="text-center">Loading campaigns...</p>;
+  const normalizedSearch = searchTerm.trim().toLowerCase();
+  const filteredCampaigns = donationCampaigns.filter((campaign) => {
+    if (!normalizedSearch) return true;
+
+    return [
+      campaign.Nama,
+      campaign.Deskripsi,
+      campaign.masjid?.Nama,
+      campaign.masjid?.Alamat,
+    ]
+      .filter(Boolean)
+      .some((value) => value.toLowerCase().includes(normalizedSearch));
+  });
 
   return (
     <section className={`${position}`}>
@@ -143,11 +130,11 @@ const MosqueCardSection = ({
         <EnhancedLoadingScreen limit={limit} />
       ) : donationCampaigns.length === 0 ? (
         showEmptyState ? (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100">
-            <div className="text-center py-16 px-4">
+          <div className="rounded-[32px] border border-gray-100 bg-white shadow-sm">
+            <div className="px-4 py-16 text-center">
               <div className="relative mb-8 inline-block">
                 <div
-                  className="w-32 h-32 mx-auto rounded-full flex items-center justify-center shadow-lg"
+                  className="mx-auto flex h-32 w-32 items-center justify-center rounded-full shadow-lg"
                   style={{
                     background:
                       "linear-gradient(135deg, rgba(12, 104, 57, 0.2) 0%, rgba(17, 130, 75, 0.2) 50%, rgba(10, 79, 46, 0.2) 100%)",
@@ -162,28 +149,47 @@ const MosqueCardSection = ({
               <h3 className="text-2xl font-bold text-gray-700 mb-4">
                 Belum Ada Donasi
               </h3>
-              <p className="text-gray-500 mb-8 max-w-md mx-auto">
-                Belum ada kampanye donasi yang tersedia saat ini. Kampanye donasi akan muncul di sini setelah ada yang mengajukan.
+              <p className="mx-auto mb-8 max-w-md text-gray-500">
+                Belum ada campaign donasi yang tersedia saat ini. Campaign akan
+                ditampilkan di halaman ini setelah dibuka oleh pengelola masjid.
               </p>
             </div>
           </div>
         ) : null
+      ) : filteredCampaigns.length === 0 ? (
+        <div className="rounded-[32px] border border-slate-200 bg-white p-10 text-center shadow-sm">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-slate-100">
+            <SearchX className="h-8 w-8 text-slate-600" />
+          </div>
+          <h3 className="mt-5 text-2xl font-bold text-slate-900">
+            Campaign tidak ditemukan
+          </h3>
+          <p className="mt-2 text-sm leading-6 text-slate-600">
+            Belum ada campaign yang cocok dengan pencarian <b>{searchTerm}</b>.
+            Coba gunakan kata kunci lain untuk melihat hasil yang tersedia.
+          </p>
+        </div>
       ) : (
         <>
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-900">
-              {title}
-            </h2>
+          <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 md:text-3xl">
+                {title}
+              </h2>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-gray-600">
+                {subtitle}
+              </p>
+            </div>
 
             {seeMore && (
               <button
                 onClick={() => navigate(seeMoreUrl)}
-                className="bg-[#0473A8] hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm flex items-center transition"
+                className="flex items-center rounded-2xl bg-[#0473A8] px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-700"
               >
                 Lihat Lebih banyak
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-4 w-4 ml-1"
+                  className="ml-1 h-4 w-4"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -199,8 +205,8 @@ const MosqueCardSection = ({
             )}
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-            {donationCampaigns.map((mosque, index) => (
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
+            {filteredCampaigns.map((mosque, index) => (
               <MosqueCard
                 key={index}
                 image={mosque.FotoDonasi}
@@ -209,7 +215,7 @@ const MosqueCardSection = ({
                 description={mosque.Deskripsi}
                 currentAmount={mosque.UangDonasiTerkumpul}
                 targetAmount={mosque.TargetUangDonasi}
-                onClick={() => navigate(`/home/donation/${mosque.id}`)}
+                onClick={() => navigate(`/campaign/${mosque.id}`)}
               />
             ))}
           </div>

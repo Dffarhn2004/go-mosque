@@ -6,6 +6,7 @@ import tailwindcss from "@tailwindcss/vite";
 export default defineConfig({
   server: {
     allowedHosts: ["enormous-mint-tomcat.ngrok-free.app"],
+    port: 3050,
   },
   plugins: [react(), tailwindcss()],
 });

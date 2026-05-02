@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import axiosInstance from "../../../api/axiosInstance";
 import formatCurrency from "../../../utils/formatCurrency";
 import { DonationDetailSkeleton } from "../../../components/common/Skeleton";
+import { getDonorNavbarUser } from "../../../utils/authStorage";
 
 // SVG component for the decorative curve
 const TopCurve = () => (
@@ -27,6 +28,7 @@ function DetailDonation() {
   const [donation, setDonation] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedExpense, setSelectedExpense] = useState(null);
+  const navbarUser = getDonorNavbarUser();
 
   const navigate = useNavigate();
   useEffect(() => {
@@ -76,7 +78,7 @@ function DetailDonation() {
     '@type': 'FundraiserCampaign',
     name: donation.Nama,
     description: donation.Deskripsi || `Kampanye donasi untuk ${donation.masjid?.Nama}`,
-    url: `https://goqu.vercel.app/home/donation/${id}`,
+    url: `https://goqu.vercel.app/campaign/${id}`,
     organizer: {
       '@type': 'Place',
       name: donation.masjid?.Nama,
@@ -101,18 +103,13 @@ function DetailDonation() {
         }
         keywords={`donasi ${donation.masjid?.Nama}, ${donation.Nama}, GoQu, wakaf masjid`}
         image={donation.FotoThumbnailDonasi}
-        url={`/home/donation/${id}`}
+        url={`/campaign/${id}`}
         type="website"
         jsonLd={donationJsonLd}
       />
       <Navbar
         position="static"
-        user={{
-          name: JSON.parse(localStorage.getItem("user"))?.NamaLengkap || "User",
-          role: "Donatur",
-          avatar:
-            "https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg",
-        }}
+        user={navbarUser}
       />
 
       <main>
@@ -205,7 +202,7 @@ function DetailDonation() {
                   </button>
                   <button
                     className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-lg shadow-lg transition duration-300 transform hover:scale-105"
-                    onClick={() => navigate(`/home/donation/${id}/checkout`)} // Navigate to donation page
+                    onClick={() => navigate(`/campaign/${id}/checkout`)}
                   >
                     Ayo Donasi Segera →
                   </button>
@@ -390,7 +387,7 @@ function DetailDonation() {
             <div className="mt-16 text-center">
               <button
                 className="bg-green-600 hover:bg-green-700 text-white font-bold w-full max-w-lg mx-auto py-4 rounded-xl shadow-lg transition duration-300 text-xl transform hover:scale-105"
-                onClick={() => navigate(`/home/donation/${id}/checkout`)} // Navigate to donation page
+                onClick={() => navigate(`/campaign/${id}/checkout`)}
               >
                 Ikut Berdonasi Sekarang
               </button>
