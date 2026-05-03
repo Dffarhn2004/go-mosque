@@ -1,168 +1,138 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { logoutAndRedirect } from "../../../utils/authStorage";
+import { routes } from "../../../routes";
+
+const publicLinks = [
+  { text: "Beranda", path: routes.public.landing },
+  { text: "Jelajah Masjid", path: routes.public.mosques },
+  { text: "Campaign Donasi", path: routes.public.campaigns },
+  { text: "Tentang", path: routes.public.about },
+];
+
+const donorLinks = [
+  { text: "Beranda Saya", path: routes.donor.home },
+  { text: "Riwayat Donasi", path: routes.donor.history },
+  { text: "Jelajah Masjid", path: routes.public.mosques },
+  { text: "Campaign Donasi", path: routes.public.campaigns },
+];
 
 const Navbar = ({ position = "fixed", user = null }) => {
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const dropdownRef = useRef(null);
+  const desktopPositionClass = position === "static" ? "lg:static" : "lg:fixed";
 
-  // Handle scroll effect for navbar backdrop
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
     };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setIsUserDropdownOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  // Handle keyboard navigation
-  const handleKeyDown = (event, action) => {
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault();
-      action();
-    }
-  };
-
-  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
-  const toggleUserDropdown = () => setIsUserDropdownOpen(!isUserDropdownOpen);
 
   const handleLogout = () => {
-    logoutAndRedirect("/");
+    logoutAndRedirect(routes.public.landing);
   };
+
+  const links = user ? donorLinks : publicLinks;
 
   return (
     <>
       <nav
-        className={`static lg:${position} top-0 left-0 w-full z-[120] isolate transition-all duration-500 ease-in-out`}
+        className={`static ${desktopPositionClass} left-0 top-0 isolate z-[120] w-full transition-all duration-500 ease-in-out`}
         style={{
-          background: isScrolled 
+          background: isScrolled
             ? "linear-gradient(135deg, rgba(12, 104, 57, 0.98) 0%, rgba(17, 130, 75, 0.98) 50%, rgba(10, 79, 46, 0.98) 100%)"
             : "linear-gradient(135deg, rgba(12, 104, 57, 0.95) 0%, rgba(17, 130, 75, 0.95) 50%, rgba(10, 79, 46, 0.95) 100%)",
           backdropFilter: "blur(20px)",
           WebkitBackdropFilter: "blur(20px)",
-          boxShadow: isScrolled 
+          boxShadow: isScrolled
             ? "0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 16px rgba(0, 0, 0, 0.08)"
             : "0 4px 20px rgba(0, 0, 0, 0.1)",
-          borderBottom: isScrolled ? "1px solid rgba(255, 255, 255, 0.1)" : "none"
+          borderBottom: isScrolled ? "1px solid rgba(255, 255, 255, 0.1)" : "none",
         }}
         role="navigation"
         aria-label="Main navigation"
       >
         <div className="mx-auto px-4 sm:px-6 lg:px-32">
-          <div className="flex items-center justify-between h-16 lg:h-20">
-            {/* Enhanced Logo with Glow Effect */}
-            <div 
-              className="flex items-center cursor-pointer group" 
-              onClick={() => navigate("/")}
-              onKeyDown={(e) => handleKeyDown(e, () => navigate("/"))}
-              tabIndex={0}
-              role="button"
+          <div className="flex h-16 items-center justify-between lg:h-20">
+            <button
+              type="button"
+              className="group flex items-center"
+              onClick={() => navigate(routes.public.landing)}
               aria-label="Go to homepage"
             >
               <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-teal-400 opacity-0 blur-xl transition-all duration-500 group-hover:opacity-25 group-hover:scale-105"></div>
+                <div className="absolute inset-0 scale-100 bg-gradient-to-r from-emerald-400 to-teal-400 opacity-0 blur-xl transition-all duration-500 group-hover:opacity-25 group-hover:scale-105" />
                 <img
                   src="/Logo_With_Text.png"
                   alt="GoQu"
                   className="relative z-10 h-8 w-auto object-contain transition-all duration-300 group-hover:scale-[1.02] md:h-10"
                 />
               </div>
-            </div>
+            </button>
 
-            {/* Enhanced Desktop Menu */}
-            <div className="hidden lg:flex items-center space-x-2 lg:space-x-4">
+            <div className="hidden items-center space-x-2 lg:flex lg:space-x-4">
+              {links.map((link) => (
+                <NavLink
+                  key={link.path}
+                  text={link.text}
+                  onClick={() => navigate(link.path)}
+                />
+              ))}
+
               {user ? (
-                // Enhanced Authenticated view
-                <>
-                  <NavLink 
-                    text="Dashboard" 
-                    onClick={() => navigate("/home")}
-                    icon="🏠"
-                  />
-                  <NavLink 
-                    text="Riwayat Donasi" 
-                    onClick={() => navigate("/riwayat")}
-                    icon="📋"
-                  />
-                  <NavLink 
-                    text="Masjid Terdaftar" 
-                    onClick={() => navigate("/masjid-terdaftar")}
-                    icon="🕌"
-                  />
-                  
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center space-x-3 rounded-xl border border-white/30 bg-white/5 p-3 backdrop-blur-sm">
-                      <div className="relative">
-                        <img
-                          src={user.avatar || "https://source.unsplash.com/40x40/?face"}
-                          alt={`${user.name} profile picture`}
-                          className="h-10 w-10 rounded-full border-2 border-white/20 shadow-lg"
-                        />
-                        <div className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-2 border-white bg-emerald-400 animate-pulse"></div>
-                      </div>
-                      <div className="text-sm leading-tight text-white">
-                        <div className="font-semibold">{user.name}</div>
-                        <div className="text-xs opacity-80">
-                          {user.role || "Donatur"}
-                        </div>
-                      </div>
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center space-x-3 rounded-xl border border-white/30 bg-white/5 p-3 backdrop-blur-sm">
+                    <div className="relative">
+                      <img
+                        src={user.avatar || "https://source.unsplash.com/40x40/?face"}
+                        alt={`${user.name} profile picture`}
+                        className="h-10 w-10 rounded-full border-2 border-white/20 shadow-lg"
+                      />
+                      <div className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-2 border-white bg-emerald-400" />
                     </div>
-                    <button
-                      onClick={handleLogout}
-                      className="rounded-xl bg-red-500/90 px-4 py-2.5 font-semibold text-white shadow-lg transition-all duration-300 hover:bg-red-600 hover:shadow-xl"
-                    >
-                      Keluar
-                    </button>
+                    <div className="text-sm leading-tight text-white">
+                      <div className="font-semibold">{user.name}</div>
+                      <div className="text-xs opacity-80">{user.role || "Donatur"}</div>
+                    </div>
                   </div>
-                </>
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="rounded-xl bg-red-500/90 px-4 py-2.5 font-semibold text-white shadow-lg transition-all duration-300 hover:bg-red-600 hover:shadow-xl"
+                  >
+                    Keluar
+                  </button>
+                </div>
               ) : (
-                // Enhanced Landing page view
-                <>
-                  <NavLink text="Beranda" onClick={() => navigate("/")} icon="🏠" />
-                  <NavLink
-                    text="Tentang Kami"
-                    onClick={() => navigate("/tentang-kami")}
-                    icon="ℹ️"
+                <div className="flex items-center space-x-3">
+                  <PrimaryButton
+                    text="Masuk"
+                    onClick={() => navigate(routes.public.login)}
+                    className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-xl"
                   />
-                  
-                  <div className="flex items-center space-x-3">
-                    <PrimaryButton
-                      text="Mulai Donasi"
-                      onClick={() => navigate("/masjid-terdaftar")}
-                      className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-xl"
-                      icon="🤲"
-                    />
-                    <SecondaryButton
-                      text="Daftarkan Mesjid"
-                      onClick={() => navigate("/auth/admin")}
-                      className="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 shadow-lg hover:shadow-xl"
-                      icon="🕌"
-                    />
-                  </div>
-                </>
+                  <SecondaryButton
+                    text="Daftar"
+                    onClick={() => navigate(routes.public.register)}
+                    className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 shadow-lg hover:shadow-xl"
+                  />
+                  <SecondaryButton
+                    text="Daftarkan Masjid"
+                    onClick={() => navigate(routes.admin.login)}
+                    className="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 shadow-lg hover:shadow-xl"
+                  />
+                </div>
               )}
             </div>
 
-            {/* Enhanced Mobile menu button */}
             <div className="lg:hidden">
               <button
-                onClick={toggleMenu}
-                onKeyDown={(e) => handleKeyDown(e, toggleMenu)}
-                className="text-white hover:text-emerald-200 focus:outline-none focus:ring-2 focus:ring-white/50 focus:rounded-lg p-2 transition-all duration-300 hover:bg-white/10 rounded-lg"
+                type="button"
+                onClick={() => setIsMenuOpen((prev) => !prev)}
+                className="rounded-lg p-2 text-white transition-all duration-300 hover:bg-white/10 hover:text-emerald-200 focus:outline-none focus:ring-2 focus:ring-white/50"
                 aria-expanded={isMenuOpen}
                 aria-label="Toggle mobile menu"
               >
@@ -194,71 +164,62 @@ const Navbar = ({ position = "fixed", user = null }) => {
             </div>
           </div>
 
-          {/* Enhanced Mobile Menu */}
           {isMenuOpen && (
-            <div className="lg:hidden border-t border-white/20 py-4 animate-slideDown backdrop-blur-xl">
+            <div className="animate-slideDown border-t border-white/20 py-4 backdrop-blur-xl lg:hidden">
+              <div className="space-y-2">
+                {links.map((link) => (
+                  <MobileNavLink
+                    key={link.path}
+                    text={link.text}
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      navigate(link.path);
+                    }}
+                  />
+                ))}
+              </div>
+
               {user ? (
-                <div className="space-y-2">
-                  <MobileNavLink text="🏠 Dashboard" onClick={() => navigate("/home")} />
-                  <MobileNavLink text="📋 Riwayat Donasi" onClick={() => navigate("/riwayat")} />
-                  <MobileNavLink text="🕌 Masjid Terdaftar" onClick={() => navigate("/masjid-terdaftar")} />
-                  
-                  {/* Enhanced Mobile User Info */}
-                  <div className="mx-4 my-4 p-4 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20">
-                    <div className="flex items-center space-x-3">
-                      <div className="relative">
-                        <img
-                          src={user.avatar || "https://source.unsplash.com/40x40/?face"}
-                          alt={user.name}
-                          className="h-12 w-12 rounded-full border-2 border-white/30"
-                        />
-                        <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-400 rounded-full border-2 border-white animate-pulse"></div>
-                      </div>
-                      <div className="text-white">
-                        <div className="font-semibold text-base">{user.name}</div>
-                        <div className="text-sm opacity-80">{user.role || "Donatur"}</div>
-                      </div>
-                    </div>
-                    <div className="mt-3 pt-3 border-t border-white/20 space-y-2">
-                      <MobileNavLink text="👤 Profil Saya" onClick={() => navigate("/profile")} />
-                      <MobileNavLink text="⚙️ Pengaturan" onClick={() => navigate("/settings")} />
-                      <MobileNavLink 
-                        text="🚪 Keluar" 
-                        onClick={handleLogout}
-                        className="text-red-200 hover:text-red-100 hover:bg-red-500/20"
+                <div className="mx-4 my-4 rounded-xl border border-white/20 bg-white/10 p-4 backdrop-blur-sm">
+                  <div className="flex items-center space-x-3">
+                    <div className="relative">
+                      <img
+                        src={user.avatar || "https://source.unsplash.com/40x40/?face"}
+                        alt={user.name}
+                        className="h-12 w-12 rounded-full border-2 border-white/30"
                       />
+                      <div className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-2 border-white bg-emerald-400" />
                     </div>
+                    <div className="text-white">
+                      <div className="font-semibold text-base">{user.name}</div>
+                      <div className="text-sm opacity-80">{user.role || "Donatur"}</div>
+                    </div>
+                  </div>
+                  <div className="mt-3 border-t border-white/20 pt-3">
+                    <MobileNavLink
+                      text="Keluar"
+                      onClick={handleLogout}
+                      className="text-red-200 hover:bg-red-500/20 hover:text-red-100"
+                    />
                   </div>
                 </div>
               ) : (
-                <div className="space-y-2">
-                  <MobileNavLink
-                    text="🏠 Beranda"
-                    onClick={() => {
-                      setIsMenuOpen(false);
-                      navigate("/");
-                    }}
+                <div className="space-y-3 px-4 pt-4">
+                  <PrimaryButton
+                    text="Masuk"
+                    onClick={() => navigate(routes.public.login)}
+                    className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
                   />
-                  <MobileNavLink
-                    text="ℹ️ Tentang Kami"
-                    onClick={() => {
-                      setIsMenuOpen(false);
-                      navigate("/tentang-kami");
-                    }}
+                  <SecondaryButton
+                    text="Daftar"
+                    onClick={() => navigate(routes.public.register)}
+                    className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700"
                   />
-                  
-                  <div className="space-y-3 px-4 pt-4">
-                    <PrimaryButton
-                      text="🤲 Mulai Donasi"
-                      onClick={() => navigate("/masjid-terdaftar")}
-                      className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
-                    />
-                    <SecondaryButton
-                      text="🕌 Daftarkan Mesjid"
-                      onClick={() => navigate("/auth/admin")}
-                      className="w-full bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700"
-                    />
-                  </div>
+                  <SecondaryButton
+                    text="Daftarkan Masjid"
+                    onClick={() => navigate(routes.admin.login)}
+                    className="w-full bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700"
+                  />
                 </div>
               )}
             </div>
@@ -266,19 +227,7 @@ const Navbar = ({ position = "fixed", user = null }) => {
         </div>
       </nav>
 
-      {/* Add global styles */}
       <style jsx>{`
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(15px) scale(0.95);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-          }
-        }
-
         @keyframes slideDown {
           from {
             opacity: 0;
@@ -292,55 +241,31 @@ const Navbar = ({ position = "fixed", user = null }) => {
           }
         }
 
-        .animate-fadeInUp {
-          animation: fadeInUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
         .animate-slideDown {
           animation: slideDown 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* Focus styles for better accessibility */
         button:focus,
         [role="button"]:focus {
           outline: 2px solid rgba(255, 255, 255, 0.8);
           outline-offset: 2px;
-        }
-
-        /* Custom scrollbar for dropdown if needed */
-        .dropdown-scroll::-webkit-scrollbar {
-          width: 4px;
-        }
-        
-        .dropdown-scroll::-webkit-scrollbar-track {
-          background: rgba(0, 0, 0, 0.1);
-          border-radius: 4px;
-        }
-        
-        .dropdown-scroll::-webkit-scrollbar-thumb {
-          background: rgba(0, 0, 0, 0.3);
-          border-radius: 4px;
         }
       `}</style>
     </>
   );
 };
 
-// Enhanced Helper Components
-const NavLink = ({ text, href, onClick, icon }) => (
+const NavLink = ({ text, href, onClick }) => (
   <a
     href={href}
     onClick={onClick}
-    onKeyDown={(e) => e.key === 'Enter' && onClick && onClick()}
-    className="group relative px-4 py-2 text-white font-medium hover:text-emerald-100 cursor-pointer transition-all duration-300 rounded-lg hover:bg-white/10 backdrop-blur-sm border border-transparent hover:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/50"
+    onKeyDown={(event) => event.key === "Enter" && onClick && onClick()}
+    className="group relative cursor-pointer rounded-lg border border-transparent px-4 py-2 font-medium text-white transition-all duration-300 hover:bg-white/10 hover:text-emerald-100 hover:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/50"
     tabIndex={0}
     role={onClick ? "button" : "link"}
   >
-    <span className="flex items-center space-x-2">
-      {icon && <span className="text-sm">{icon}</span>}
-      <span>{text}</span>
-    </span>
-    <span className="absolute bottom-1 left-4 right-4 h-0.5 bg-gradient-to-r from-emerald-400 to-teal-400 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 rounded-full"></span>
+    <span>{text}</span>
+    <span className="absolute bottom-1 left-4 right-4 h-0.5 scale-x-0 rounded-full bg-gradient-to-r from-emerald-400 to-teal-400 transition-transform duration-300 group-hover:scale-x-100" />
   </a>
 );
 
@@ -348,8 +273,8 @@ const MobileNavLink = ({ text, href, onClick, className = "" }) => (
   <a
     href={href}
     onClick={onClick}
-    onKeyDown={(e) => e.key === 'Enter' && onClick && onClick()}
-    className={`block mx-4 px-4 py-3 text-white font-medium hover:text-emerald-100 hover:bg-white/10 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-white/20 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-white/50 ${className}`}
+    onKeyDown={(event) => event.key === "Enter" && onClick && onClick()}
+    className={`mx-4 block cursor-pointer rounded-xl border border-transparent px-4 py-3 font-medium text-white transition-all duration-300 hover:bg-white/10 hover:text-emerald-100 hover:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/50 ${className}`}
     tabIndex={0}
     role={onClick ? "button" : "link"}
   >
@@ -357,40 +282,23 @@ const MobileNavLink = ({ text, href, onClick, className = "" }) => (
   </a>
 );
 
-const PrimaryButton = ({ text, onClick, className = "", icon }) => (
+const PrimaryButton = ({ text, onClick, className = "" }) => (
   <button
+    type="button"
     onClick={onClick}
-    className={`group relative px-6 py-2.5 rounded-xl text-white font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-2xl focus:outline-none focus:ring-4 focus:ring-blue-400/50 overflow-hidden ${className}`}
+    className={`relative overflow-hidden rounded-xl px-6 py-2.5 font-semibold text-white transition-all duration-300 hover:scale-105 hover:shadow-2xl focus:outline-none focus:ring-4 focus:ring-blue-400/50 ${className}`}
   >
-    <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-    <span className="relative flex items-center justify-center space-x-2">
-      {icon && <span>{icon}</span>}
-      <span>{text}</span>
-    </span>
+    <span className="relative">{text}</span>
   </button>
 );
 
-const SecondaryButton = ({ text, onClick, className = "", icon }) => (
+const SecondaryButton = ({ text, onClick, className = "" }) => (
   <button
+    type="button"
     onClick={onClick}
-    className={`group relative px-6 py-2.5 rounded-xl text-white font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-2xl focus:outline-none focus:ring-4 focus:ring-amber-400/50 overflow-hidden ${className}`}
+    className={`relative overflow-hidden rounded-xl px-6 py-2.5 font-semibold text-white transition-all duration-300 hover:scale-105 hover:shadow-2xl focus:outline-none focus:ring-4 focus:ring-emerald-400/50 ${className}`}
   >
-    <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-    <span className="relative flex items-center justify-center space-x-2">
-      {icon && <span>{icon}</span>}
-      <span>{text}</span>
-    </span>
-  </button>
-);
-
-const DropdownItem = ({ text, onClick, className = "" }) => (
-  <button
-    onClick={onClick}
-    onKeyDown={(e) => e.key === 'Enter' && onClick()}
-    className={`w-full text-left px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-all duration-200 focus:outline-none focus:bg-gray-50 focus:text-gray-900 flex items-center space-x-2 ${className}`}
-    tabIndex={0}
-  >
-    <span>{text}</span>
+    <span className="relative">{text}</span>
   </button>
 );
 

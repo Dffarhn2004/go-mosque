@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import MetaData from "../components/common/MetaData";
 import Navbar from "../components/common/LandingPage/Navbar";
 import Footer from "../components/common/LandingPage/Footer";
+import { routes } from "../routes";
 
 const principles = [
   {
@@ -46,9 +47,9 @@ function AboutPage() {
     "@graph": [
       {
         "@type": "AboutPage",
-        "@id": "https://goqu.vercel.app/tentang-kami",
+        "@id": `https://goqu.vercel.app${routes.public.about}`,
         name: "Tentang Kami",
-        url: "https://goqu.vercel.app/tentang-kami",
+        url: `https://goqu.vercel.app${routes.public.about}`,
         description:
           "Profil GoQu sebagai platform donasi dan pengelolaan masjid yang transparan dan modern.",
         isPartOf: { "@id": "https://goqu.vercel.app/#website" },
@@ -61,7 +62,7 @@ function AboutPage() {
       <MetaData
         title="Tentang Kami"
         description="Kenali GoQu, platform donasi dan pengelolaan masjid yang dibangun untuk transparansi, akuntabilitas, dan kemudahan jamaah serta takmir."
-        url="/tentang-kami"
+        url={routes.public.about}
         jsonLd={jsonLd}
       />
       <Navbar />
@@ -90,13 +91,13 @@ function AboutPage() {
 
               <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-4">
                 <button
-                  onClick={() => navigate("/masjid-terdaftar")}
+                  onClick={() => navigate(routes.public.mosques)}
                   className="w-full rounded-2xl bg-white px-6 py-3 font-semibold text-[#0C6839] transition hover:bg-emerald-50 sm:w-auto"
                 >
                   Mulai Berdonasi
                 </button>
                 <button
-                  onClick={() => navigate("/auth/admin")}
+                  onClick={() => navigate(routes.admin.login)}
                   className="w-full rounded-2xl border border-white/25 bg-white/10 px-6 py-3 font-semibold text-white transition hover:bg-white/15 sm:w-auto"
                 >
                   Daftarkan Masjid
@@ -216,13 +217,13 @@ function AboutPage() {
 
               <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap lg:justify-end">
                 <button
-                  onClick={() => navigate("/masjid-terdaftar")}
+                  onClick={() => navigate(routes.public.mosques)}
                   className="w-full rounded-2xl border border-slate-200 px-5 py-3 font-semibold text-slate-800 transition hover:border-emerald-200 hover:bg-emerald-50 sm:w-auto"
                 >
                   Lihat Masjid
                 </button>
                 <button
-                  onClick={() => navigate("/")}
+                  onClick={() => navigate(routes.public.landing)}
                   className="w-full rounded-2xl bg-[#0C6839] px-5 py-3 font-semibold text-white transition hover:bg-[#0A5A31] sm:w-auto"
                 >
                   Kembali ke Beranda

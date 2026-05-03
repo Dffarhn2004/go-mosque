@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ImageCarousel from "./ImageCarousel";
+import { routes } from "../../../routes";
 
 const landingPopularSearches = [
   "Masjid Jogja",
@@ -42,11 +43,11 @@ const Hero = ({ isHome = false }) => {
     const trimmedKeyword = keyword.trim();
 
     if (!trimmedKeyword) {
-      navigate("/masjid-terdaftar");
+      navigate(routes.public.mosques);
       return;
     }
 
-    navigate(`/masjid-terdaftar?search=${encodeURIComponent(trimmedKeyword)}`);
+    navigate(`${routes.public.mosques}?search=${encodeURIComponent(trimmedKeyword)}`);
   };
 
   return (
@@ -115,7 +116,7 @@ const Hero = ({ isHome = false }) => {
               <button
                 type="button"
                 onClick={() =>
-                  navigate("/masjid-terdaftar")
+                  navigate(routes.public.mosques)
                 }
                 className="rounded-2xl bg-emerald-600 px-6 py-4 text-base font-semibold text-white transition hover:bg-emerald-700"
               >

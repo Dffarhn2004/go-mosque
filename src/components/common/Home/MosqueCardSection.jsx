@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import MosqueCard from "../MosqueCard";
 import axiosInstance from "../../../api/axiosInstance";
 import { Heart, Building2, SearchX } from "lucide-react";
+import { getCampaignDetailRoute, routes } from "../../../routes";
 
 // Loading Skeleton Component
 const MosqueCardSkeleton = () => {
@@ -84,7 +85,7 @@ const MosqueCardSection = ({
   title = "Masjid Membutuhkan Kamu Segera",
   subtitle = "Pilih campaign dari masjid terdaftar sesuai kebutuhan yang ingin Anda bantu.",
   seeMore = true,
-  seeMoreUrl = "/campaign",
+  seeMoreUrl = routes.public.campaigns,
   position = "px-6 md:px-20 mt-12",
   limit = 3,
   showEmptyState = true,
@@ -215,7 +216,7 @@ const MosqueCardSection = ({
                 description={mosque.Deskripsi}
                 currentAmount={mosque.UangDonasiTerkumpul}
                 targetAmount={mosque.TargetUangDonasi}
-                onClick={() => navigate(`/campaign/${mosque.id}`)}
+                onClick={() => navigate(getCampaignDetailRoute(mosque.id))}
               />
             ))}
           </div>

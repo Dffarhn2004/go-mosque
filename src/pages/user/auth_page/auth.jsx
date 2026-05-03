@@ -7,6 +7,7 @@ import SubmitButton from "../../../components/common/Auth/SubmitButton";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import axiosInstance from "../../../api/axiosInstance";
+import { routes } from "../../../routes";
 
 // Toggle Link Component
 const AuthToggle = ({ isLogin, onToggle }) => {
@@ -98,8 +99,8 @@ const TrustIndicators = () => {
 };
 
 // Main Auth Component
-const AuthPage = () => {
-  const [isLogin, setIsLogin] = useState(true);
+const AuthPage = ({ defaultMode = "login" }) => {
+  const [isLogin, setIsLogin] = useState(defaultMode !== "register");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -112,6 +113,10 @@ const AuthPage = () => {
   const [error, setError] = useState("");
 
   const navigate = useNavigate();
+
+  React.useEffect(() => {
+    setIsLogin(defaultMode !== "register");
+  }, [defaultMode]);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -166,7 +171,7 @@ const AuthPage = () => {
         localStorage.setItem("user", JSON.stringify(res.data.data.user));
 
         toast.success("Authenticated! Redirecting...");
-        navigate("/home");
+        navigate(routes.donor.home);
       } else {
         // Register
         const res = await axiosInstance.post("/auth/register", {
@@ -193,7 +198,8 @@ const AuthPage = () => {
   };
 
   const handleToggleAuth = () => {
-    setIsLogin(!isLogin);
+    const nextIsLogin = !isLogin;
+    setIsLogin(nextIsLogin);
     setError("");
     setForm({
       name: "",
@@ -203,6 +209,7 @@ const AuthPage = () => {
     });
     setShowPassword(false);
     setShowConfirmPassword(false);
+    navigate(nextIsLogin ? routes.public.login : routes.public.register);
   };
 
   return (

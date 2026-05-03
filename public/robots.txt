@@ -1,15 +1,17 @@
 User-agent: *
 Allow: /
 Allow: /masjid/
-Allow: /home/donation/
-Allow: /donation
-Allow: /masjid-terdaftar
+Allow: /donasi
+Allow: /tentang
 
 # Blokir halaman admin & authenticated-only
 Disallow: /admin/
 Disallow: /auth/
-Disallow: /riwayat
-Disallow: /home/donation/*/checkout
+Disallow: /masuk
+Disallow: /daftar
+Disallow: /akun
+Disallow: /akun/riwayat
+Disallow: /donasi/*/checkout
 Disallow: /system-admin/
 
 # Sitemap

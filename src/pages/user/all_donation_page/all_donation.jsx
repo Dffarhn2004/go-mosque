@@ -6,6 +6,7 @@ import Navbar from "../../../components/common/LandingPage/Navbar";
 import MetaData from "../../../components/common/MetaData";
 import { useSearchParams } from "react-router-dom";
 import { getDonorNavbarUser } from "../../../utils/authStorage";
+import { routes } from "../../../routes";
 
 function AllDonationUser() {
   const [searchParams] = useSearchParams();
@@ -23,7 +24,7 @@ function AllDonationUser() {
         title="Semua Donasi Masjid"
         description="Jelajahi semua kampanye donasi masjid yang aktif. Pilih masjid yang ingin Anda dukung untuk pembangunan, renovasi, dan kegiatan keislaman."
         keywords="donasi masjid aktif, kampanye donasi, wakaf online, sedekah masjid"
-        url="/campaign"
+        url={routes.public.campaigns}
       />
       <Navbar
         position="static"

@@ -14,6 +14,7 @@ import axiosInstance from "../../../api/axiosInstance";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { MasjidListSkeleton } from "../../../components/common/Skeleton";
 import { getDonorNavbarUser } from "../../../utils/authStorage";
+import { getMosqueDetailRoute, routes } from "../../../routes";
 
 const MasjidTerdaftarPage = () => {
   const [masjidList, setMasjidList] = useState([]);
@@ -56,7 +57,7 @@ const MasjidTerdaftarPage = () => {
   );
 
   const handleViewDetail = (masjidId) => {
-    navigate(`/masjid/${masjidId}`);
+    navigate(getMosqueDetailRoute(masjidId));
   };
 
   if (loading) {
@@ -66,7 +67,7 @@ const MasjidTerdaftarPage = () => {
           title="Masjid Terdaftar"
           description="Daftar masjid yang terdaftar di GoQu. Temukan masjid yang membutuhkan dukungan donasi untuk pembangunan dan renovasi di seluruh Indonesia."
           keywords="daftar masjid, masjid terdaftar, masjid butuh donasi, GoQu"
-          url="/masjid-terdaftar"
+          url={routes.public.mosques}
         />
         <Navbar
           position="static"
@@ -85,7 +86,7 @@ const MasjidTerdaftarPage = () => {
           title="Masjid Terdaftar"
           description="Daftar masjid yang terdaftar di GoQu. Temukan masjid yang membutuhkan dukungan donasi untuk pembangunan dan renovasi di seluruh Indonesia."
           keywords="daftar masjid, masjid terdaftar, masjid butuh donasi, GoQu"
-          url="/masjid-terdaftar"
+          url={routes.public.mosques}
         />
         <Navbar
           position="static"
@@ -115,7 +116,7 @@ const MasjidTerdaftarPage = () => {
           title="Masjid Terdaftar"
           description="Daftar masjid yang terdaftar di GoQu. Temukan masjid yang membutuhkan dukungan donasi untuk pembangunan dan renovasi di seluruh Indonesia."
           keywords="daftar masjid, masjid terdaftar, masjid butuh donasi, GoQu"
-          url="/masjid-terdaftar"
+          url={routes.public.mosques}
         />
       <Navbar
         position="static"

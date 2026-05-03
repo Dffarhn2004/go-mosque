@@ -7,6 +7,7 @@ import TransparencyHighlights from "../components/common/LandingPage/Transparenc
 import UIISupport from "../components/common/LandingPage/UIISupport";
 import CallToAction from "../components/common/LandingPage/CallToAction";
 import Footer from "../components/common/LandingPage/Footer";
+import { routes } from "../routes";
 
 function Landing() {
   const jsonLd = {
@@ -29,7 +30,7 @@ function Landing() {
         publisher: { '@id': 'https://goqu.vercel.app/#organization' },
         potentialAction: {
           '@type': 'SearchAction',
-          target: 'https://goqu.vercel.app/masjid-terdaftar?search={search_term_string}',
+          target: `https://goqu.vercel.app${routes.public.mosques}?search={search_term_string}`,
           'query-input': 'required name=search_term_string',
         },
       },

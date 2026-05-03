@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { routes } from "../../../routes";
 
 const Footer = () => {
   const navigate = useNavigate();
@@ -24,19 +25,19 @@ const Footer = () => {
           <h3 className="mb-4 text-xl font-bold text-white">Jelajahi GoQu</h3>
           <div className="flex flex-wrap gap-3">
             <button
-              onClick={() => navigate("/")}
+              onClick={() => navigate(routes.public.landing)}
               className="rounded-xl border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/15"
             >
               Beranda
             </button>
             <button
-              onClick={() => navigate("/tentang-kami")}
+              onClick={() => navigate(routes.public.about)}
               className="rounded-xl border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/15"
             >
               Tentang Kami
             </button>
             <button
-              onClick={() => navigate("/masjid-terdaftar")}
+              onClick={() => navigate(routes.public.mosques)}
               className="rounded-xl bg-blue-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-600"
             >
               Mulai Donasi

@@ -2,6 +2,11 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Building2, HeartHandshake, MapPin } from "lucide-react";
 import axiosInstance from "../../../api/axiosInstance";
+import {
+  getMosqueCheckoutRoute,
+  getMosqueDetailRoute,
+  routes,
+} from "../../../routes";
 
 const loadingCards = Array.from({ length: 3 }, (_, index) => index);
 
@@ -59,7 +64,7 @@ const FeaturedMosques = () => {
           </div>
           <button
             type="button"
-            onClick={() => navigate("/masjid-terdaftar")}
+            onClick={() => navigate(routes.public.mosques)}
             className="rounded-2xl border border-gray-300 bg-white px-5 py-3 text-sm font-semibold text-gray-800 transition hover:border-emerald-500 hover:text-emerald-700"
           >
             Lihat Semua Masjid
@@ -133,14 +138,14 @@ const FeaturedMosques = () => {
                   <div className="mt-6 grid grid-cols-2 gap-3">
                     <button
                       type="button"
-                      onClick={() => navigate(`/masjid/${masjid.id}`)}
+                      onClick={() => navigate(getMosqueDetailRoute(masjid.id))}
                       className="rounded-2xl border border-gray-300 px-4 py-3 text-sm font-semibold text-gray-800 transition hover:bg-gray-50"
                     >
                       Lihat Profil
                     </button>
                     <button
                       type="button"
-                      onClick={() => navigate(`/masjid/${masjid.id}/checkout`)}
+                      onClick={() => navigate(getMosqueCheckoutRoute(masjid.id))}
                       className="rounded-2xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700"
                     >
                       Donasi Umum

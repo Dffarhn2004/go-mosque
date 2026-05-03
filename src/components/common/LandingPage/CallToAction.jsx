@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { routes } from "../../../routes";
 
 const CallToAction = ({ login = false }) => {
   const navigate = useNavigate();
@@ -42,7 +43,7 @@ const CallToAction = ({ login = false }) => {
         {!login && (
           <div className="flex flex-col md:flex-row justify-center items-center gap-4">
             <button
-              onClick={() => navigate("/masjid-terdaftar")}
+              onClick={() => navigate(routes.public.mosques)}
               className="bg-blue-600 hover:bg-blue-700 text-white px-10 py-4 rounded-lg font-bold text-lg transition duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center"
               style={{ backgroundColor: "#0473A8" }}
             >
@@ -61,7 +62,7 @@ const CallToAction = ({ login = false }) => {
               </svg>
             </button>
             <button
-              onClick={() => navigate("/auth/admin")}
+              onClick={() => navigate(routes.admin.login)}
               className="border border-gray-300 bg-white text-gray-800 px-10 py-4 rounded-lg font-bold text-lg transition duration-300 hover:bg-gray-50 shadow-sm"
             >
               Daftarkan Masjid
