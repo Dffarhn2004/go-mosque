@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { Bell, CheckCircle2 } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 import TakmirLayout from "../../../layouts/takmir_layout";
 import axiosInstance from "../../../api/axiosInstance";
 import formatDateWIB from "../../../utils/formatDate";
 
 const NotificationsTakmir = () => {
+  const queryClient = useQueryClient();
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -12,8 +14,15 @@ const NotificationsTakmir = () => {
     const fetchNotifications = async () => {
       try {
         const response = await axiosInstance.get("/notifications");
-        setNotifications(response.data.data || []);
-        await axiosInstance.patch("/notifications/read-all");
+        const list = response.data.data || [];
+        setNotifications(list);
+        const readResponse = await axiosInstance.patch("/notifications/read-all");
+        const updated = readResponse.data.data || list;
+        setNotifications(updated);
+        queryClient.setQueryData(["takmir-notifications"], {
+          notifications: updated,
+          unreadCount: 0,
+        });
       } catch (error) {
         console.error("Error fetching notifications:", error);
       } finally {
@@ -22,7 +31,7 @@ const NotificationsTakmir = () => {
     };
 
     fetchNotifications();
-  }, []);
+  }, [queryClient]);
 
   return (
     <TakmirLayout>

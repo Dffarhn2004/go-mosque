@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import {
   Calendar,
   Download,
@@ -17,55 +18,53 @@ import formatCurrency from "../../../utils/formatCurrency";
 import axiosInstance from "../../../api/axiosInstance";
 
 const Dashboard = () => {
-  const [loading, setLoading] = useState(true);
-  const [donationCampaigns, setDonationCampaigns] = useState([]);
-  const [donatur, setDonatur] = useState([]);
-  const [masjid, setMasjid] = useState(null);
-  const [stats, setStats] = useState({
+  const navigate = useNavigate();
+
+  const masjidId = useMemo(() => {
+    try {
+      const raw = localStorage.getItem("masjid");
+      const parsedMasjid = raw ? JSON.parse(raw) : null;
+      return parsedMasjid?.id ?? null;
+    } catch {
+      return null;
+    }
+  }, []);
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["takmir-dashboard", masjidId],
+    enabled: Boolean(masjidId),
+    staleTime: 2 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    queryFn: async () => {
+      const [statsResponse, campaignResponse, donorResponse, masjidResponse] =
+        await Promise.all([
+          axiosInstance.get(`/statistik/${masjidId}`),
+          axiosInstance.get("/donasi-masjid/takmir?limit=3"),
+          axiosInstance.get("/donasi/donatur"),
+          axiosInstance.get("/masjid/takmir"),
+        ]);
+
+      return {
+        stats: statsResponse.data.data,
+        donationCampaigns: campaignResponse.data.data || [],
+        donatur: donorResponse.data.data || [],
+        masjid: masjidResponse.data.data || null,
+      };
+    },
+  });
+
+  const stats = data?.stats ?? {
     cashIn: { total: 0 },
     cashOut: { total: 0 },
     transactions: { total: 0 },
     generalDonations: { total: 0, count: 0 },
     campaignDonations: { total: 0, count: 0 },
-  });
+  };
+  const donationCampaigns = data?.donationCampaigns ?? [];
+  const donatur = data?.donatur ?? [];
+  const masjid = data?.masjid ?? null;
 
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const fetchDashboard = async () => {
-      try {
-        const raw = localStorage.getItem("masjid");
-        const parsedMasjid = raw ? JSON.parse(raw) : null;
-        const masjidId = parsedMasjid?.id;
-
-        if (!masjidId) {
-          setLoading(false);
-          return;
-        }
-
-        const [statsResponse, campaignResponse, donorResponse, masjidResponse] =
-          await Promise.all([
-            axiosInstance.get(`/statistik/${masjidId}`),
-            axiosInstance.get("/donasi-masjid/takmir?limit=3"),
-            axiosInstance.get("/donasi/donatur"),
-            axiosInstance.get("/masjid/takmir"),
-          ]);
-
-        setStats(statsResponse.data.data);
-        setDonationCampaigns(campaignResponse.data.data || []);
-        setDonatur(donorResponse.data.data || []);
-        setMasjid(masjidResponse.data.data || null);
-      } catch (error) {
-        console.error("Error fetching dashboard:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchDashboard();
-  }, []);
-
-  if (loading) return <DashboardSkeleton />;
+  if (masjidId && isLoading) return <DashboardSkeleton />;
 
   return (
     <div className="space-y-6 p-6">

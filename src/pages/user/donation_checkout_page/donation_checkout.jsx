@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import {
   ArrowLeft,
@@ -21,6 +21,7 @@ function CheckoutDonation() {
   const { campaignId, masjidId } = useParams();
   const isGeneralDonation = Boolean(masjidId);
   const currentUser = JSON.parse(localStorage.getItem("user")) || null;
+  const customAmountInputRef = useRef(null);
   const [formData, setFormData] = useState({
     donorName: "",
     email: "",
@@ -63,16 +64,10 @@ function CheckoutDonation() {
     setFormData((prev) => ({
       ...prev,
       selectedAmount: amount,
-      customAmount: "",
+      customAmount: String(amount),
     }));
-  };
-
-  const handleCustomAmountChange = (e) => {
-    setFormData((prev) => ({
-      ...prev,
-      customAmount: e.target.value,
-      selectedAmount: null,
-    }));
+    // Make the "Masukkan Nominal" input reflect the button choice.
+    customAmountInputRef.current?.focus?.();
   };
 
   const handleCurrencyInput = (name, value) => {
@@ -81,6 +76,7 @@ function CheckoutDonation() {
     setFormData((prev) => ({
       ...prev,
       [name]: numericValue,
+      selectedAmount: null,
     }));
   };
 
@@ -432,6 +428,7 @@ function CheckoutDonation() {
                         Rp.
                       </span>
                       <input
+                        ref={customAmountInputRef}
                         type="text"
                         name="customAmount"
                         value={
@@ -464,7 +461,7 @@ function CheckoutDonation() {
                           type="button"
                           onClick={() => handleAmountSelect(amount.value)}
                           className={`px-5 py-4 lg:px-6 lg:py-5 rounded-2xl border-2 transition-all font-semibold text-base lg:text-lg ${
-                            formData.selectedAmount === amount.value
+                            Number(formData.customAmount || 0) === amount.value
                               ? "border-emerald-500 bg-emerald-50 text-emerald-700"
                               : "border-gray-200 hover:border-emerald-300 text-gray-700 hover:bg-gray-50"
                           }`}

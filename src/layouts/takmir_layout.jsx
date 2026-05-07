@@ -1,5 +1,6 @@
 // src/layouts/MainLayout.jsx
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   LogOut,
   Users,
@@ -16,6 +17,8 @@ import {
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import axiosInstance from "../api/axiosInstance";
 import { logoutAndRedirect } from "../utils/authStorage";
+
+const NOTIFICATIONS_POLL_MS = 45_000;
 
 const createNavItems = (unreadCount = 0) => [
   {
@@ -64,13 +67,34 @@ const createNavItems = (unreadCount = 0) => [
 ];
 
 export default function TakmirLayout({ children }) {
+  const queryClient = useQueryClient();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
-  const [notifications, setNotifications] = useState([]);
-  const [unreadCount, setUnreadCount] = useState(0);
   const location = useLocation();
   const navigate = useNavigate();
+
+  const { data: notificationBundle } = useQuery({
+    queryKey: ["takmir-notifications"],
+    queryFn: async () => {
+      const [notificationsResponse, unreadResponse] = await Promise.all([
+        axiosInstance.get("/notifications"),
+        axiosInstance.get("/notifications/unread-count"),
+      ]);
+      return {
+        notifications: notificationsResponse.data.data || [],
+        unreadCount: unreadResponse.data.data?.count || 0,
+      };
+    },
+    staleTime: 30_000,
+    refetchInterval: () =>
+      typeof document !== "undefined" && document.visibilityState === "visible"
+        ? NOTIFICATIONS_POLL_MS
+        : false,
+  });
+
+  const notifications = notificationBundle?.notifications ?? [];
+  const unreadCount = notificationBundle?.unreadCount ?? 0;
 
   const parseStorageItem = (key) => {
     try {
@@ -129,34 +153,6 @@ export default function TakmirLayout({ children }) {
     }));
   };
 
-  useEffect(() => {
-    let isMounted = true;
-
-    const fetchNotifications = async () => {
-      try {
-        const [notificationsResponse, unreadResponse] = await Promise.all([
-          axiosInstance.get("/notifications"),
-          axiosInstance.get("/notifications/unread-count"),
-        ]);
-
-        if (!isMounted) return;
-
-        setNotifications(notificationsResponse.data.data || []);
-        setUnreadCount(unreadResponse.data.data?.count || 0);
-      } catch (error) {
-        console.error("Error fetching notifications:", error);
-      }
-    };
-
-    fetchNotifications();
-    const intervalId = window.setInterval(fetchNotifications, 10000);
-
-    return () => {
-      isMounted = false;
-      window.clearInterval(intervalId);
-    };
-  }, []);
-
   const handleOpenNotifications = async () => {
     const nextOpen = !isNotificationOpen;
     setIsNotificationOpen(nextOpen);
@@ -167,8 +163,10 @@ export default function TakmirLayout({ children }) {
 
     try {
       const response = await axiosInstance.patch("/notifications/read-all");
-      setNotifications(response.data.data || []);
-      setUnreadCount(0);
+      queryClient.setQueryData(["takmir-notifications"], {
+        notifications: response.data.data || [],
+        unreadCount: 0,
+      });
     } catch (error) {
       console.error("Error marking notifications as read:", error);
     }

@@ -16,11 +16,20 @@ import {
   Download,
   Eye,
   FileText,
+  Heart,
   TrendingUp,
   User,
 } from "lucide-react";
 import StatCard from "../../../components/common/Dashboard_Takmir/StatCards";
 import { getDonorNavbarUser } from "../../../utils/authStorage";
+import { getCampaignDetailRoute } from "../../../routes";
+
+function campaignIsOpenForDonation(campaign) {
+  const target = Number(campaign?.TargetUangDonasi ?? 0);
+  const raised = Number(campaign?.UangDonasiTerkumpul ?? 0);
+  if (!Number.isFinite(target) || target <= 0) return true;
+  return raised < target;
+}
 
 // SVG component for the decorative curve
 const TopCurve = () => (
@@ -436,6 +445,7 @@ const LaporanKeuangan = ({ masjidId = null }) => {
 };
 function DetailMasjid() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [masjidData, setMasjidData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("laporankeuangan");
@@ -446,49 +456,57 @@ function DetailMasjid() {
     cashOut: { total: 0 },
     transactions: { total: 0 },
   });
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const res = await axiosInstance.get(`/statistik/${id}`);
-        const data = res.data.data;
+  const [openCampaigns, setOpenCampaigns] = useState([]);
 
+  useEffect(() => {
+    if (!id) return;
+
+    let cancelled = false;
+    setLoading(true);
+
+    const load = async () => {
+      try {
+        const [statsRes, masjidRes, campaignsRes] = await Promise.all([
+          axiosInstance.get(`/statistik/${id}`),
+          axiosInstance.get(`/masjid/${id}`),
+          axiosInstance.get(
+            `/donasi-masjid?masjidId=${encodeURIComponent(id)}&limit=50`
+          ),
+        ]);
+
+        if (cancelled) return;
+
+        const data = statsRes.data.data;
         setStats({
-          cashIn: {
-            total: data?.cashIn?.total ?? 0,
-          },
-          cashOut: {
-            total: data?.cashOut?.total ?? 0,
-          },
-          transactions: {
-            total: data?.transactions?.total ?? 0,
-          },
+          cashIn: { total: data?.cashIn?.total ?? 0 },
+          cashOut: { total: data?.cashOut?.total ?? 0 },
+          transactions: { total: data?.transactions?.total ?? 0 },
         });
+
+        setMasjidData(masjidRes.data.data);
+
+        const list = Array.isArray(campaignsRes.data?.data)
+          ? campaignsRes.data.data
+          : [];
+        const forThisMosque = list.filter(
+          (c) => c.id_masjid === id || c.masjid?.id === id
+        );
+        setOpenCampaigns(forThisMosque.filter(campaignIsOpenForDonation));
       } catch (error) {
-        console.error("Error fetching stats:", error);
+        if (!cancelled) {
+          console.error("Error loading masjid page:", error);
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     };
 
-    fetchStats();
-  }, [id]);
-
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const fetchMasjidData = async () => {
-      try {
-        const res = await axiosInstance.get("/masjid/" + id);
-        setMasjidData(res.data.data);
-        console.log("Fetched masjid data:", res.data.data);
-      } catch (error) {
-        console.error("Error fetching masjid data:", error);
-      } finally {
-        setLoading(false);
-      }
+    load();
+    return () => {
+      cancelled = true;
     };
-
-    fetchMasjidData();
   }, [id]);
 
   if (loading)
@@ -661,6 +679,90 @@ function DetailMasjid() {
         {/* Content Section */}
         <section className="bg-gray-50 py-16">
           <div className="container mx-auto px-6">
+            {!loading && openCampaigns.length > 0 && (
+              <div className="mb-8 rounded-2xl border border-green-100 bg-white p-6 shadow-lg md:p-8">
+                <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <h2 className="text-xl font-bold text-gray-900 md:text-2xl flex items-center gap-2">
+                    <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-100 text-green-700">
+                      <Heart className="h-5 w-5" aria-hidden />
+                    </span>
+                    Campaign donasi yang sedang dibuka
+                  </h2>
+                  <p className="text-sm text-gray-600 max-w-xl">
+                    Masjid ini saat ini membuka pengumpulan donasi untuk campaign berikut.
+                  </p>
+                </div>
+                <ul className="grid gap-4 md:grid-cols-2">
+                  {openCampaigns.map((c) => {
+                    const target = Number(c.TargetUangDonasi ?? 0);
+                    const raised = Number(c.UangDonasiTerkumpul ?? 0);
+                    const pct =
+                      target > 0 ? Math.min(100, Math.round((raised / target) * 100)) : 0;
+                    return (
+                      <li
+                        key={c.id}
+                        className="flex flex-col rounded-xl border border-gray-100 bg-gray-50/80 p-4 transition hover:border-green-200 hover:bg-white"
+                      >
+                        <div className="flex gap-3">
+                          {c.FotoDonasi ? (
+                            <img
+                              src={c.FotoDonasi}
+                              alt=""
+                              className="h-20 w-20 shrink-0 rounded-lg object-cover"
+                            />
+                          ) : (
+                            <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-lg bg-green-100 text-green-700">
+                              <Heart className="h-8 w-8 opacity-80" aria-hidden />
+                            </div>
+                          )}
+                          <div className="min-w-0 flex-1">
+                            <p className="font-semibold text-gray-900 line-clamp-2">
+                              {c.Nama}
+                            </p>
+                            {c.kategori_donasi?.Nama && (
+                              <p className="mt-1 text-xs font-medium text-green-700">
+                                {c.kategori_donasi.Nama}
+                              </p>
+                            )}
+                            <p className="mt-2 text-xs text-gray-600">
+                              Terkumpul{" "}
+                              <span className="font-semibold text-gray-800">
+                                {formatCurrency(raised)}
+                              </span>
+                              {target > 0 && (
+                                <>
+                                  {" "}
+                                  dari{" "}
+                                  <span className="font-semibold text-gray-800">
+                                    {formatCurrency(target)}
+                                  </span>
+                                </>
+                              )}
+                            </p>
+                            {target > 0 && (
+                              <div className="mt-2 h-2 overflow-hidden rounded-full bg-gray-200">
+                                <div
+                                  className="h-full rounded-full bg-green-600 transition-all"
+                                  style={{ width: `${pct}%` }}
+                                />
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => navigate(getCampaignDetailRoute(c.id))}
+                          className="mt-4 w-full rounded-lg bg-[#0C6839] py-2.5 text-sm font-semibold text-white transition hover:bg-[#094b2b]"
+                        >
+                          Lihat campaign & donasi
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            )}
+
             {/* Highlight Section - Informasi Penting */}
             <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
               <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">

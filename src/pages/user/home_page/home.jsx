@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import {
   ArrowRight,
   Building2,
@@ -58,44 +59,35 @@ function HomeUser() {
   const user = getStoredUser();
   const userName = user?.NamaLengkap || "Donatur";
   const navbarUser = getDonorNavbarUser();
-  const [loadingSummary, setLoadingSummary] = useState(true);
-  const [recentDonations, setRecentDonations] = useState([]);
-  const [summary, setSummary] = useState({
-    totalTransactions: 0,
-    totalSuccessful: 0,
-    totalAmount: 0,
-    latestDonation: null,
+
+  const { data: donations = [], isLoading: loadingSummary } = useQuery({
+    queryKey: ["donor", "donations", "home-summary"],
+    queryFn: async () => {
+      const response = await axiosInstance.get("/donasi");
+      return response.data?.data || [];
+    },
+    staleTime: 5 * 60 * 1000,
+    gcTime: 15 * 60 * 1000,
   });
 
-  useEffect(() => {
-    const fetchDonorSummary = async () => {
-      try {
-        const response = await axiosInstance.get("/donasi");
-        const donations = response.data?.data || [];
-        const successfulDonations = donations.filter(
-          (donation) => donation.StatusDonasi === "Sukses"
-        );
-
-        setRecentDonations(donations.slice(0, 3));
-        setSummary({
-          totalTransactions: donations.length,
-          totalSuccessful: successfulDonations.length,
-          totalAmount: successfulDonations.reduce(
-            (accumulator, donation) =>
-              accumulator + Number(donation.JumlahDonasi || 0),
-            0
-          ),
-          latestDonation: donations[0] || null,
-        });
-      } catch (error) {
-        console.error("Error fetching donor summary:", error);
-      } finally {
-        setLoadingSummary(false);
-      }
+  const { recentDonations, summary } = useMemo(() => {
+    const successfulDonations = donations.filter(
+      (donation) => donation.StatusDonasi === "Sukses"
+    );
+    return {
+      recentDonations: donations.slice(0, 3),
+      summary: {
+        totalTransactions: donations.length,
+        totalSuccessful: successfulDonations.length,
+        totalAmount: successfulDonations.reduce(
+          (accumulator, donation) =>
+            accumulator + Number(donation.JumlahDonasi || 0),
+          0
+        ),
+        latestDonation: donations[0] || null,
+      },
     };
-
-    fetchDonorSummary();
-  }, []);
+  }, [donations]);
 
   const welcomeMessage = useMemo(() => {
     if (summary.totalTransactions === 0) {
