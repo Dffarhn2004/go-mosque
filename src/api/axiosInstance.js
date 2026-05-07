@@ -2,7 +2,8 @@ import axios from "axios";
 
 const axiosInstance = axios.create({
   // baseURL: "https://go-mosque-be.vercel.app/api/v1",
-  baseURL: "https://startling-queijadas-684594.netlify.app/api/v1",
+  // baseURL: "https://startling-queijadas-684594.netlify.app/api/v1",
+  baseURL: "https://go-mosque-be-production.up.railway.app/api/v1",
   // baseURL: "http://localhost:3001/api/v1",
   headers: {
     "Content-Type": "application/json",
