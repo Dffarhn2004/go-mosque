@@ -101,6 +101,13 @@ const Navbar = ({ position = "fixed", user = null }) => {
                   </div>
                   <button
                     type="button"
+                    onClick={() => navigate(routes.donor.settings)}
+                    className="rounded-xl bg-white/10 px-4 py-2.5 font-semibold text-white shadow-lg transition-all duration-300 hover:bg-white/20 hover:shadow-xl"
+                  >
+                    Pengaturan
+                  </button>
+                  <button
+                    type="button"
                     onClick={handleLogout}
                     className="rounded-xl bg-red-500/90 px-4 py-2.5 font-semibold text-white shadow-lg transition-all duration-300 hover:bg-red-600 hover:shadow-xl"
                   >

@@ -93,7 +93,7 @@ function CheckoutDonation() {
         NoTelepon: formData.phone,
         Keterangan: formData.keterangan,
         JumlahDonasi: getSelectedAmount(),
-        StatusDonasi: "Sukses",
+        StatusDonasi: "Pending",
         DonationChannel: isGeneralDonation ? "GENERAL" : "CAMPAIGN",
         ...(isGeneralDonation
           ? { masjidId }

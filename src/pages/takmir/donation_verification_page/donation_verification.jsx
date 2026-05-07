@@ -27,7 +27,7 @@ const DonationVerificationPage = () => {
 
       const pending = (donationsRes.data?.data || []).filter(
         (donation) =>
-          donation.StatusDonasi === "Sukses" &&
+          donation.StatusDonasi === "Pending" &&
           donation.JurnalApprovalStatus === "PENDING" &&
           !existingReferences.has(`DONASI:${donation.id}`)
       );

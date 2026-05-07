@@ -10,6 +10,7 @@ export const routes = {
   donor: {
     home: "/akun",
     history: "/akun/riwayat",
+    settings: "/akun/pengaturan",
   },
   admin: {
     login: "/auth/admin",

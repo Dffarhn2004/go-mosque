@@ -38,6 +38,8 @@ import SystemAdminAuditLogsPage from "./pages/system_admin/audit_page/audit_logs
 import SystemAdminSettingsPage from "./pages/system_admin/settings_page/settings";
 import NotificationsTakmir from "./pages/takmir/notification_page/notifications";
 import DonationVerificationPage from "./pages/takmir/donation_verification_page/donation_verification";
+import DonorProfileSettingsPage from "./pages/user/profile_settings_page/profile_settings";
+import TakmirProfileSettingsPage from "./pages/takmir/profile_settings_page/profile_settings";
 import AboutPage from "./pages/about_page";
 import ScrollToTop from "./components/common/ScrollToTop";
 import { getStoredUser, hasAuthSession } from "./utils/authStorage";
@@ -145,6 +147,14 @@ function App() {
             </RequireDonorAuth>
           }
         />
+        <Route
+          path={routes.donor.settings}
+          element={
+            <RequireDonorAuth>
+              <DonorProfileSettingsPage />
+            </RequireDonorAuth>
+          }
+        />
         <Route path="/home" element={<Navigate to={routes.donor.home} replace />} />
         <Route path={getMosqueDetailRoute()} element={<DetailMasjid />} />
         <Route path={getMosqueCheckoutRoute()} element={<CheckoutDonation />} />
@@ -164,6 +174,14 @@ function App() {
           element={
             <RequireTakmirAuth>
               <DashboardTakmir />
+            </RequireTakmirAuth>
+          }
+        />
+        <Route
+          path="/admin/profile"
+          element={
+            <RequireTakmirAuth>
+              <TakmirProfileSettingsPage />
             </RequireTakmirAuth>
           }
         />
