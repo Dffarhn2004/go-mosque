@@ -12,7 +12,7 @@ import {
   Menu,
   X,
 } from "lucide-react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { logoutAndRedirect } from "../utils/authStorage";
 
 const navItems = [
@@ -39,8 +39,7 @@ export default function SystemAdminLayout({ children }) {
   }, []);
 
   if (!user || user?.role?.Nama !== "Admin") {
-    navigate("/auth/admin", { replace: true });
-    return null;
+    return <Navigate to="/auth/admin" replace />;
   }
 
   return (

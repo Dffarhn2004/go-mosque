@@ -40,7 +40,7 @@ import NotificationsTakmir from "./pages/takmir/notification_page/notifications"
 import DonationVerificationPage from "./pages/takmir/donation_verification_page/donation_verification";
 import AboutPage from "./pages/about_page";
 import ScrollToTop from "./components/common/ScrollToTop";
-import { hasAuthSession } from "./utils/authStorage";
+import { getStoredUser, hasAuthSession } from "./utils/authStorage";
 import {
   getCampaignCheckoutRoute,
   getCampaignDetailRoute,
@@ -53,6 +53,51 @@ import {
 function RequireDonorAuth({ children }) {
   if (!hasAuthSession()) {
     return <Navigate to={routes.public.login} replace />;
+  }
+
+  return children;
+}
+
+function RequireTakmirAuth({ children }) {
+  if (!hasAuthSession()) {
+    return <Navigate to="/auth/admin" replace />;
+  }
+
+  const user = getStoredUser();
+  if (!user) {
+    return <Navigate to="/auth/admin" replace />;
+  }
+
+  if (user?.role?.Nama === "Admin") {
+    return <Navigate to="/system-admin/dashboard" replace />;
+  }
+
+  // Takmir pages rely on mosque context; allow fallback from user.masjid.
+  let masjid = null;
+  try {
+    masjid = JSON.parse(localStorage.getItem("masjid") || "null");
+  } catch {
+    masjid = null;
+  }
+  if (!masjid && user?.masjid) {
+    masjid = user.masjid;
+  }
+
+  if (!masjid) {
+    return <Navigate to="/auth/admin" replace />;
+  }
+
+  return children;
+}
+
+function RequireSystemAdminAuth({ children }) {
+  if (!hasAuthSession()) {
+    return <Navigate to="/auth/admin" replace />;
+  }
+
+  const user = getStoredUser();
+  if (!user || user?.role?.Nama !== "Admin") {
+    return <Navigate to="/auth/admin" replace />;
   }
 
   return children;
@@ -114,42 +159,223 @@ function App() {
           path="/campaign/:campaignId/checkout"
           element={<LegacyCampaignCheckoutRedirect />}
         />
-        <Route path="/admin/dashboard" element={<DashboardTakmir />} />
-        <Route path="/admin/notifications" element={<NotificationsTakmir />} />
-        <Route path="/admin/donation" element={<DonationTakmir />} />
+        <Route
+          path="/admin/dashboard"
+          element={
+            <RequireTakmirAuth>
+              <DashboardTakmir />
+            </RequireTakmirAuth>
+          }
+        />
+        <Route
+          path="/admin/notifications"
+          element={
+            <RequireTakmirAuth>
+              <NotificationsTakmir />
+            </RequireTakmirAuth>
+          }
+        />
+        <Route
+          path="/admin/donation"
+          element={
+            <RequireTakmirAuth>
+              <DonationTakmir />
+            </RequireTakmirAuth>
+          }
+        />
         <Route
           path="/admin/donation/verifikasi"
-          element={<DonationVerificationPage />}
+          element={
+            <RequireTakmirAuth>
+              <DonationVerificationPage />
+            </RequireTakmirAuth>
+          }
         />
-        <Route path="/admin/add/donation" element={<AddDonationTakmirPage />} />
-        <Route path="/admin/donation/:id" element={<DonationDetailTakmir />} />
-        <Route path="/admin/donation/:id/pengeluaran/tambah" element={<DonationExpenseFormPage />} />
-        <Route path="/admin/donatur" element={<DonaturTakmir />} />
-        <Route path="/admin/laporan" element={<LaporanKeuanganPage />} />
-        <Route path="/admin/coa" element={<COAPage />} />
-        <Route path="/admin/jurnal" element={<JurnalPage />} />
-        <Route path="/admin/jurnal/tambah" element={<JurnalFormPage />} />
-        <Route path="/admin/jurnal/edit/:id" element={<JurnalFormPage />} />
-        <Route path="/admin/buku-besar" element={<BukuBesarPage />} />
-        <Route path="/admin/laporan-jurnal" element={<LaporanKeuanganJurnalPage />} />
+        <Route
+          path="/admin/add/donation"
+          element={
+            <RequireTakmirAuth>
+              <AddDonationTakmirPage />
+            </RequireTakmirAuth>
+          }
+        />
+        <Route
+          path="/admin/donation/:id"
+          element={
+            <RequireTakmirAuth>
+              <DonationDetailTakmir />
+            </RequireTakmirAuth>
+          }
+        />
+        <Route
+          path="/admin/donation/:id/pengeluaran/tambah"
+          element={
+            <RequireTakmirAuth>
+              <DonationExpenseFormPage />
+            </RequireTakmirAuth>
+          }
+        />
+        <Route
+          path="/admin/donatur"
+          element={
+            <RequireTakmirAuth>
+              <DonaturTakmir />
+            </RequireTakmirAuth>
+          }
+        />
+        <Route
+          path="/admin/laporan"
+          element={
+            <RequireTakmirAuth>
+              <LaporanKeuanganPage />
+            </RequireTakmirAuth>
+          }
+        />
+        <Route
+          path="/admin/coa"
+          element={
+            <RequireTakmirAuth>
+              <COAPage />
+            </RequireTakmirAuth>
+          }
+        />
+        <Route
+          path="/admin/jurnal"
+          element={
+            <RequireTakmirAuth>
+              <JurnalPage />
+            </RequireTakmirAuth>
+          }
+        />
+        <Route
+          path="/admin/jurnal/tambah"
+          element={
+            <RequireTakmirAuth>
+              <JurnalFormPage />
+            </RequireTakmirAuth>
+          }
+        />
+        <Route
+          path="/admin/jurnal/edit/:id"
+          element={
+            <RequireTakmirAuth>
+              <JurnalFormPage />
+            </RequireTakmirAuth>
+          }
+        />
+        <Route
+          path="/admin/buku-besar"
+          element={
+            <RequireTakmirAuth>
+              <BukuBesarPage />
+            </RequireTakmirAuth>
+          }
+        />
+        <Route
+          path="/admin/laporan-jurnal"
+          element={
+            <RequireTakmirAuth>
+              <LaporanKeuanganJurnalPage />
+            </RequireTakmirAuth>
+          }
+        />
         <Route
           path="/admin/masjid/identitas"
-          element={<KelolaIdentitasMasjidPage />}
+          element={
+            <RequireTakmirAuth>
+              <KelolaIdentitasMasjidPage />
+            </RequireTakmirAuth>
+          }
         />
         <Route
           path="/admin/masjid/fasilitas"
-          element={<FasilitasMasjidPage />}
+          element={
+            <RequireTakmirAuth>
+              <FasilitasMasjidPage />
+            </RequireTakmirAuth>
+          }
         />
-        <Route path="/admin/masjid/dokumen" element={<DokumenMasjidPage />} />
-        <Route path="/admin/masjid/kegiatan" element={<KegiatanMasjidPage />} />
-        <Route path="/system-admin/dashboard" element={<SystemAdminDashboardPage />} />
-        <Route path="/system-admin/users" element={<SystemAdminUsersPage />} />
-        <Route path="/system-admin/masjids" element={<SystemAdminMasjidsPage />} />
-        <Route path="/system-admin/categories" element={<SystemAdminCategoriesPage />} />
-        <Route path="/system-admin/coa" element={<SystemAdminCoaPage />} />
-        <Route path="/system-admin/monitoring" element={<SystemAdminMonitoringPage />} />
-        <Route path="/system-admin/audit-logs" element={<SystemAdminAuditLogsPage />} />
-        <Route path="/system-admin/settings" element={<SystemAdminSettingsPage />} />
+        <Route
+          path="/admin/masjid/dokumen"
+          element={
+            <RequireTakmirAuth>
+              <DokumenMasjidPage />
+            </RequireTakmirAuth>
+          }
+        />
+        <Route
+          path="/admin/masjid/kegiatan"
+          element={
+            <RequireTakmirAuth>
+              <KegiatanMasjidPage />
+            </RequireTakmirAuth>
+          }
+        />
+
+        <Route
+          path="/system-admin/dashboard"
+          element={
+            <RequireSystemAdminAuth>
+              <SystemAdminDashboardPage />
+            </RequireSystemAdminAuth>
+          }
+        />
+        <Route
+          path="/system-admin/users"
+          element={
+            <RequireSystemAdminAuth>
+              <SystemAdminUsersPage />
+            </RequireSystemAdminAuth>
+          }
+        />
+        <Route
+          path="/system-admin/masjids"
+          element={
+            <RequireSystemAdminAuth>
+              <SystemAdminMasjidsPage />
+            </RequireSystemAdminAuth>
+          }
+        />
+        <Route
+          path="/system-admin/categories"
+          element={
+            <RequireSystemAdminAuth>
+              <SystemAdminCategoriesPage />
+            </RequireSystemAdminAuth>
+          }
+        />
+        <Route
+          path="/system-admin/coa"
+          element={
+            <RequireSystemAdminAuth>
+              <SystemAdminCoaPage />
+            </RequireSystemAdminAuth>
+          }
+        />
+        <Route
+          path="/system-admin/monitoring"
+          element={
+            <RequireSystemAdminAuth>
+              <SystemAdminMonitoringPage />
+            </RequireSystemAdminAuth>
+          }
+        />
+        <Route
+          path="/system-admin/audit-logs"
+          element={
+            <RequireSystemAdminAuth>
+              <SystemAdminAuditLogsPage />
+            </RequireSystemAdminAuth>
+          }
+        />
+        <Route
+          path="/system-admin/settings"
+          element={
+            <RequireSystemAdminAuth>
+              <SystemAdminSettingsPage />
+            </RequireSystemAdminAuth>
+          }
+        />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </Router>

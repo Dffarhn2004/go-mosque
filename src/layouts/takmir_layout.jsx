@@ -13,7 +13,7 @@ import {
   Settings,
   User,
 } from "lucide-react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import axiosInstance from "../api/axiosInstance";
 import { logoutAndRedirect } from "../utils/authStorage";
 
@@ -81,8 +81,7 @@ export default function TakmirLayout({ children }) {
   };
 
   if (!localStorage.getItem("user")) {
-    navigate("/", { replace: true });
-    return null; // Prevent rendering if user is not logged in
+    return <Navigate to="/" replace />;
   }
 
   const user = parseStorageItem("user");
@@ -96,13 +95,11 @@ export default function TakmirLayout({ children }) {
   const masjidName = masjid?.Nama || user?.masjid?.Nama || "Masjid";
 
   if (user?.role?.Nama === "Admin") {
-    navigate("/system-admin/dashboard", { replace: true });
-    return null;
+    return <Navigate to="/system-admin/dashboard" replace />;
   }
 
   if (!masjid) {
-    navigate("/auth/admin", { replace: true });
-    return null;
+    return <Navigate to="/auth/admin" replace />;
   }
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
