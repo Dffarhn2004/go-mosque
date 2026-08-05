@@ -1,0 +1,51 @@
+# Keep the Supabase project active by running a lightweight read twice a week.
+# Free-tier projects can pause after inactivity; this scheduled ping prevents that.
+#
+# Required GitHub Secrets (Settings → Secrets and variables → Actions):
+#   SUPABASE_URL              – Project URL (e.g. https://xxxx.supabase.co)
+#   SUPABASE_ANON_KEY         – Public anon key
+#   SUPABASE_SERVICE_ROLE_KEY – Optional; used when set (e.g. if RLS blocks anon)
+#
+# Optional repository variable (or job env below):
+#   SUPABASE_HEALTH_TABLE     – Table to SELECT from (default: health_check)
+#   Create a public-readable row table in Supabase, or set this to an existing table.
+
+name: Ping Supabase
+
+on:
+  schedule:
+    # Monday and Thursday at 09:00 UTC
+    - cron: "0 9 * * 1,4"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    name: Health check
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      # Change the ping table via repo variable, or override the default here.
+      SUPABASE_HEALTH_TABLE: ${{ vars.SUPABASE_HEALTH_TABLE || 'health_check' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: scripts/package-lock.json
+
+      - name: Install @supabase/supabase-js
+        working-directory: scripts
+        run: npm ci
+
+      - name: Ping Supabase
+        working-directory: scripts
+        run: node ping-supabase.js

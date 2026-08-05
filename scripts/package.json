@@ -1,0 +1,8 @@
+{
+  "name": "goqu-supabase-ping",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@supabase/supabase-js": "2.49.1"
+  }
+}
