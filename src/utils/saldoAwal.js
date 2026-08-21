@@ -1,5 +1,6 @@
 export const SALDO_AWAL_REFERENSI = "SALDO_AWAL";
-export const SALDO_AWAL_TANGGAL = "1000-10-10";
+export const SALDO_AWAL_TANGGAL = "1970-01-02";
+export const LEGACY_SALDO_AWAL_TANGGAL = "1000-10-10";
 export const SALDO_AWAL_LABEL = "Saldo Awal";
 
 export const getJurnalTanggalKey = (tanggal) => {
@@ -18,8 +19,10 @@ export const getJurnalTanggalKey = (tanggal) => {
   return date.toISOString().split("T")[0];
 };
 
-export const isSaldoAwalTanggal = (tanggal) =>
-  getJurnalTanggalKey(tanggal) === SALDO_AWAL_TANGGAL;
+export const isSaldoAwalTanggal = (tanggal) => {
+  const key = getJurnalTanggalKey(tanggal);
+  return key === SALDO_AWAL_TANGGAL || key === LEGACY_SALDO_AWAL_TANGGAL;
+};
 
 export const isSaldoAwalJurnal = (jurnal) =>
   jurnal?.referensi === SALDO_AWAL_REFERENSI ||

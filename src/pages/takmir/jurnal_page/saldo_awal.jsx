@@ -18,6 +18,7 @@ import { createJurnal, getAllJurnals, updateJurnal } from "../../../services/jur
 import { transformAccounts, transformJurnals } from "../../../utils/dataTransform";
 import formatCurrency from "../../../utils/formatCurrency";
 import {
+  LEGACY_SALDO_AWAL_TANGGAL,
   SALDO_AWAL_LABEL,
   SALDO_AWAL_REFERENSI,
   SALDO_AWAL_TANGGAL,
@@ -27,6 +28,7 @@ import {
   getAccountType,
   getChildAccounts,
   getFillableOpeningAccounts,
+  getJurnalTanggalKey,
   getOpeningEquityAccounts,
   getSaldoAwalUiConfig,
   getSectionRoots,
@@ -425,6 +427,14 @@ const SaldoAwalPage = () => {
             nextAmounts[entry.akunId] = Number(entry.jumlah) || 0;
           });
           setAmounts(nextAmounts);
+
+          if (getJurnalTanggalKey(openingJurnal.tanggal) === LEGACY_SALDO_AWAL_TANGGAL) {
+            try {
+              await updateJurnal(openingJurnal.id, { tanggal: SALDO_AWAL_TANGGAL });
+            } catch (error) {
+              console.error("Gagal menyesuaikan tanggal saldo awal lama:", error);
+            }
+          }
         }
       } catch (error) {
         console.error("Error loading saldo awal:", error);
