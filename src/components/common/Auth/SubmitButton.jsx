@@ -1,29 +1,47 @@
-import React, { useState } from "react";
-import { Eye, EyeOff, Mail, Lock, User, Heart, Home } from "lucide-react";
+import React from "react";
 
-const SubmitButton = ({ isLogin, loading = false, onClick }) => {
+const SubmitButton = ({
+  isLogin,
+  loading = false,
+  label,
+  loadingLabel,
+}) => {
   return (
     <button
-      type="button"
-      onClick={onClick}
+      type="submit"
       disabled={loading}
-      className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+      className="flex w-full items-center justify-center rounded-2xl bg-[#0C6839] px-4 py-3.5 text-sm font-semibold text-white shadow-lg shadow-emerald-900/20 transition hover:bg-[#075a2f] focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
     >
       {loading ? (
-        <div className="flex items-center">
-          <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        <span className="flex items-center">
+          <svg
+            className="-ml-1 mr-3 h-5 w-5 animate-spin text-white"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+            />
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            />
           </svg>
-          Processing...
-        </div>
+          {loadingLabel || "Memproses..."}
+        </span>
       ) : (
-        <>
-          {isLogin ? 'Sign In' : 'Create Account'}
-        </>
+        label || (isLogin ? "Masuk" : "Daftar")
       )}
     </button>
   );
 };
 
-export default SubmitButton
+export default SubmitButton;

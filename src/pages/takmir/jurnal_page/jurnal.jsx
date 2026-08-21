@@ -11,6 +11,7 @@ import {
 } from "../../../services/jurnalService";
 import { transformAccounts, transformJurnals } from "../../../utils/dataTransform";
 import formatCurrency from "../../../utils/formatCurrency";
+import { isSaldoAwalJurnal } from "../../../utils/saldoAwal";
 import toast from "react-hot-toast";
 import { Plus, CheckCircle2, AlertCircle, CircleAlert, FileCheck2, XCircle } from "lucide-react";
 import axiosInstance from "../../../api/axiosInstance";
@@ -68,6 +69,11 @@ const JurnalPage = () => {
   };
 
   const handleEdit = (jurnal) => {
+    const fullJurnal = jurnalList.find((item) => item.id === jurnal.id) || jurnal;
+    if (isSaldoAwalJurnal(fullJurnal)) {
+      navigate("/admin/jurnal/saldo-awal");
+      return;
+    }
     navigate(`/admin/jurnal/edit/${jurnal.id}`);
   };
 
@@ -128,6 +134,7 @@ const JurnalPage = () => {
 
   const summaryBalance = Math.abs(jurnalSummary.totalDebit - jurnalSummary.totalKredit);
   const isSummaryBalanced = summaryBalance < 0.01;
+  const hasOpeningBalance = jurnalList.some(isSaldoAwalJurnal);
 
   const pendingApprovals = useMemo(() => {
     const existingReferences = new Set(
@@ -205,6 +212,24 @@ const JurnalPage = () => {
             Tambah Jurnal
           </button>
         </div>
+
+        {!loading && !hasOpeningBalance && (
+          <div className="flex flex-col gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="font-semibold text-amber-900">Belum ada saldo awal</p>
+              <p className="mt-1 text-sm text-amber-800">
+                Isi saldo awal dulu agar laporan dan buku besar tidak mulai dari Rp 0.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => navigate("/admin/jurnal/saldo-awal")}
+              className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-700"
+            >
+              Isi saldo awal
+            </button>
+          </div>
+        )}
 
         {loading ? (
           <div className="space-y-4">

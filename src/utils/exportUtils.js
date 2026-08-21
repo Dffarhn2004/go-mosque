@@ -2,6 +2,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
 import formatCurrency from "./formatCurrency";
+import { formatJurnalTanggalLabel } from "./saldoAwal";
 
 /**
  * Export laporan ke PDF
@@ -322,11 +323,7 @@ export const exportBukuBesarToPDF = (entries, masjidName = "Masjid", periode = {
 
     // Prepare table data
     const tableData = (entries || []).map((entry) => {
-      const tanggal = new Date(entry.transactionTanggal).toLocaleDateString("id-ID", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-      });
+      const tanggal = formatJurnalTanggalLabel(entry.transactionTanggal);
       const akun = entry.akun 
         ? `${entry.akun.kodeAkun || ""} - ${entry.akun.namaAkun || ""}`.trim()
         : "-";
@@ -450,11 +447,7 @@ export const exportBukuBesarToExcel = (entries, masjidName = "Masjid", periode =
 
     // Data rows
     (entries || []).forEach((entry) => {
-      const tanggal = new Date(entry.transactionTanggal).toLocaleDateString("id-ID", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-      });
+      const tanggal = formatJurnalTanggalLabel(entry.transactionTanggal);
       const akun = entry.akun 
         ? `${entry.akun.kodeAkun || ""} - ${entry.akun.namaAkun || ""}`.trim()
         : "-";
@@ -1005,11 +998,7 @@ const generateBukuBesarPDF = (doc, data, startY, pageWidth, margin, pageHeight, 
   const totalKredit = data.totalKredit || 0;
 
   const tableData = entries.map((entry) => {
-    const tanggal = new Date(entry.transactionTanggal).toLocaleDateString("id-ID", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
+    const tanggal = formatJurnalTanggalLabel(entry.transactionTanggal);
     const akun = entry.akun 
       ? `${entry.akun.kodeAkun || ""} - ${entry.akun.namaAkun || ""}`.trim()
       : "-";
@@ -1521,11 +1510,7 @@ const generateBukuBesarExcel = (data, masjidName, periode) => {
 
   // Data rows
   entries.forEach((entry) => {
-    const tanggal = new Date(entry.transactionTanggal).toLocaleDateString("id-ID", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
+    const tanggal = formatJurnalTanggalLabel(entry.transactionTanggal);
     const akun = entry.akun 
       ? `${entry.akun.kodeAkun || ""} - ${entry.akun.namaAkun || ""}`.trim()
       : "-";

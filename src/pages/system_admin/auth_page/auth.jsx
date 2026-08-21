@@ -3,6 +3,7 @@ import { Shield, Mail, Lock } from "lucide-react";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../../api/axiosInstance";
+import { persistAuthSession } from "../../../utils/authStorage";
 
 export default function SystemAdminAuthPage() {
   const navigate = useNavigate();
@@ -21,13 +22,7 @@ export default function SystemAdminAuthPage() {
         return;
       }
 
-      localStorage.setItem("accessToken", token);
-      localStorage.setItem("user", JSON.stringify(user));
-      if (user.masjid) {
-        localStorage.setItem("masjid", JSON.stringify(user.masjid));
-      } else {
-        localStorage.removeItem("masjid");
-      }
+      persistAuthSession(token, user);
 
       toast.success("Admin authenticated");
       navigate("/system-admin/dashboard");

@@ -518,7 +518,7 @@ export const buildEntriesFromTransactionType = (
     }
     case "PENGELUARAN": {
       // Dikeluarkan dari: Aset Kas/Bank (akunSatuId)
-      // Dipakai untuk: Beban (akunDuaId)
+      // Dipakai untuk: Beban atau Aset selain kas/bank (akunDuaId)
       return [
         {
           ...baseEntry,

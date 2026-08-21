@@ -1,52 +1,61 @@
-// Input Component
-import React, { useState } from "react";
-import { Eye, EyeOff, Mail, Lock, User, Heart, Home } from "lucide-react";
+import React from "react";
+import { Eye, EyeOff } from "lucide-react";
 
-
-const InputField = ({ 
-  label, 
-  type, 
-  name, 
-  value, 
-  onChange, 
-  required, 
+const InputField = ({
+  label,
+  type,
+  name,
+  value,
+  onChange,
+  required,
   icon: Icon,
   showPasswordToggle,
   onTogglePassword,
-  showPassword
+  showPassword,
+  placeholder,
+  autoComplete,
+  hint,
 }) => {
   return (
-    <div className="mb-6">
-      <label className="block text-gray-700 text-sm font-medium mb-2">
+    <div>
+      <label htmlFor={name} className="mb-2 block text-sm font-medium text-gray-700">
         {label} {required && <span className="text-red-500">*</span>}
       </label>
       <div className="relative">
-        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <Icon className="h-5 w-5 text-gray-400" />
-        </div>
+        {Icon && (
+          <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+            <Icon className="h-5 w-5 text-gray-400" />
+          </div>
+        )}
         <input
-          type={showPasswordToggle && showPassword ? 'text' : type}
+          id={name}
+          type={showPasswordToggle && showPassword ? "text" : type}
           name={name}
           value={value}
           onChange={onChange}
           required={required}
-          className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 bg-white  dark:border-gray-600 text-black placeholder-gray-400"
-          placeholder={`Enter your ${label.toLowerCase()}`}
+          autoComplete={autoComplete}
+          className={`w-full rounded-2xl border border-gray-200 bg-white py-3.5 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 ${
+            Icon ? "pl-11" : "pl-4"
+          } ${showPasswordToggle ? "pr-12" : "pr-4"}`}
+          placeholder={placeholder || label}
         />
         {showPasswordToggle && (
           <button
             type="button"
             onClick={onTogglePassword}
-            className="absolute inset-y-0 right-0 pr-3 flex items-center"
+            className="absolute inset-y-0 right-0 flex items-center pr-4 text-gray-400 transition hover:text-gray-600"
+            aria-label={showPassword ? "Sembunyikan password" : "Tampilkan password"}
           >
             {showPassword ? (
-              <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+              <EyeOff className="h-5 w-5" />
             ) : (
-              <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+              <Eye className="h-5 w-5" />
             )}
           </button>
         )}
       </div>
+      {hint && <p className="mt-1.5 text-xs text-gray-500">{hint}</p>}
     </div>
   );
 };

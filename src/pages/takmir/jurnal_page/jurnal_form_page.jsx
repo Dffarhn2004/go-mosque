@@ -15,7 +15,6 @@ import {
   buildEntriesFromTransactionType,
   getAsetKasBank,
   getPendapatanAccounts,
-  getBebanAccounts,
   getHutangAccounts,
   getPiutangAccounts,
 } from "../../../utils/jurnalUtils";
@@ -559,10 +558,6 @@ const JurnalFormPage = () => {
     () => filterByRestriction(getPendapatanAccounts(activeCOA), templateForm.hasRestriction),
     [activeCOA, templateForm.hasRestriction, filterByRestriction]
   );
-  const bebanAccounts = useMemo(
-    () => filterByRestriction(getBebanAccounts(activeCOA), templateForm.hasRestriction),
-    [activeCOA, templateForm.hasRestriction, filterByRestriction]
-  );
   const hutangAccounts = useMemo(
     () => filterByRestriction(getHutangAccounts(activeCOA), templateForm.hasRestriction),
     [activeCOA, templateForm.hasRestriction, filterByRestriction]
@@ -584,6 +579,18 @@ const JurnalFormPage = () => {
     ),
     [activeCOA, templateForm.hasRestriction, filterByRestriction, filterByCodePrefix]
   );
+
+  // Filter untuk PENGELUARAN - beban + aset, kecuali kas/bank (itu sumber dana)
+  const pengeluaranAkunDuaOptions = useMemo(() => {
+    const kasBankIds = new Set(getAsetKasBank(activeCOA).map((akun) => akun.id));
+
+    return filterByRestriction(
+      filterByCodePrefix(activeCOA, ["1", "5"]).filter(
+        (akun) => !kasBankIds.has(akun.id)
+      ),
+      templateForm.hasRestriction
+    );
+  }, [activeCOA, templateForm.hasRestriction, filterByRestriction, filterByCodePrefix]);
 
   // Filter untuk PIUTANG - akun dengan code dimulai 1 (aset) dan 4 (pendapatan)
   // Kode 3 (ekuitas/aset neto) tidak dimasukkan karena aset neto otomatis perhitungan sistem
@@ -630,11 +637,11 @@ const JurnalFormPage = () => {
         return {
           title: "Pengeluaran",
           description:
-            "Catat beban/biaya/penyaluran dana. Sistem akan membuat jurnal: DEBIT Beban, KREDIT Kas/Bank.",
+            "Catat beban/biaya atau pembelian aset. Sistem akan membuat jurnal: DEBIT Beban/Aset, KREDIT Kas/Bank.",
           akunSatuLabel: "Dikeluarkan dari",
-          akunDuaLabel: "Untuk Beban",
+          akunDuaLabel: "Untuk Beban/Aset",
           akunSatuOptions: asetKasBankAccounts,
-          akunDuaOptions: bebanAccounts,
+          akunDuaOptions: pengeluaranAkunDuaOptions,
         };
       case "HUTANG":
         return {
@@ -661,7 +668,7 @@ const JurnalFormPage = () => {
           title: "Piutang",
           description:
             "Catat jasa/fasilitas yang belum dibayar jamaah. Sistem akan membuat jurnal: DEBIT Piutang, KREDIT Pendapatan.",
-          akunSatuLabel: "Sumber Pendapatan",
+          akunSatuLabel: "Sumber Dana",
           akunDuaLabel: "Piutang ke",
           akunSatuOptions: piutangAkunSatuOptions, // Hanya pendapatan, aset neto tidak dimasukkan karena otomatis perhitungan sistem
           akunDuaOptions: piutangAccounts,
@@ -695,29 +702,29 @@ const JurnalFormPage = () => {
     <TakmirLayout>
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div className="flex items-center gap-4">
+        <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4">
+          <div className="flex items-center gap-3 min-w-0">
             <button
               onClick={handleBack}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0"
             >
               <ArrowLeft className="w-5 h-5 text-gray-600" />
             </button>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-800">
+            <div className="min-w-0">
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
                 {isEditMode ? "Edit Jurnal" : "Tambah Jurnal"}
               </h1>
-              <p className="text-gray-600 mt-1">
+              <p className="text-gray-600 mt-1 text-sm sm:text-base">
                 {isEditMode
                   ? "Edit transaksi jurnal akuntansi"
                   : "Catat transaksi keuangan dalam jurnal akuntansi"}
               </p>
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 sm:flex-shrink-0">
             <button
               onClick={handlePreview}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="flex w-full sm:w-auto items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
               <Eye className="w-4 h-4" />
               Preview
@@ -765,7 +772,7 @@ const JurnalFormPage = () => {
         )}
 
         {/* Step 1: Informasi Dasar */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
           <div className="flex items-center gap-3 mb-6">
             <div className="flex items-center justify-center w-8 h-8 rounded-full bg-green-100 text-green-700 font-semibold text-sm">
               1
@@ -867,7 +874,7 @@ const JurnalFormPage = () => {
 
         {/* Step 2: Detail Transaksi - hanya untuk mode template */}
         {!isEditMode && templateConfig && (
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
             <div className="flex items-center gap-3 mb-6">
               <div className="flex items-center justify-center w-8 h-8 rounded-full bg-green-100 text-green-700 font-semibold text-sm">
                 2
@@ -890,12 +897,12 @@ const JurnalFormPage = () => {
                     className="w-5 h-5 mt-0.5 text-green-600 border-gray-300 rounded focus:ring-green-500"
                   />
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-sm font-medium text-gray-800">
+                    <div className="flex flex-wrap items-center gap-2 mb-1">
+                      <span className="text-sm font-medium text-gray-800 min-w-0">
                         Dengan Pembatasan dari Pemberi Sumber Daya
                       </span>
                       {templateForm.hasRestriction && (
-                        <span className="px-2 py-0.5 text-xs font-semibold text-orange-700 bg-orange-200 rounded">
+                        <span className="px-2 py-0.5 text-xs font-semibold text-orange-700 bg-orange-200 rounded flex-shrink-0">
                           Aktif
                         </span>
                       )}
@@ -1021,7 +1028,7 @@ const JurnalFormPage = () => {
 
         {/* Step 3: Preview Entries - hanya untuk mode edit */}
         {isEditMode && (
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
             <div className="flex items-center gap-3 mb-6">
               <div className="flex items-center justify-center w-8 h-8 rounded-full bg-green-100 text-green-700 font-semibold text-sm">
                 3
@@ -1065,12 +1072,12 @@ const JurnalFormPage = () => {
                           className="w-5 h-5 mt-0.5 text-green-600 border-gray-300 rounded focus:ring-green-500"
                         />
                         <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="text-sm font-medium text-gray-800">
+                          <div className="flex flex-wrap items-center gap-2 mb-1">
+                            <span className="text-sm font-medium text-gray-800 min-w-0">
                               Dengan Pembatasan dari Pemberi Sumber Daya
                             </span>
                             {entry.hasRestriction && (
-                              <span className="px-2 py-0.5 text-xs font-semibold text-orange-700 bg-orange-200 rounded">
+                              <span className="px-2 py-0.5 text-xs font-semibold text-orange-700 bg-orange-200 rounded flex-shrink-0">
                                 Aktif
                               </span>
                             )}
@@ -1136,7 +1143,7 @@ const JurnalFormPage = () => {
                       return null;
                     })()}
                   </label>
-                  <div className="flex gap-3">
+                  <div className="flex flex-col sm:flex-row gap-3">
                     <label
                       className={`flex-1 cursor-pointer relative overflow-hidden rounded-lg border-2 transition-all duration-200 ${
                         entry.tipe === "DEBIT"
@@ -1153,7 +1160,7 @@ const JurnalFormPage = () => {
                         }
                         className="sr-only"
                       />
-                      <div className="p-4 flex items-center justify-center gap-2">
+                      <div className="p-3 sm:p-4 flex items-center justify-center gap-2">
                         <div
                           className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
                             entry.tipe === "DEBIT"
@@ -1200,7 +1207,7 @@ const JurnalFormPage = () => {
                         }
                         className="sr-only"
                       />
-                      <div className="p-4 flex items-center justify-center gap-2">
+                      <div className="p-3 sm:p-4 flex items-center justify-center gap-2">
                         <div
                           className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
                             entry.tipe === "KREDIT"
@@ -1324,18 +1331,18 @@ const JurnalFormPage = () => {
         )}
 
         {/* Action Buttons */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <div className="flex gap-3">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+          <div className="flex flex-col-reverse sm:flex-row gap-3">
             <button
               onClick={handleBack}
-              className="flex-1 px-6 py-3 border border-gray-400 bg-white text-gray-800 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+              className="w-full sm:flex-1 px-4 sm:px-6 py-3 border border-gray-400 bg-white text-gray-800 rounded-lg hover:bg-gray-50 transition-colors font-medium"
             >
               Batal
             </button>
             <button
               onClick={handleSave}
               disabled={saving}
-              className="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 font-medium"
+              className="w-full sm:flex-1 px-4 sm:px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 font-medium"
             >
               {saving ? (
                 <>
@@ -1354,10 +1361,10 @@ const JurnalFormPage = () => {
 
         {/* Preview Modal */}
         {showPreview && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4">
             <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-              <div className="flex items-center justify-between p-6 border-b border-gray-200">
-                <h2 className="text-2xl font-bold text-gray-800">Preview Jurnal</h2>
+              <div className="flex items-center justify-between gap-3 p-4 sm:p-6 border-b border-gray-200">
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-800">Preview Jurnal</h2>
                 <button
                   onClick={() => setShowPreview(false)}
                   className="text-gray-400 hover:text-gray-600 transition-colors"
@@ -1366,25 +1373,25 @@ const JurnalFormPage = () => {
                 </button>
               </div>
 
-              <div className="p-6 space-y-4">
+              <div className="p-4 sm:p-6 space-y-4">
                 {/* Summary */}
-                <div className="grid grid-cols-3 gap-4 p-4 bg-gray-50 rounded-lg">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 p-4 bg-gray-50 rounded-lg">
                   <div>
                     <div className="text-sm text-gray-600">Total Debit</div>
-                    <div className="text-xl font-bold text-blue-600">
+                    <div className="text-lg sm:text-xl font-bold text-blue-600 break-all">
                       {formatCurrency(totals.debit)}
                     </div>
                   </div>
                   <div>
                     <div className="text-sm text-gray-600">Total Kredit</div>
-                    <div className="text-xl font-bold text-green-600">
+                    <div className="text-lg sm:text-xl font-bold text-green-600 break-all">
                       {formatCurrency(totals.kredit)}
                     </div>
                   </div>
                   <div>
                     <div className="text-sm text-gray-600">Selisih</div>
                     <div
-                      className={`text-xl font-bold ${
+                      className={`text-lg sm:text-xl font-bold break-all ${
                         isBalanced ? "text-gray-600" : "text-red-600"
                       }`}
                     >
@@ -1477,17 +1484,17 @@ const JurnalFormPage = () => {
                 </div>
 
                 {/* Actions */}
-                <div className="flex gap-3 pt-4">
+                <div className="flex flex-col-reverse sm:flex-row gap-3 pt-4">
                   <button
                     onClick={() => setShowPreview(false)}
-                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                    className="w-full sm:flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
                   >
                     Kembali ke Edit
                   </button>
                   <button
                     onClick={handleSave}
                     disabled={saving}
-                    className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="w-full sm:flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
                     {saving ? (
                       <>

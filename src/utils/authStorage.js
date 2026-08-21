@@ -47,6 +47,33 @@ export const getDonorNavbarUser = () => {
   };
 };
 
+export const persistAuthSession = (token, user) => {
+  localStorage.setItem("accessToken", token);
+  localStorage.setItem("user", JSON.stringify(user));
+
+  if (user?.masjid) {
+    localStorage.setItem("masjid", JSON.stringify(user.masjid));
+  } else {
+    localStorage.removeItem("masjid");
+  }
+};
+
+export const getUserRoleName = (user) => user?.role?.Nama || "";
+
+export const getPostLoginPath = (user) => {
+  const roleName = getUserRoleName(user);
+
+  if (roleName === "Admin") {
+    return "/system-admin/dashboard";
+  }
+
+  if (roleName === "Takmir" || user?.masjid) {
+    return "/admin/dashboard";
+  }
+
+  return "/akun";
+};
+
 export const logoutAndRedirect = (targetPath = "/") => {
   clearAuthSession();
   window.location.replace(targetPath);

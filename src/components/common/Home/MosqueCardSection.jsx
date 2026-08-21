@@ -54,7 +54,7 @@ const EnhancedLoadingScreen = ({ limit = 3 }) => {
       </div>
 
       {/* Cards grid loading */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-2 gap-3 sm:gap-6 md:grid-cols-3">
         {Array.from({ length: limit }, (_, index) => (
           <MosqueCardSkeleton key={index} />
         ))}
@@ -206,7 +206,7 @@ const MosqueCardSection = ({
             )}
           </div>
 
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="grid grid-cols-2 gap-3 sm:gap-6 xl:grid-cols-3">
             {filteredCampaigns.map((mosque, index) => (
               <MosqueCard
                 key={index}

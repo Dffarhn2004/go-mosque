@@ -2,7 +2,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate, useParams } from "react-router-dom";
 import Landing from "./pages/landing_pages";
 import AuthPage from "./pages/user/auth_page/auth";
-import AdminAuthPage from "./pages/takmir/auth_page/auth";
 import HomeUser from "./pages/user/home_page/home";
 import DashboardTakmir from "./pages/takmir/dashboard_page/dashboard";
 import DonationTakmir from "./pages/takmir/donation_page/donation";
@@ -24,6 +23,7 @@ import DetailMasjid from "./pages/user/detail_masjid_page/detail_masjid";
 import COAPage from "./pages/takmir/coa_page/coa";
 import JurnalPage from "./pages/takmir/jurnal_page/jurnal";
 import JurnalFormPage from "./pages/takmir/jurnal_page/jurnal_form_page";
+import SaldoAwalPage from "./pages/takmir/jurnal_page/saldo_awal";
 import LaporanKeuanganJurnalPage from "./pages/takmir/laporan_keuangan_jurnal_page/laporan_keuangan_jurnal";
 import LaporanKeuanganUserPage from "./pages/user/laporan_keuangan_page/laporan_keuangan";
 import MasjidTerdaftarPage from "./pages/user/masjid_terdaftar_page/masjid_terdaftar";
@@ -41,6 +41,7 @@ import DonationVerificationPage from "./pages/takmir/donation_verification_page/
 import DonorProfileSettingsPage from "./pages/user/profile_settings_page/profile_settings";
 import TakmirProfileSettingsPage from "./pages/takmir/profile_settings_page/profile_settings";
 import AboutPage from "./pages/about_page";
+import SystemAdminAuthPage from "./pages/system_admin/auth_page/auth";
 import ScrollToTop from "./components/common/ScrollToTop";
 import { getStoredUser, hasAuthSession } from "./utils/authStorage";
 import {
@@ -62,12 +63,12 @@ function RequireDonorAuth({ children }) {
 
 function RequireTakmirAuth({ children }) {
   if (!hasAuthSession()) {
-    return <Navigate to="/auth/admin" replace />;
+    return <Navigate to={routes.public.login} replace />;
   }
 
   const user = getStoredUser();
   if (!user) {
-    return <Navigate to="/auth/admin" replace />;
+    return <Navigate to={routes.public.login} replace />;
   }
 
   if (user?.role?.Nama === "Admin") {
@@ -86,7 +87,7 @@ function RequireTakmirAuth({ children }) {
   }
 
   if (!masjid) {
-    return <Navigate to="/auth/admin" replace />;
+    return <Navigate to={routes.public.login} replace />;
   }
 
   return children;
@@ -94,12 +95,12 @@ function RequireTakmirAuth({ children }) {
 
 function RequireSystemAdminAuth({ children }) {
   if (!hasAuthSession()) {
-    return <Navigate to="/auth/admin" replace />;
+    return <Navigate to={routes.systemAdmin.login} replace />;
   }
 
   const user = getStoredUser();
   if (!user || user?.role?.Nama !== "Admin") {
-    return <Navigate to="/auth/admin" replace />;
+    return <Navigate to={routes.systemAdmin.login} replace />;
   }
 
   return children;
@@ -126,8 +127,8 @@ function App() {
         <Route path={routes.public.login} element={<AuthPage defaultMode="login" />} />
         <Route path={routes.public.register} element={<AuthPage defaultMode="register" />} />
         <Route path="/auth" element={<Navigate to={routes.public.login} replace />} />
-        <Route path="/auth/admin" element={<AdminAuthPage />} />
-        <Route path="/auth/system-admin" element={<Navigate to="/auth/admin" replace />} />
+        <Route path="/auth/admin" element={<Navigate to={routes.public.login} replace />} />
+        <Route path="/auth/system-admin" element={<SystemAdminAuthPage />} />
         <Route
           path={routes.donor.history}
           element={
@@ -262,6 +263,14 @@ function App() {
           element={
             <RequireTakmirAuth>
               <JurnalPage />
+            </RequireTakmirAuth>
+          }
+        />
+        <Route
+          path="/admin/jurnal/saldo-awal"
+          element={
+            <RequireTakmirAuth>
+              <SaldoAwalPage />
             </RequireTakmirAuth>
           }
         />

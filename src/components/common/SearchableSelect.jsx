@@ -252,7 +252,12 @@ const SearchableSelect = ({
               {filteredOptions.length > 0 && (
                 <div className="px-4 py-2 border-t border-gray-200 bg-gray-50">
                   <p className="text-xs text-gray-500 text-center">
-                    {filteredOptions.length} hasil ditemukan • Gunakan ↑↓ untuk navigasi, Enter untuk memilih, Esc untuk menutup
+                    {filteredOptions.length} hasil ditemukan
+                    <span className="hidden sm:inline">
+                      {" "}
+                      • Gunakan ↑↓ untuk navigasi, Enter untuk memilih, Esc
+                      untuk menutup
+                    </span>
                   </p>
                 </div>
               )}

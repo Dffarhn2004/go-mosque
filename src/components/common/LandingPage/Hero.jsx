@@ -58,12 +58,8 @@ const Hero = ({ isHome = false }) => {
         <div className="absolute bottom-0 left-1/3 h-56 w-56 rounded-full bg-amber-300/30 blur-3xl" />
       </div>
 
-      <div className="relative mx-auto grid min-h-[calc(100vh-72px)] max-w-7xl gap-12 px-6 py-14 md:px-10 lg:grid-cols-[1.05fr_0.95fr] lg:px-16 lg:py-20">
+      <div className="relative mx-auto grid min-h-[calc(100vh-64px)] max-w-7xl gap-12 px-6 py-14 md:px-10 lg:grid-cols-[1.05fr_0.95fr] lg:px-16 lg:py-20">
         <div className="flex flex-col justify-center">
-          <div className="inline-flex w-fit items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-semibold text-emerald-50 backdrop-blur">
-            <span className="h-2 w-2 rounded-full bg-amber-300" />
-            Donasi masjid dimulai dari profil masjid yang jelas
-          </div>
 
           <h1 className="mt-6 max-w-3xl text-4xl font-bold leading-tight text-white md:text-5xl lg:text-6xl">
             Temukan masjid, pahami kebutuhannya, lalu salurkan donasi dengan

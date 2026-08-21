@@ -48,6 +48,7 @@ const createNavItems = (unreadCount = 0) => [
     to: "/admin/jurnal",
     children: [
       { label: "Chart of Accounts", to: "/admin/coa" },
+      { label: "Saldo Awal", to: "/admin/jurnal/saldo-awal" },
       { label: "Input Jurnal", to: "/admin/jurnal" },
       { label: "Buku Besar", to: "/admin/buku-besar" },
       { label: "Laporan dari Jurnal", to: "/admin/laporan-jurnal" },
@@ -123,7 +124,7 @@ export default function TakmirLayout({ children }) {
   }
 
   if (!masjid) {
-    return <Navigate to="/auth/admin" replace />;
+    return <Navigate to="/masuk" replace />;
   }
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
@@ -134,8 +135,12 @@ export default function TakmirLayout({ children }) {
   const isActiveRoute = (path) => location.pathname === path;
 
   const getCurrentPageTitle = () => {
-    const currentItem = navItems.find((item) => item.to === location.pathname);
-    return currentItem ? currentItem.label : "Dashboard";
+    for (const item of navItems) {
+      if (item.to === location.pathname) return item.label;
+      const child = item.children?.find((entry) => entry.to === location.pathname);
+      if (child) return child.label;
+    }
+    return "Dashboard";
   };
 
   const [openMenus, setOpenMenus] = useState(() =>
@@ -185,22 +190,22 @@ export default function TakmirLayout({ children }) {
       {/* Sidebar */}
       <aside
         className={`
-        fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out
+        fixed lg:sticky lg:top-0 lg:h-screen inset-y-0 left-0 z-50 flex w-64 flex-col bg-white shadow-lg transform transition-transform duration-300 ease-in-out
         ${
           isSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         }
       `}
       >
         {/* Sidebar Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <div className="flex items-center gap-3">
-            <div>
+        <div className="flex flex-shrink-0 items-center justify-between p-6 border-b border-gray-200">
+          <div className="flex min-w-0 items-center gap-3">
+            <div className="min-w-0">
               <img
                 src="/Logo_With_Text.png"
                 alt="GoQu"
                 className="h-8 w-auto max-w-[160px] object-contain"
               />
-              <h3 className="mt-1 text-lg font-bold text-gray-800">{masjidName}</h3>
+              <h3 className="mt-1 truncate text-lg font-bold text-gray-800">{masjidName}</h3>
               <p className="text-xs text-gray-500">Management System</p>
             </div>
           </div>
@@ -212,7 +217,7 @@ export default function TakmirLayout({ children }) {
           </button>
         </div>
         {/* Navigation */}
-        <nav className="mt-6 px-4 space-y-1">
+        <nav className="mt-6 flex-1 space-y-1 overflow-y-auto px-4 pb-4">
           {navItems.map((item) => {
             const isActive = isActiveRoute(item.to);
             const isMenuOpen = openMenus[item.label] || false;
@@ -307,7 +312,7 @@ export default function TakmirLayout({ children }) {
         </nav>
 
         {/* Sidebar Footer */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200">
+        <div className="flex-shrink-0 border-t border-gray-200 p-4">
           <button
             className="flex items-center gap-3 w-full px-3 py-2.5 text-sm font-medium text-red-600 rounded-lg hover:bg-red-50 transition-colors duration-200"
             onClick={() => {
@@ -323,25 +328,25 @@ export default function TakmirLayout({ children }) {
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Header */}
-        <header className="flex items-center justify-between px-4 lg:px-6 py-4 bg-white border-b border-gray-200 shadow-sm">
-          <div className="flex items-center gap-4">
+        <header className="flex items-center justify-between gap-3 px-4 lg:px-6 py-4 bg-white border-b border-gray-200 shadow-sm">
+          <div className="flex min-w-0 flex-1 items-center gap-3">
             <button
               onClick={toggleSidebar}
-              className="lg:hidden p-2 rounded-md hover:bg-gray-100 transition-colors duration-200"
+              className="lg:hidden p-2 rounded-md hover:bg-gray-100 transition-colors duration-200 flex-shrink-0"
             >
               <Menu className="w-5 h-5 text-gray-600" />
             </button>
-            <div>
-              <h2 className="text-xl font-semibold text-gray-800">
+            <div className="min-w-0">
+              <h2 className="truncate text-lg sm:text-xl font-semibold text-gray-800">
                 {getCurrentPageTitle()}
               </h2>
-              <p className="text-sm text-gray-500">
+              <p className="hidden truncate text-sm text-gray-500 sm:block">
                 Manage your mosque operations
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-shrink-0 items-center gap-2 sm:gap-3">
             {/* Notifications */}
             <div className="relative">
               <button
@@ -358,7 +363,7 @@ export default function TakmirLayout({ children }) {
 
               {/* Notification Dropdown */}
               {isNotificationOpen && (
-                <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                <div className="fixed left-4 right-4 top-[4.75rem] z-50 rounded-lg border border-gray-200 bg-white shadow-lg sm:absolute sm:left-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-80">
                   <div className="p-4 border-b border-gray-200">
                     <h3 className="font-semibold text-gray-800">
                       Notifications
@@ -452,10 +457,6 @@ export default function TakmirLayout({ children }) {
                     >
                       <User className="w-4 h-4" />
                       Profile Settings
-                    </button>
-                    <button className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                      <Settings className="w-4 h-4" />
-                      System Settings
                     </button>
                   </div>
                   <div className="border-t border-gray-200 py-2">

@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { routes } from "../../../routes";
+import { getRegisterRoute, routes } from "../../../routes";
 
 const CallToAction = ({ login = false }) => {
   const navigate = useNavigate();
@@ -62,7 +62,7 @@ const CallToAction = ({ login = false }) => {
               </svg>
             </button>
             <button
-              onClick={() => navigate(routes.admin.login)}
+              onClick={() => navigate(getRegisterRoute("takmir"))}
               className="border border-gray-300 bg-white text-gray-800 px-10 py-4 rounded-lg font-bold text-lg transition duration-300 hover:bg-gray-50 shadow-sm"
             >
               Daftarkan Masjid

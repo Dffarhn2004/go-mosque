@@ -13,12 +13,18 @@ export const routes = {
     settings: "/akun/pengaturan",
   },
   admin: {
-    login: "/auth/admin",
+    login: "/masuk",
+    register: "/daftar?role=takmir",
   },
   systemAdmin: {
     login: "/auth/system-admin",
   },
 };
+
+export const getRegisterRoute = (role = "donatur") =>
+  role === "takmir"
+    ? `${routes.public.register}?role=takmir`
+    : routes.public.register;
 
 export const getMosqueDetailRoute = (id = ":id") => `${routes.public.mosques}/${id}`;
 export const getMosqueReportRoute = (id = ":id") =>

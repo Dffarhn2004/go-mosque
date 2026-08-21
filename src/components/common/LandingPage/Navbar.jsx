@@ -1,312 +1,317 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useRef, useState } from "react";
+import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
+import { ChevronDown, LogOut, Menu, Settings, X } from "lucide-react";
 import { logoutAndRedirect } from "../../../utils/authStorage";
 import { routes } from "../../../routes";
 
 const publicLinks = [
-  { text: "Beranda", path: routes.public.landing },
+  { text: "Beranda", path: routes.public.landing, end: true },
   { text: "Jelajah Masjid", path: routes.public.mosques },
   { text: "Campaign Donasi", path: routes.public.campaigns },
-  { text: "Tentang", path: routes.public.about },
+  { text: "Tentang", path: routes.public.about, end: true },
 ];
 
 const donorLinks = [
-  { text: "Beranda Saya", path: routes.donor.home },
+  { text: "Beranda Saya", path: routes.donor.home, end: true },
   { text: "Riwayat Donasi", path: routes.donor.history },
   { text: "Jelajah Masjid", path: routes.public.mosques },
   { text: "Campaign Donasi", path: routes.public.campaigns },
 ];
 
+const getInitials = (name = "") => {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+
+  if (parts.length === 0) return "GQ";
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+
+  return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
+};
+
+const BrandLogo = ({ to }) => (
+  <Link
+    to={to}
+    className="group flex items-center gap-2.5"
+    aria-label="GoQu"
+  >
+    <span className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-xl">
+      <img
+        src="/Logo_Only.png"
+        alt=""
+        className="h-11 w-11 object-contain mix-blend-screen"
+      />
+    </span>
+    <span className="text-[1.15rem] font-bold tracking-tight text-white transition group-hover:text-emerald-50">
+      GoQu
+    </span>
+  </Link>
+);
+
+const DesktopNavLinks = ({ links }) => (
+  <div className="flex items-center gap-1">
+    {links.map((link) => (
+      <NavLink
+        key={link.path}
+        to={link.path}
+        end={link.end}
+        className={({ isActive }) =>
+          `rounded-full px-3.5 py-2 text-sm font-medium transition ${
+            isActive
+              ? "bg-white/15 text-white"
+              : "text-white/75 hover:bg-white/10 hover:text-white"
+          }`
+        }
+      >
+        {link.text}
+      </NavLink>
+    ))}
+  </div>
+);
+
+const AuthButtons = ({ fullWidth = false }) => (
+  <div className={`flex items-center gap-2 ${fullWidth ? "flex-col" : ""}`}>
+    <Link
+      to={routes.public.login}
+      className={`inline-flex items-center justify-center rounded-full border border-white/25 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/10 ${
+        fullWidth ? "w-full" : ""
+      }`}
+    >
+      Masuk
+    </Link>
+    <Link
+      to={routes.public.register}
+      className={`inline-flex items-center justify-center rounded-full bg-white px-4 py-2 text-sm font-semibold text-[#0C6839] transition hover:bg-emerald-50 ${
+        fullWidth ? "w-full" : ""
+      }`}
+    >
+      Daftar
+    </Link>
+  </div>
+);
+
+const UserMenu = ({ user, onLogout }) => {
+  const [open, setOpen] = useState(false);
+  const menuRef = useRef(null);
+  const initials = getInitials(user.name);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setOpen(false);
+      }
+    };
+
+    const handleEscape = (event) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEscape);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, []);
+
+  return (
+    <div className="relative" ref={menuRef}>
+      <button
+        type="button"
+        onClick={() => setOpen((prev) => !prev)}
+        className="flex items-center gap-2 rounded-full border border-white/15 bg-white/10 py-1 pl-1 pr-3 text-left transition hover:bg-white/15"
+        aria-expanded={open}
+        aria-haspopup="menu"
+      >
+        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-300 text-xs font-bold text-[#063c24]">
+          {initials}
+        </span>
+        <span className="max-w-[8.5rem] truncate text-sm font-semibold text-white">
+          {user.name}
+        </span>
+        <ChevronDown
+          className={`h-4 w-4 text-white/70 transition ${open ? "rotate-180" : ""}`}
+        />
+      </button>
+
+      {open && (
+        <div
+          role="menu"
+          className="absolute right-0 mt-2 w-56 overflow-hidden rounded-2xl border border-black/5 bg-white py-2 shadow-xl shadow-black/10"
+        >
+          <div className="border-b border-gray-100 px-4 py-3">
+            <p className="truncate text-sm font-semibold text-gray-900">{user.name}</p>
+            <p className="truncate text-xs text-gray-500">
+              {user.email || "Donatur GoQu"}
+            </p>
+          </div>
+          <Link
+            to={routes.donor.settings}
+            role="menuitem"
+            onClick={() => setOpen(false)}
+            className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 transition hover:bg-emerald-50 hover:text-emerald-800"
+          >
+            <Settings className="h-4 w-4" />
+            Pengaturan
+          </Link>
+          <button
+            type="button"
+            role="menuitem"
+            onClick={onLogout}
+            className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-red-600 transition hover:bg-red-50"
+          >
+            <LogOut className="h-4 w-4" />
+            Keluar
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const Navbar = ({ position = "fixed", user = null }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const desktopPositionClass = position === "static" ? "lg:static" : "lg:fixed";
+  const isFixed = position !== "static";
+  const links = user ? donorLinks : publicLinks;
+  const homePath = user ? routes.donor.home : routes.public.landing;
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
+      setIsScrolled(window.scrollY > 12);
     };
 
-    window.addEventListener("scroll", handleScroll);
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  useEffect(() => {
+    setIsMenuOpen(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    document.body.style.overflow = isMenuOpen ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isMenuOpen]);
 
   const handleLogout = () => {
     logoutAndRedirect(routes.public.landing);
   };
 
-  const links = user ? donorLinks : publicLinks;
-
   return (
     <>
       <nav
-        className={`static ${desktopPositionClass} left-0 top-0 isolate z-[120] w-full transition-all duration-500 ease-in-out`}
+        className={`${
+          isFixed ? "sticky top-0 lg:fixed" : "relative"
+        } left-0 top-0 isolate z-[120] w-full border-b border-white/10 transition-shadow duration-300 ${
+          isScrolled ? "shadow-lg shadow-black/10" : ""
+        }`}
         style={{
-          background: isScrolled
-            ? "linear-gradient(135deg, rgba(12, 104, 57, 0.98) 0%, rgba(17, 130, 75, 0.98) 50%, rgba(10, 79, 46, 0.98) 100%)"
-            : "linear-gradient(135deg, rgba(12, 104, 57, 0.95) 0%, rgba(17, 130, 75, 0.95) 50%, rgba(10, 79, 46, 0.95) 100%)",
-          backdropFilter: "blur(20px)",
-          WebkitBackdropFilter: "blur(20px)",
-          boxShadow: isScrolled
-            ? "0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 16px rgba(0, 0, 0, 0.08)"
-            : "0 4px 20px rgba(0, 0, 0, 0.1)",
-          borderBottom: isScrolled ? "1px solid rgba(255, 255, 255, 0.1)" : "none",
+          background:
+            "linear-gradient(135deg, #063c24 0%, #0C6839 52%, #0a4f32 100%)",
         }}
         role="navigation"
-        aria-label="Main navigation"
+        aria-label="Navigasi utama"
       >
-        <div className="mx-auto px-4 sm:px-6 lg:px-32">
-          <div className="flex h-16 items-center justify-between lg:h-20">
-            <button
-              type="button"
-              className="group flex items-center"
-              onClick={() => navigate(routes.public.landing)}
-              aria-label="Go to homepage"
-            >
-              <div className="relative">
-                <div className="absolute inset-0 scale-100 bg-gradient-to-r from-emerald-400 to-teal-400 opacity-0 blur-xl transition-all duration-500 group-hover:opacity-25 group-hover:scale-105" />
-                <img
-                  src="/Logo_With_Text.png"
-                  alt="GoQu"
-                  className="relative z-10 h-8 w-auto object-contain transition-all duration-300 group-hover:scale-[1.02] md:h-10"
-                />
-              </div>
-            </button>
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-10">
+          <div className="flex h-16 items-center justify-between gap-4">
+            <BrandLogo to={homePath} />
 
-            <div className="hidden items-center space-x-2 lg:flex lg:space-x-4">
-              {links.map((link) => (
-                <NavLink
-                  key={link.path}
-                  text={link.text}
-                  onClick={() => navigate(link.path)}
-                />
-              ))}
+            <div className="hidden flex-1 items-center justify-center lg:flex">
+              <DesktopNavLinks links={links} />
+            </div>
 
+            <div className="hidden shrink-0 items-center lg:flex">
               {user ? (
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center space-x-3 rounded-xl border border-white/30 bg-white/5 p-3 backdrop-blur-sm">
-                    <div className="relative">
-                      <img
-                        src={user.avatar || "https://source.unsplash.com/40x40/?face"}
-                        alt={`${user.name} profile picture`}
-                        className="h-10 w-10 rounded-full border-2 border-white/20 shadow-lg"
-                      />
-                      <div className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-2 border-white bg-emerald-400" />
-                    </div>
-                    <div className="text-sm leading-tight text-white">
-                      <div className="font-semibold">{user.name}</div>
-                      <div className="text-xs opacity-80">{user.role || "Donatur"}</div>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => navigate(routes.donor.settings)}
-                    className="rounded-xl bg-white/10 px-4 py-2.5 font-semibold text-white shadow-lg transition-all duration-300 hover:bg-white/20 hover:shadow-xl"
-                  >
-                    Pengaturan
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleLogout}
-                    className="rounded-xl bg-red-500/90 px-4 py-2.5 font-semibold text-white shadow-lg transition-all duration-300 hover:bg-red-600 hover:shadow-xl"
-                  >
-                    Keluar
-                  </button>
-                </div>
+                <UserMenu user={user} onLogout={handleLogout} />
               ) : (
-                <div className="flex items-center space-x-3">
-                  <PrimaryButton
-                    text="Masuk"
-                    onClick={() => navigate(routes.public.login)}
-                    className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-xl"
-                  />
-                  <SecondaryButton
-                    text="Daftar"
-                    onClick={() => navigate(routes.public.register)}
-                    className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 shadow-lg hover:shadow-xl"
-                  />
-                  <SecondaryButton
-                    text="Daftarkan Masjid"
-                    onClick={() => navigate(routes.admin.login)}
-                    className="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 shadow-lg hover:shadow-xl"
-                  />
-                </div>
+                <AuthButtons />
               )}
             </div>
 
-            <div className="lg:hidden">
-              <button
-                type="button"
-                onClick={() => setIsMenuOpen((prev) => !prev)}
-                className="rounded-lg p-2 text-white transition-all duration-300 hover:bg-white/10 hover:text-emerald-200 focus:outline-none focus:ring-2 focus:ring-white/50"
-                aria-expanded={isMenuOpen}
-                aria-label="Toggle mobile menu"
-              >
-                <svg
-                  className={`h-6 w-6 transition-transform duration-300 ${
-                    isMenuOpen ? "rotate-90 scale-110" : ""
-                  }`}
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  {isMenuOpen ? (
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  ) : (
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M4 6h16M4 12h16M4 18h16"
-                    />
-                  )}
-                </svg>
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={() => setIsMenuOpen((prev) => !prev)}
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full text-white transition hover:bg-white/10 lg:hidden"
+              aria-expanded={isMenuOpen}
+              aria-label={isMenuOpen ? "Tutup menu" : "Buka menu"}
+            >
+              {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
           </div>
 
           {isMenuOpen && (
-            <div className="animate-slideDown border-t border-white/20 py-4 backdrop-blur-xl lg:hidden">
-              <div className="space-y-2">
+            <div className="border-t border-white/10 pb-5 pt-3 lg:hidden">
+              <div className="space-y-1">
                 {links.map((link) => (
-                  <MobileNavLink
+                  <NavLink
                     key={link.path}
-                    text={link.text}
-                    onClick={() => {
-                      setIsMenuOpen(false);
-                      navigate(link.path);
-                    }}
-                  />
+                    to={link.path}
+                    end={link.end}
+                    onClick={() => setIsMenuOpen(false)}
+                    className={({ isActive }) =>
+                      `block rounded-xl px-3 py-3 text-sm font-medium transition ${
+                        isActive
+                          ? "bg-white/15 text-white"
+                          : "text-white/80 hover:bg-white/10 hover:text-white"
+                      }`
+                    }
+                  >
+                    {link.text}
+                  </NavLink>
                 ))}
               </div>
 
               {user ? (
-                <div className="mx-4 my-4 rounded-xl border border-white/20 bg-white/10 p-4 backdrop-blur-sm">
-                  <div className="flex items-center space-x-3">
-                    <div className="relative">
-                      <img
-                        src={user.avatar || "https://source.unsplash.com/40x40/?face"}
-                        alt={user.name}
-                        className="h-12 w-12 rounded-full border-2 border-white/30"
-                      />
-                      <div className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-2 border-white bg-emerald-400" />
-                    </div>
-                    <div className="text-white">
-                      <div className="font-semibold text-base">{user.name}</div>
-                      <div className="text-sm opacity-80">{user.role || "Donatur"}</div>
+                <div className="mt-4 rounded-2xl border border-white/15 bg-white/10 p-4">
+                  <div className="flex items-center gap-3">
+                    <span className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-300 text-sm font-bold text-[#063c24]">
+                      {getInitials(user.name)}
+                    </span>
+                    <div className="min-w-0">
+                      <p className="truncate font-semibold text-white">{user.name}</p>
+                      <p className="truncate text-xs text-white/70">
+                        {user.email || "Donatur GoQu"}
+                      </p>
                     </div>
                   </div>
-                  <div className="mt-3 border-t border-white/20 pt-3">
-                    <MobileNavLink
-                      text="Keluar"
+                  <div className="mt-3 grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsMenuOpen(false);
+                        navigate(routes.donor.settings);
+                      }}
+                      className="inline-flex items-center justify-center gap-2 rounded-full bg-white/10 px-3 py-2 text-sm font-semibold text-white"
+                    >
+                      <Settings className="h-4 w-4" />
+                      Pengaturan
+                    </button>
+                    <button
+                      type="button"
                       onClick={handleLogout}
-                      className="text-red-200 hover:bg-red-500/20 hover:text-red-100"
-                    />
+                      className="inline-flex items-center justify-center gap-2 rounded-full bg-red-500/90 px-3 py-2 text-sm font-semibold text-white"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      Keluar
+                    </button>
                   </div>
                 </div>
               ) : (
-                <div className="space-y-3 px-4 pt-4">
-                  <PrimaryButton
-                    text="Masuk"
-                    onClick={() => navigate(routes.public.login)}
-                    className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
-                  />
-                  <SecondaryButton
-                    text="Daftar"
-                    onClick={() => navigate(routes.public.register)}
-                    className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700"
-                  />
-                  <SecondaryButton
-                    text="Daftarkan Masjid"
-                    onClick={() => navigate(routes.admin.login)}
-                    className="w-full bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700"
-                  />
+                <div className="mt-4">
+                  <AuthButtons fullWidth />
                 </div>
               )}
             </div>
           )}
         </div>
       </nav>
-
-      <style jsx>{`
-        @keyframes slideDown {
-          from {
-            opacity: 0;
-            transform: translateY(-15px);
-            max-height: 0;
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-            max-height: 500px;
-          }
-        }
-
-        .animate-slideDown {
-          animation: slideDown 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        button:focus,
-        [role="button"]:focus {
-          outline: 2px solid rgba(255, 255, 255, 0.8);
-          outline-offset: 2px;
-        }
-      `}</style>
     </>
   );
 };
-
-const NavLink = ({ text, href, onClick }) => (
-  <a
-    href={href}
-    onClick={onClick}
-    onKeyDown={(event) => event.key === "Enter" && onClick && onClick()}
-    className="group relative cursor-pointer rounded-lg border border-transparent px-4 py-2 font-medium text-white transition-all duration-300 hover:bg-white/10 hover:text-emerald-100 hover:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/50"
-    tabIndex={0}
-    role={onClick ? "button" : "link"}
-  >
-    <span>{text}</span>
-    <span className="absolute bottom-1 left-4 right-4 h-0.5 scale-x-0 rounded-full bg-gradient-to-r from-emerald-400 to-teal-400 transition-transform duration-300 group-hover:scale-x-100" />
-  </a>
-);
-
-const MobileNavLink = ({ text, href, onClick, className = "" }) => (
-  <a
-    href={href}
-    onClick={onClick}
-    onKeyDown={(event) => event.key === "Enter" && onClick && onClick()}
-    className={`mx-4 block cursor-pointer rounded-xl border border-transparent px-4 py-3 font-medium text-white transition-all duration-300 hover:bg-white/10 hover:text-emerald-100 hover:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/50 ${className}`}
-    tabIndex={0}
-    role={onClick ? "button" : "link"}
-  >
-    {text}
-  </a>
-);
-
-const PrimaryButton = ({ text, onClick, className = "" }) => (
-  <button
-    type="button"
-    onClick={onClick}
-    className={`relative overflow-hidden rounded-xl px-6 py-2.5 font-semibold text-white transition-all duration-300 hover:scale-105 hover:shadow-2xl focus:outline-none focus:ring-4 focus:ring-blue-400/50 ${className}`}
-  >
-    <span className="relative">{text}</span>
-  </button>
-);
-
-const SecondaryButton = ({ text, onClick, className = "" }) => (
-  <button
-    type="button"
-    onClick={onClick}
-    className={`relative overflow-hidden rounded-xl px-6 py-2.5 font-semibold text-white transition-all duration-300 hover:scale-105 hover:shadow-2xl focus:outline-none focus:ring-4 focus:ring-emerald-400/50 ${className}`}
-  >
-    <span className="relative">{text}</span>
-  </button>
-);
 
 export default Navbar;

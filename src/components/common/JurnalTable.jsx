@@ -9,6 +9,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import formatCurrency from "../../utils/formatCurrency";
+import { isSaldoAwalJurnal, formatJurnalTanggalLabel, SALDO_AWAL_LABEL } from "../../utils/saldoAwal";
 
 const JurnalTable = ({
   jurnalList,
@@ -64,8 +65,9 @@ const JurnalTable = ({
 
       const transactionDate = new Date(transaction.tanggal);
       const matchTanggal =
-        (!tanggalAwal || transactionDate >= new Date(tanggalAwal)) &&
-        (!tanggalAkhir || transactionDate <= new Date(tanggalAkhir));
+        isSaldoAwalJurnal(transaction) ||
+        ((!tanggalAwal || transactionDate >= new Date(tanggalAwal)) &&
+          (!tanggalAkhir || transactionDate <= new Date(tanggalAkhir)));
 
       return matchSearch && matchAkun && matchTipe && matchTanggal;
     });
@@ -73,6 +75,10 @@ const JurnalTable = ({
 
   const sortedTransactions = useMemo(() => {
     return [...filteredTransactions].sort((a, b) => {
+      const aOpening = isSaldoAwalJurnal(a);
+      const bOpening = isSaldoAwalJurnal(b);
+      if (aOpening !== bOpening) return aOpening ? -1 : 1;
+
       const dateA = new Date(a.tanggal);
       const dateB = new Date(b.tanggal);
       if (dateB.getTime() !== dateA.getTime()) {
@@ -238,12 +244,14 @@ const JurnalTable = ({
                           <div className="flex items-center gap-3">
                             <Calendar className="w-4 h-4 text-blue-700" />
                             <span className="text-sm font-semibold text-blue-900">
-                              {new Date(transaction.tanggal).toLocaleDateString("id-ID", {
-                                weekday: "long",
-                                day: "numeric",
-                                month: "long",
-                                year: "numeric",
-                              })}
+                              {isSaldoAwalJurnal(transaction)
+                                ? SALDO_AWAL_LABEL
+                                : new Date(transaction.tanggal).toLocaleDateString("id-ID", {
+                                    weekday: "long",
+                                    day: "numeric",
+                                    month: "long",
+                                    year: "numeric",
+                                  })}
                             </span>
                           </div>
                         </td>
@@ -252,7 +260,7 @@ const JurnalTable = ({
 
                     <tr className="hover:bg-gray-50 border-b border-gray-100 align-top">
                       <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {new Date(transaction.tanggal).toISOString().split("T")[0]}
+                        {formatJurnalTanggalLabel(transaction.tanggal)}
                       </td>
                       <td className="px-4 py-4">
                         <div className="space-y-3">
@@ -304,7 +312,14 @@ const JurnalTable = ({
                       <td className="px-4 py-4 text-sm text-gray-600">
                         <div className="space-y-3">
                           <div className="font-medium text-gray-700">
-                            {transaction.keterangan || "-"}
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span>{transaction.keterangan || "-"}</span>
+                              {isSaldoAwalJurnal(transaction) && (
+                                <span className="inline-flex rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-700">
+                                  Saldo Awal
+                                </span>
+                              )}
+                            </div>
                             {transaction.referensi && (
                               <div className="mt-1 text-xs text-gray-500">
                                 Ref: {transaction.referensi}

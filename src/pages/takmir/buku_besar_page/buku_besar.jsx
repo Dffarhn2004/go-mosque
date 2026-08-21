@@ -4,7 +4,7 @@ import { getAllAccounts } from "../../../services/coaService";
 import { getAllJurnals } from "../../../services/jurnalService";
 import { transformAccounts, transformJurnals } from "../../../utils/dataTransform";
 import formatCurrency from "../../../utils/formatCurrency";
-import { hitungSaldoAkun } from "../../../utils/jurnalUtils";
+import { isSaldoAwalJurnal, formatJurnalTanggalLabel } from "../../../utils/saldoAwal";
 import { exportBukuBesarToPDF } from "../../../utils/exportUtils";
 import { Calendar, Loader2, Download } from "lucide-react";
 import { TableSkeleton } from "../../../components/common/Skeleton";
@@ -77,6 +77,7 @@ const BukuBesarPage = () => {
         transactionTanggal: trx.tanggal,
         transactionId: trx.id,
         transactionKeterangan: trx.keterangan,
+        referensi: trx.referensi,
       }))
     );
   }, [jurnalList]);
@@ -84,6 +85,8 @@ const BukuBesarPage = () => {
   // Filter berdasarkan tanggal - memoized
   const filteredEntries = useMemo(() => {
     return allEntries.filter((entry) => {
+      if (isSaldoAwalJurnal(entry)) return true;
+
       const t = new Date(entry.transactionTanggal);
       return (
         (!tanggalAwal || t >= new Date(tanggalAwal)) &&
@@ -275,14 +278,7 @@ const BukuBesarPage = () => {
                       paginatedEntries.map((row, idx) => (
                         <tr key={row.id || idx}>
                           <td className="px-4 py-2 text-sm text-gray-900 whitespace-nowrap">
-                            {new Date(row.transactionTanggal).toLocaleDateString(
-                              "id-ID",
-                              {
-                                day: "2-digit",
-                                month: "short",
-                                year: "numeric",
-                              }
-                            )}
+                            {formatJurnalTanggalLabel(row.transactionTanggal)}
                           </td>
                           <td className="px-4 py-2 text-sm text-gray-700">
                             {row.akun?.kodeAkun || "-"}{" "}

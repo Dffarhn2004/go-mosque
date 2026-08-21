@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import MetaData from "../components/common/MetaData";
 import Navbar from "../components/common/LandingPage/Navbar";
 import Footer from "../components/common/LandingPage/Footer";
-import { routes } from "../routes";
+import { getRegisterRoute, routes } from "../routes";
 
 const principles = [
   {
@@ -97,7 +97,7 @@ function AboutPage() {
                   Mulai Berdonasi
                 </button>
                 <button
-                  onClick={() => navigate(routes.admin.login)}
+                  onClick={() => navigate(getRegisterRoute("takmir"))}
                   className="w-full rounded-2xl border border-white/25 bg-white/10 px-6 py-3 font-semibold text-white transition hover:bg-white/15 sm:w-auto"
                 >
                   Daftarkan Masjid
