@@ -225,7 +225,7 @@ const AllAccountsWorksheet = ({
           <span>{formatCurrency(totalAsetNeto)}</span>
         </div>
         <div className="flex items-center justify-between border-t border-white/20 pt-2">
-          <span className="font-semibold">Total Kanan</span>
+          <span className="font-semibold">Total Kewajiban dan Aset Neto</span>
           <span className="text-lg font-bold">{formatCurrency(totalKanan)}</span>
         </div>
       </div>
@@ -694,11 +694,11 @@ const SaldoAwalPage = () => {
               <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div className="flex flex-wrap items-center gap-4">
                   <div>
-                    <p className="text-xs text-gray-500">Total kiri</p>
+                    <p className="text-xs text-gray-500">Total Aset</p>
                     <p className="font-semibold text-gray-900">{formatCurrency(totalAset)}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-500">Total kanan</p>
+                    <p className="text-xs text-gray-500">Total Kewajiban dan Aset Neto</p>
                     <p className="font-semibold text-gray-900">{formatCurrency(totalKanan)}</p>
                   </div>
                   <div

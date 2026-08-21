@@ -68,24 +68,14 @@ const DesktopNavLinks = ({ links }) => (
 );
 
 const AuthButtons = ({ fullWidth = false }) => (
-  <div className={`flex items-center gap-2 ${fullWidth ? "flex-col" : ""}`}>
-    <Link
-      to={routes.public.login}
-      className={`inline-flex items-center justify-center rounded-full border border-white/25 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/10 ${
-        fullWidth ? "w-full" : ""
-      }`}
-    >
-      Masuk
-    </Link>
-    <Link
-      to={routes.public.register}
-      className={`inline-flex items-center justify-center rounded-full bg-white px-4 py-2 text-sm font-semibold text-[#0C6839] transition hover:bg-emerald-50 ${
-        fullWidth ? "w-full" : ""
-      }`}
-    >
-      Daftar
-    </Link>
-  </div>
+  <Link
+    to={routes.public.login}
+    className={`inline-flex items-center justify-center rounded-full bg-white px-4 py-2 text-sm font-semibold text-[#0C6839] transition hover:bg-emerald-50 ${
+      fullWidth ? "w-full" : ""
+    }`}
+  >
+    Masuk
+  </Link>
 );
 
 const UserMenu = ({ user, onLogout }) => {

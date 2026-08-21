@@ -594,30 +594,45 @@ const AuthPage = ({ defaultMode = "login" }) => {
                 </div>
               </form>
 
-              <p className="mt-6 text-center text-sm text-gray-600">
-                {isLogin ? "Belum punya akun?" : "Sudah punya akun?"}{" "}
-                <button
-                  type="button"
-                  onClick={handleToggleAuth}
-                  className="font-semibold text-emerald-700 hover:text-emerald-800"
-                >
-                  {isLogin ? "Daftar" : "Masuk"}
-                </button>
-              </p>
-
-              {isLogin && (
-                <p className="mt-2 text-center text-sm text-gray-500">
-                  Takmir masjid?{" "}
+              {isLogin ? (
+                <div className="mt-6 space-y-3">
+                  <p className="text-center text-sm text-gray-500">
+                    Belum punya akun?
+                  </p>
+                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        resetForm();
+                        setIsLogin(false);
+                        navigate(getRegisterRoute("donatur"));
+                      }}
+                      className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800 transition hover:bg-emerald-100"
+                    >
+                      Daftar sebagai donatur
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        resetForm();
+                        setIsLogin(false);
+                        navigate(getRegisterRoute("takmir"));
+                      }}
+                      className="rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm font-semibold text-sky-800 transition hover:bg-sky-100"
+                    >
+                      Daftar sebagai takmir
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <p className="mt-6 text-center text-sm text-gray-600">
+                  Sudah punya akun?{" "}
                   <button
                     type="button"
-                    onClick={() => {
-                      resetForm();
-                      setIsLogin(false);
-                      navigate(getRegisterRoute("takmir"));
-                    }}
-                    className="font-semibold text-[#0473A8] hover:text-sky-800"
+                    onClick={handleToggleAuth}
+                    className="font-semibold text-emerald-700 hover:text-emerald-800"
                   >
-                    Daftarkan masjid
+                    Masuk
                   </button>
                 </p>
               )}
