@@ -416,6 +416,18 @@ export const getAsetKasBank = (accounts = []) => {
   );
 };
 
+/**
+ * Semua akun aset detail: aset lancar (11xxxx) dan aset tidak lancar (12xxxx).
+ */
+export const getAsetAccounts = (accounts = []) => {
+  const asetCategories = new Set(["ASET_LANCAR", "ASET_TIDAK_LANCAR"]);
+  return accounts.filter((akun) => {
+    if (akun.isGroup || !akun.isActive) return false;
+    if (akun.tipeAkun === "ASET") return true;
+    return asetCategories.has(akun.category);
+  });
+};
+
 export const getPendapatanAccounts = (accounts = []) => {
   return accounts.filter(
     (akun) => !akun.isGroup && akun.tipeAkun === "PENDAPATAN" && akun.isActive
@@ -500,7 +512,7 @@ export const buildEntriesFromTransactionType = (
   switch (jenisTransaksi) {
     case "PEMASUKAN": {
       // Diterima dari: Pendapatan (akunSatuId)
-      // Simpan ke: Aset Kas/Bank (akunDuaId)
+      // Simpan ke: Aset lancar / aset tidak lancar (akunDuaId)
       return [
         {
           ...baseEntry,

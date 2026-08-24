@@ -14,6 +14,7 @@ import axiosInstance from "../../../api/axiosInstance";
 import {
   buildEntriesFromTransactionType,
   getAsetKasBank,
+  getAsetAccounts,
   getPendapatanAccounts,
   getHutangAccounts,
   getPiutangAccounts,
@@ -554,6 +555,10 @@ const JurnalFormPage = () => {
     () => filterByRestriction(getAsetKasBank(activeCOA), templateForm.hasRestriction),
     [activeCOA, templateForm.hasRestriction, filterByRestriction]
   );
+  const asetAccounts = useMemo(
+    () => filterByRestriction(getAsetAccounts(activeCOA), templateForm.hasRestriction),
+    [activeCOA, templateForm.hasRestriction, filterByRestriction]
+  );
   const pendapatanAccounts = useMemo(
     () => filterByRestriction(getPendapatanAccounts(activeCOA), templateForm.hasRestriction),
     [activeCOA, templateForm.hasRestriction, filterByRestriction]
@@ -627,11 +632,11 @@ const JurnalFormPage = () => {
         return {
           title: "Pemasukan",
           description:
-            "Catat pendapatan/infaq/donasi/uang masuk lain. Sistem akan membuat jurnal: DEBIT Kas/Bank, KREDIT Pendapatan.",
+            "Catat pendapatan/infaq/donasi/uang masuk lain. Sistem akan membuat jurnal: DEBIT Aset (lancar/tidak lancar), KREDIT Pendapatan.",
           akunSatuLabel: "Sumber Pendapatan",
           akunDuaLabel: "Disimpan ke",
           akunSatuOptions: pendapatanAccounts,
-          akunDuaOptions: asetKasBankAccounts,
+          akunDuaOptions: asetAccounts,
         };
       case "PENGELUARAN":
         return {
