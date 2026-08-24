@@ -154,29 +154,15 @@ export const getOpeningEquityAccounts = (accounts = []) => {
   };
 };
 
-export const calculateOpeningEquity = (assetAccounts, liabilityAccounts, amounts) => {
-  const sumByRestriction = (accounts, restricted) =>
-    accounts
-      .filter((account) => !account.isGroup)
-      .filter((account) => isRestrictedAccount(account) === restricted)
-      .reduce((total, account) => total + (Number(amounts[account.id]) || 0), 0);
-
-  const unrestrictedAssets = sumByRestriction(assetAccounts, false);
-  const restrictedAssets = sumByRestriction(assetAccounts, true);
-  const unrestrictedLiabilities = sumByRestriction(liabilityAccounts, false);
-  const restrictedLiabilities = sumByRestriction(liabilityAccounts, true);
-
-  return {
-    unrestricted: unrestrictedAssets - unrestrictedLiabilities,
-    restricted: restrictedAssets - restrictedLiabilities,
-  };
-};
+export const sumLeafAmounts = (accounts = [], amounts = {}) =>
+  accounts
+    .filter((account) => !account.isGroup)
+    .reduce((total, account) => total + (Number(amounts[account.id]) || 0), 0);
 
 export const buildOpeningEntries = ({
   amounts,
   assetAccounts,
   liabilityAccounts,
-  equity,
   equityAccounts,
 }) => {
   const entries = [];
@@ -206,39 +192,24 @@ export const buildOpeningEntries = ({
       pushEntry(account, amounts[account.id], "KREDIT");
     });
 
-  if (equityAccounts.unrestricted && equityAccounts.restricted) {
-    pushEntry(
-      equityAccounts.unrestricted,
-      equity.unrestricted,
-      equity.unrestricted >= 0 ? "KREDIT" : "DEBIT"
-    );
-    pushEntry(
-      equityAccounts.restricted,
-      equity.restricted,
-      equity.restricted >= 0 ? "KREDIT" : "DEBIT"
-    );
-  } else {
-    const fallbackAccount =
-      equityAccounts.unrestricted || equityAccounts.restricted;
-    const totalEquity = (equity.unrestricted || 0) + (equity.restricted || 0);
-    pushEntry(
-      fallbackAccount,
-      totalEquity,
-      totalEquity >= 0 ? "KREDIT" : "DEBIT"
-    );
-  }
+  equityAccounts
+    .filter((account) => !account.isGroup && !isTahunBerjalanEquity(account))
+    .forEach((account) => {
+      pushEntry(account, amounts[account.id], "KREDIT");
+    });
 
   return entries;
 };
 
 export const getFillableOpeningAccounts = (accounts = []) =>
   sortAccounts(
-    accounts.filter(
-      (account) =>
-        !account.isGroup &&
-        (getAccountType(account) === "ASSET" ||
-          getAccountType(account) === "LIABILITY")
-    )
+    accounts.filter((account) => {
+      if (account.isGroup) return false;
+
+      const type = getAccountType(account);
+      if (type === "ASSET" || type === "LIABILITY") return true;
+      return type === "EQUITY" && !isTahunBerjalanEquity(account);
+    })
   );
 
 export const getSaldoAwalUiConfig = () => {

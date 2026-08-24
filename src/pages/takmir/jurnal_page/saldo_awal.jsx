@@ -23,7 +23,6 @@ import {
   SALDO_AWAL_REFERENSI,
   SALDO_AWAL_TANGGAL,
   buildOpeningEntries,
-  calculateOpeningEquity,
   formatAmountInput,
   getAccountType,
   getChildAccounts,
@@ -39,9 +38,18 @@ import {
   isTahunBerjalanEquity,
   parseAmount,
   sumDescendantAmounts,
+  sumLeafAmounts,
 } from "../../../utils/saldoAwal";
 
 const saldoAwalUi = getSaldoAwalUiConfig();
+
+const getAccountKindLabel = (account) => {
+  const type = getAccountType(account);
+  if (type === "ASSET") return "Aset";
+  if (type === "LIABILITY") return "Kewajiban";
+  if (type === "EQUITY") return "Aset Neto";
+  return type;
+};
 
 const AmountInput = ({ value, onChange, disabled = false }) => (
   <input
@@ -94,8 +102,6 @@ const AccountTree = ({
   roots,
   amounts,
   onAmountChange,
-  readOnlyAmounts = {},
-  showInputs = true,
 }) => {
   const renderNode = (account, depth = 0) => {
     if (!hasVisibleDescendant(account, accounts)) return null;
@@ -104,10 +110,7 @@ const AccountTree = ({
     const paddingLeft = 12 + depth * 16;
 
     if (account.isGroup) {
-      const subtotal = sumDescendantAmounts(account, accounts, {
-        ...amounts,
-        ...readOnlyAmounts,
-      });
+      const subtotal = sumDescendantAmounts(account, accounts, amounts);
 
       return (
         <div key={account.id}>
@@ -129,10 +132,7 @@ const AccountTree = ({
       );
     }
 
-    const isEquity = getAccountType(account) === "EQUITY";
-    const amount = isEquity
-      ? Number(readOnlyAmounts[account.id]) || 0
-      : Number(amounts[account.id]) || 0;
+    const amount = Number(amounts[account.id]) || 0;
 
     return (
       <div
@@ -148,14 +148,10 @@ const AccountTree = ({
           </p>
         </div>
         <div className="w-36 shrink-0">
-          {showInputs && !isEquity ? (
-            <AmountInput
-              value={amount}
-              onChange={(nextValue) => onAmountChange(account.id, nextValue)}
-            />
-          ) : (
-            <AmountInput value={amount} onChange={() => {}} disabled />
-          )}
+          <AmountInput
+            value={amount}
+            onChange={(nextValue) => onAmountChange(account.id, nextValue)}
+          />
         </div>
       </div>
     );
@@ -169,7 +165,6 @@ const AllAccountsWorksheet = ({
   liabilityAccounts,
   equityAccounts,
   amounts,
-  equityDisplayAmounts,
   totalAset,
   totalKewajiban,
   totalAsetNeto,
@@ -198,7 +193,7 @@ const AllAccountsWorksheet = ({
       <div className="border-b border-amber-100 bg-amber-50 px-4 py-3">
         <h2 className="font-semibold text-amber-900">Kewajiban & Aset Neto</h2>
         <p className="text-xs text-amber-800">
-          Hutang diisi manual, aset neto menyesuaikan otomatis
+          Isi saldo kewajiban dan aset neto secara manual
         </p>
       </div>
       <AccountTree
@@ -207,19 +202,17 @@ const AllAccountsWorksheet = ({
         amounts={amounts}
         onAmountChange={onAmountChange}
       />
+      <div className="flex items-center justify-between border-y border-amber-200 bg-amber-100 px-4 py-2.5 font-semibold text-amber-950">
+        <span className="text-sm">Total Kewajiban</span>
+        <span className="text-sm tabular-nums">{formatCurrency(totalKewajiban)}</span>
+      </div>
       <AccountTree
         accounts={equityAccounts}
         roots={getSectionRoots(equityAccounts, "EQUITY")}
-        amounts={{}}
-        readOnlyAmounts={equityDisplayAmounts}
-        onAmountChange={() => {}}
-        showInputs={false}
+        amounts={amounts}
+        onAmountChange={onAmountChange}
       />
       <div className="space-y-2 bg-amber-800 px-4 py-3 text-white">
-        <div className="flex items-center justify-between text-sm">
-          <span>Total Kewajiban</span>
-          <span>{formatCurrency(totalKewajiban)}</span>
-        </div>
         <div className="flex items-center justify-between text-sm">
           <span>Total Aset Neto</span>
           <span>{formatCurrency(totalAsetNeto)}</span>
@@ -236,11 +229,8 @@ const AllAccountsWorksheet = ({
 const PerAccountPanel = ({
   fillableAccounts,
   amounts,
-  equity,
-  equityLeaves,
   selectedId,
   draftAmount,
-  saving,
   onSelect,
   onDraftChange,
   onSaveOne,
@@ -280,7 +270,7 @@ const PerAccountPanel = ({
             />
             {selectedAccount && (
               <p className="mt-2 text-xs text-gray-500">
-                {getAccountType(selectedAccount) === "ASSET" ? "Aset" : "Kewajiban"}
+                {getAccountKindLabel(selectedAccount)}
                 {isRestrictedAccount(selectedAccount) ? " · Dana terikat" : ""}
               </p>
             )}
@@ -297,11 +287,11 @@ const PerAccountPanel = ({
             <button
               type="button"
               onClick={onSaveOne}
-              disabled={saving || !selectedId || !draftAmount}
+              disabled={!selectedId || !draftAmount}
               className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg bg-green-600 px-4 py-2.5 font-semibold text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Save className="h-4 w-4" />
-              {saving ? "Menyimpan..." : "Simpan & lanjut"}
+              Simpan & lanjut
             </button>
             <button
               type="button"
@@ -315,74 +305,54 @@ const PerAccountPanel = ({
         </div>
       </section>
 
-      <div className="space-y-6">
-        <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-          <div className="mb-4 flex items-center justify-between gap-3">
-            <h3 className="font-semibold text-gray-800">Sudah diisi</h3>
-            <span className="text-xs text-gray-500">
-              {filledAccounts.length} akun · {remainingCount} belum
-            </span>
-          </div>
-          {filledAccounts.length === 0 ? (
-            <p className="text-sm text-gray-500">Belum ada akun yang diisi.</p>
-          ) : (
-            <div className="space-y-2">
-              {filledAccounts.map((account) => (
-                <div
-                  key={account.id}
-                  className="flex items-center justify-between gap-3 rounded-lg border border-gray-100 bg-gray-50 px-3 py-2"
-                >
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-medium text-gray-800">
-                      {account.namaAkun}
-                    </p>
-                    <p className="text-xs text-gray-500">{account.kodeAkun}</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold text-gray-900">
-                      {formatCurrency(amounts[account.id])}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => onEditFilled(account.id)}
-                      className="rounded p-1 text-blue-600 hover:bg-blue-50"
-                      title="Ubah"
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => onRemoveFilled(account.id)}
-                      className="rounded p-1 text-red-600 hover:bg-red-50"
-                      title="Hapus"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
+      <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <h3 className="font-semibold text-gray-800">Sudah diisi</h3>
+          <span className="text-xs text-gray-500">
+            {filledAccounts.length} akun · {remainingCount} belum
+          </span>
+        </div>
+        {filledAccounts.length === 0 ? (
+          <p className="text-sm text-gray-500">Belum ada akun yang diisi.</p>
+        ) : (
+          <div className="space-y-2">
+            {filledAccounts.map((account) => (
+              <div
+                key={account.id}
+                className="flex items-center justify-between gap-3 rounded-lg border border-gray-100 bg-gray-50 px-3 py-2"
+              >
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-medium text-gray-800">
+                    {account.namaAkun}
+                  </p>
+                  <p className="text-xs text-gray-500">{account.kodeAkun}</p>
                 </div>
-              ))}
-            </div>
-          )}
-        </section>
-
-        <section className="rounded-xl border border-amber-200 bg-amber-50 p-5">
-          <h3 className="font-semibold text-amber-900">Aset neto otomatis</h3>
-          <div className="mt-3 space-y-2 text-sm text-amber-950">
-            <div className="flex items-center justify-between gap-3">
-              <span>{equityLeaves.unrestricted?.namaAkun || "Tanpa pembatasan"}</span>
-              <span className="font-semibold">
-                {formatCurrency(equity.unrestricted)}
-              </span>
-            </div>
-            <div className="flex items-center justify-between gap-3">
-              <span>{equityLeaves.restricted?.namaAkun || "Dengan pembatasan"}</span>
-              <span className="font-semibold">
-                {formatCurrency(equity.restricted)}
-              </span>
-            </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-semibold text-gray-900">
+                    {formatCurrency(amounts[account.id])}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => onEditFilled(account.id)}
+                    className="rounded p-1 text-blue-600 hover:bg-blue-50"
+                    title="Ubah"
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onRemoveFilled(account.id)}
+                    className="rounded p-1 text-red-600 hover:bg-red-50"
+                    title="Hapus"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
-        </section>
-      </div>
+        )}
+      </section>
     </div>
   );
 };
@@ -423,7 +393,10 @@ const SaldoAwalPage = () => {
           const nextAmounts = {};
           (openingJurnal.entries || []).forEach((entry) => {
             const account = allAccounts.find((item) => item.id === entry.akunId);
-            if (!account || getAccountType(account) === "EQUITY") return;
+            if (!account) return;
+            if (getAccountType(account) === "EQUITY" && isTahunBerjalanEquity(account)) {
+              return;
+            }
             nextAmounts[entry.akunId] = Number(entry.jumlah) || 0;
           });
           setAmounts(nextAmounts);
@@ -486,68 +459,39 @@ const SaldoAwalPage = () => {
     [accounts]
   );
 
-  const equity = useMemo(
-    () => calculateOpeningEquity(assetAccounts, liabilityAccounts, amounts),
-    [assetAccounts, liabilityAccounts, amounts]
-  );
-
-  const equityDisplayAmounts = useMemo(() => {
-    const values = {};
-    if (equityLeaves.unrestricted && equityLeaves.restricted) {
-      values[equityLeaves.unrestricted.id] = equity.unrestricted;
-      values[equityLeaves.restricted.id] = equity.restricted;
-    } else {
-      const fallback = equityLeaves.unrestricted || equityLeaves.restricted;
-      if (fallback) {
-        values[fallback.id] = equity.unrestricted + equity.restricted;
-      }
-    }
-    return values;
-  }, [equity, equityLeaves]);
-
   const totalAset = useMemo(
-    () =>
-      assetAccounts
-        .filter((account) => !account.isGroup)
-        .reduce((total, account) => total + (Number(amounts[account.id]) || 0), 0),
+    () => sumLeafAmounts(assetAccounts, amounts),
     [assetAccounts, amounts]
   );
-
   const totalKewajiban = useMemo(
-    () =>
-      liabilityAccounts
-        .filter((account) => !account.isGroup)
-        .reduce((total, account) => total + (Number(amounts[account.id]) || 0), 0),
+    () => sumLeafAmounts(liabilityAccounts, amounts),
     [liabilityAccounts, amounts]
   );
+  const totalAsetNeto = useMemo(
+    () => sumLeafAmounts(equityAccounts, amounts),
+    [equityAccounts, amounts]
+  );
 
-  const totalAsetNeto = equity.unrestricted + equity.restricted;
   const totalKanan = totalKewajiban + totalAsetNeto;
   const selisih = Math.abs(totalAset - totalKanan);
   const isBalanced = selisih < 0.01;
-  const hasAmount = totalAset > 0 || totalKewajiban > 0;
+  const hasAmount = totalAset > 0 || totalKewajiban > 0 || totalAsetNeto > 0;
   const showAllAccounts = inputMode === "all";
+  const unbalanceMessage =
+    "Total aset belum sama dengan total kewajiban + aset neto. Saldo awal belum bisa disimpan.";
 
   const persistAmounts = async (nextAmounts, { silent = false } = {}) => {
-    const nextEquity = calculateOpeningEquity(
-      assetAccounts,
-      liabilityAccounts,
-      nextAmounts
-    );
-    const nextTotalAset = assetAccounts
-      .filter((account) => !account.isGroup)
-      .reduce((total, account) => total + (Number(nextAmounts[account.id]) || 0), 0);
-    const nextTotalKewajiban = liabilityAccounts
-      .filter((account) => !account.isGroup)
-      .reduce((total, account) => total + (Number(nextAmounts[account.id]) || 0), 0);
+    const nextTotalAset = sumLeafAmounts(assetAccounts, nextAmounts);
+    const nextTotalKewajiban = sumLeafAmounts(liabilityAccounts, nextAmounts);
+    const nextTotalAsetNeto = sumLeafAmounts(equityAccounts, nextAmounts);
 
-    if (nextTotalAset <= 0 && nextTotalKewajiban <= 0) {
-      if (!silent) toast.error("Isi minimal satu akun aset atau kewajiban.");
+    if (nextTotalAset <= 0 && nextTotalKewajiban <= 0 && nextTotalAsetNeto <= 0) {
+      if (!silent) toast.error("Isi minimal satu akun aset, kewajiban, atau aset neto.");
       return false;
     }
 
-    if (Math.abs(nextTotalAset - (nextTotalKewajiban + nextEquity.unrestricted + nextEquity.restricted)) >= 0.01) {
-      if (!silent) toast.error("Total aset belum sama dengan kewajiban + aset neto.");
+    if (Math.abs(nextTotalAset - (nextTotalKewajiban + nextTotalAsetNeto)) >= 0.01) {
+      if (!silent) toast.error(unbalanceMessage);
       return false;
     }
 
@@ -560,8 +504,7 @@ const SaldoAwalPage = () => {
       amounts: nextAmounts,
       assetAccounts,
       liabilityAccounts,
-      equity: nextEquity,
-      equityAccounts: equityLeaves,
+      equityAccounts,
     });
 
     if (entries.length < 1) {
@@ -613,7 +556,7 @@ const SaldoAwalPage = () => {
     if (nextEmpty) setSelectedId(nextEmpty.id);
   };
 
-  const handleSaveOne = async () => {
+  const handleSaveOne = () => {
     if (!selectedId || !draftAmount) {
       toast.error("Pilih akun dan isi nominal.");
       return;
@@ -624,24 +567,24 @@ const SaldoAwalPage = () => {
       [selectedId]: draftAmount,
     };
     setAmounts(nextAmounts);
-    const saved = await persistAmounts(nextAmounts);
-    if (saved) selectNextAccount(selectedId, nextAmounts);
+    selectNextAccount(selectedId, nextAmounts);
   };
 
   const handleSkip = () => {
     selectNextAccount(selectedId, amounts);
   };
 
-  const handleRemoveFilled = async (accountId) => {
+  const handleRemoveFilled = (accountId) => {
     const nextAmounts = { ...amounts, [accountId]: 0 };
     setAmounts(nextAmounts);
     setSelectedId(accountId);
-    if (existingJurnal?.id) {
-      await persistAmounts(nextAmounts, { silent: true });
-    }
   };
 
   const handleSave = async () => {
+    if (!isBalanced) {
+      toast.error(unbalanceMessage);
+      return;
+    }
     await persistAmounts(amounts);
   };
 
@@ -661,7 +604,7 @@ const SaldoAwalPage = () => {
             <h1 className="text-3xl font-bold text-gray-800">Saldo Awal</h1>
             <p className="mt-1 text-gray-600">
               Jabarkan posisi keuangan masjid sebelum transaksi pertama dicatat di GoQu.
-              Aset neto dihitung otomatis agar neraca seimbang.
+              Pastikan total aset sama dengan total kewajiban + aset neto.
             </p>
           </div>
         </div>
@@ -676,72 +619,23 @@ const SaldoAwalPage = () => {
             <TableSkeleton rows={10} cols={2} />
           </div>
         ) : showAllAccounts ? (
-          <>
-            <AllAccountsWorksheet
-              assetAccounts={assetAccounts}
-              liabilityAccounts={liabilityAccounts}
-              equityAccounts={equityAccounts}
-              amounts={amounts}
-              equityDisplayAmounts={equityDisplayAmounts}
-              totalAset={totalAset}
-              totalKewajiban={totalKewajiban}
-              totalAsetNeto={totalAsetNeto}
-              totalKanan={totalKanan}
-              onAmountChange={handleAmountChange}
-            />
-
-            <div className="sticky bottom-4 z-10 rounded-xl border border-gray-200 bg-white/95 p-4 shadow-lg backdrop-blur">
-              <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                <div className="flex flex-wrap items-center gap-4">
-                  <div>
-                    <p className="text-xs text-gray-500">Total Aset</p>
-                    <p className="font-semibold text-gray-900">{formatCurrency(totalAset)}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Total Kewajiban dan Aset Neto</p>
-                    <p className="font-semibold text-gray-900">{formatCurrency(totalKanan)}</p>
-                  </div>
-                  <div
-                    className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-medium ${
-                      isBalanced
-                        ? "bg-emerald-50 text-emerald-700"
-                        : "bg-red-50 text-red-700"
-                    }`}
-                  >
-                    {isBalanced ? (
-                      <CheckCircle2 className="h-4 w-4" />
-                    ) : (
-                      <AlertCircle className="h-4 w-4" />
-                    )}
-                    {isBalanced ? "Seimbang" : `Selisih ${formatCurrency(selisih)}`}
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={handleSave}
-                  disabled={saving || !isBalanced || !hasAmount}
-                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-green-600 px-5 py-2.5 font-semibold text-white transition hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  <Save className="h-4 w-4" />
-                  {saving
-                    ? "Menyimpan..."
-                    : existingJurnal
-                      ? "Perbarui saldo awal"
-                      : "Simpan saldo awal"}
-                </button>
-              </div>
-            </div>
-          </>
+          <AllAccountsWorksheet
+            assetAccounts={assetAccounts}
+            liabilityAccounts={liabilityAccounts}
+            equityAccounts={equityAccounts}
+            amounts={amounts}
+            totalAset={totalAset}
+            totalKewajiban={totalKewajiban}
+            totalAsetNeto={totalAsetNeto}
+            totalKanan={totalKanan}
+            onAmountChange={handleAmountChange}
+          />
         ) : (
           <PerAccountPanel
             fillableAccounts={fillableAccounts}
             amounts={amounts}
-            equity={equity}
-            equityLeaves={equityLeaves}
             selectedId={selectedId}
             draftAmount={draftAmount}
-            saving={saving}
             onSelect={setSelectedId}
             onDraftChange={setDraftAmount}
             onSaveOne={handleSaveOne}
@@ -749,6 +643,59 @@ const SaldoAwalPage = () => {
             onEditFilled={(accountId) => setSelectedId(accountId)}
             onRemoveFilled={handleRemoveFilled}
           />
+        )}
+
+        {!loading && (
+          <div className="sticky bottom-4 z-10 space-y-3 rounded-xl border border-gray-200 bg-white/95 p-4 shadow-lg backdrop-blur">
+            {!isBalanced && hasAmount && (
+              <div className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
+                <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                <p>
+                  {unbalanceMessage} Selisih {formatCurrency(selisih)}.
+                </p>
+              </div>
+            )}
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+              <div className="flex flex-wrap items-center gap-4">
+                <div>
+                  <p className="text-xs text-gray-500">Total Aset</p>
+                  <p className="font-semibold text-gray-900">{formatCurrency(totalAset)}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Total Kewajiban dan Aset Neto</p>
+                  <p className="font-semibold text-gray-900">{formatCurrency(totalKanan)}</p>
+                </div>
+                <div
+                  className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-medium ${
+                    isBalanced
+                      ? "bg-emerald-50 text-emerald-700"
+                      : "bg-red-50 text-red-700"
+                  }`}
+                >
+                  {isBalanced ? (
+                    <CheckCircle2 className="h-4 w-4" />
+                  ) : (
+                    <AlertCircle className="h-4 w-4" />
+                  )}
+                  {isBalanced ? "Seimbang" : `Selisih ${formatCurrency(selisih)}`}
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleSave}
+                disabled={saving || !isBalanced || !hasAmount}
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-green-600 px-5 py-2.5 font-semibold text-white transition hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <Save className="h-4 w-4" />
+                {saving
+                  ? "Menyimpan..."
+                  : existingJurnal
+                    ? "Perbarui saldo awal"
+                    : "Simpan saldo awal"}
+              </button>
+            </div>
+          </div>
         )}
       </div>
     </TakmirLayout>
