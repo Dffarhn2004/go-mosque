@@ -7,6 +7,8 @@ import { getDetailAccounts } from "../../../utils/accountUtils";
 import toast from "react-hot-toast";
 import { TableSkeleton } from "../../../components/common/Skeleton";
 
+const SHOW_ADD_COA_ACCOUNT = false;
+
 const COAPage = () => {
   const masjid = JSON.parse(localStorage.getItem("masjid") || "{}");
   const masjidId = masjid?.id;
@@ -121,14 +123,16 @@ const COAPage = () => {
               Kelola akun-akun untuk sistem jurnal akuntansi
             </p>
           </div>
-          <div className="flex gap-2">
-            <button
-              onClick={handleCreate}
-              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-            >
-              Tambah Akun
-            </button>
-          </div>
+          {SHOW_ADD_COA_ACCOUNT && (
+            <div className="flex gap-2">
+              <button
+                onClick={handleCreate}
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+              >
+                Tambah Akun
+              </button>
+            </div>
+          )}
         </div>
 
         {loading ? (
@@ -139,7 +143,7 @@ const COAPage = () => {
             coaList={coaList}
             onEdit={handleEdit}
             onDelete={handleDelete}
-            onCreate={handleCreate}
+            onCreate={SHOW_ADD_COA_ACCOUNT ? handleCreate : undefined}
           />
         )}
 

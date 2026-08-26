@@ -2,18 +2,17 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import TakmirLayout from "../../../layouts/takmir_layout";
 import JurnalTable from "../../../components/common/JurnalTable";
-import { StatStripSkeleton, TableSkeleton } from "../../../components/common/Skeleton";
+import { TableSkeleton } from "../../../components/common/Skeleton";
 import { getAllAccounts } from "../../../services/coaService";
 import {
   getAllJurnals,
   deleteJurnal,
-  getAccountBalances,
 } from "../../../services/jurnalService";
 import { transformAccounts, transformJurnals } from "../../../utils/dataTransform";
 import formatCurrency from "../../../utils/formatCurrency";
 import { isSaldoAwalJurnal } from "../../../utils/saldoAwal";
 import toast from "react-hot-toast";
-import { Plus, CheckCircle2, AlertCircle, CircleAlert, FileCheck2, XCircle } from "lucide-react";
+import { Plus, CircleAlert, FileCheck2, XCircle } from "lucide-react";
 import axiosInstance from "../../../api/axiosInstance";
 
 const JurnalPage = () => {
@@ -21,7 +20,6 @@ const JurnalPage = () => {
   const [jurnalList, setJurnalList] = useState([]);
   const [coaList, setCoaList] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [saldoAkun, setSaldoAkun] = useState({});
   const [incomingDonations, setIncomingDonations] = useState([]);
 
   // Load data dari API
@@ -50,10 +48,6 @@ const JurnalPage = () => {
       setCoaList(detailAccounts);
       setJurnalList(transformedJurnals);
       setIncomingDonations(donationsRes.data?.data || []);
-
-      // Load account balances
-      const balances = await getAccountBalances();
-      setSaldoAkun(balances);
     } catch (error) {
       console.error("Error loading data:", error);
       toast.error(
@@ -98,43 +92,6 @@ const JurnalPage = () => {
     }
   };
 
-
-  // Transform saldoAkun dari backend format ke frontend format untuk display - memoized
-  const saldoAkunDisplay = useMemo(() => {
-    return Object.values(saldoAkun).map((item) => {
-      const account = item.account;
-      return {
-        akun: {
-          id: account.id,
-          kodeAkun: account.code,
-          namaAkun: account.name,
-        },
-        saldo: typeof item.saldo === "string" ? parseFloat(item.saldo) : item.saldo,
-      };
-    });
-  }, [saldoAkun]);
-
-  // Calculate summary dari semua jurnal - memoized
-  const jurnalSummary = useMemo(() => {
-    return jurnalList.reduce(
-      (acc, jurnal) => {
-        jurnal.entries.forEach((entry) => {
-          const jumlah = parseFloat(entry.jumlah) || 0;
-          if (entry.tipe === "DEBIT") {
-            acc.totalDebit += jumlah;
-          } else {
-            acc.totalKredit += jumlah;
-          }
-        });
-        return acc;
-      },
-      { totalDebit: 0, totalKredit: 0 }
-    );
-  }, [jurnalList]);
-
-  const summaryBalance = Math.abs(jurnalSummary.totalDebit - jurnalSummary.totalKredit);
-  const isSummaryBalanced = summaryBalance < 0.01;
-  const hasOpeningBalance = jurnalList.some(isSaldoAwalJurnal);
 
   const pendingApprovals = useMemo(() => {
     const existingReferences = new Set(
@@ -213,31 +170,8 @@ const JurnalPage = () => {
           </button>
         </div>
 
-        {!loading && !hasOpeningBalance && (
-          <div className="flex flex-col gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="font-semibold text-amber-900">Belum ada saldo awal</p>
-              <p className="mt-1 text-sm text-amber-800">
-                Isi saldo awal dulu agar laporan dan buku besar tidak mulai dari Rp 0.
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() => navigate("/admin/jurnal/saldo-awal")}
-              className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-700"
-            >
-              Isi saldo awal
-            </button>
-          </div>
-        )}
-
         {loading ? (
-          <div className="space-y-4">
-            {/* 3 summary cards */}
-            <StatStripSkeleton count={3} />
-            {/* Table */}
-            <TableSkeleton rows={8} cols={6} />
-          </div>
+          <TableSkeleton rows={8} cols={6} />
         ) : (
           <>
             {pendingApprovals.length > 0 && (
@@ -305,80 +239,6 @@ const JurnalPage = () => {
                 </div>
               </div>
             )}
-
-            {/* Ringkasan Jurnal */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h2 className="text-lg font-semibold text-gray-800 mb-4">
-                Ringkasan Jurnal
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="p-4 bg-blue-50 rounded-lg">
-                  <div className="text-sm text-gray-600">Total Debit</div>
-                  <div className="text-2xl font-bold text-blue-600">
-                    {formatCurrency(jurnalSummary.totalDebit)}
-                  </div>
-                </div>
-                <div className="p-4 bg-green-50 rounded-lg">
-                  <div className="text-sm text-gray-600">Total Kredit</div>
-                  <div className="text-2xl font-bold text-green-600">
-                    {formatCurrency(jurnalSummary.totalKredit)}
-                  </div>
-                </div>
-                <div className="p-4 bg-gray-50 rounded-lg">
-                  <div className="text-sm text-gray-600">Selisih</div>
-                  <div
-                    className={`text-2xl font-bold ${
-                      isSummaryBalanced ? "text-gray-600" : "text-red-600"
-                    }`}
-                  >
-                    {formatCurrency(summaryBalance)}
-                  </div>
-                  {isSummaryBalanced && (
-                    <div className="flex items-center gap-1 mt-1 text-sm text-green-600">
-                      <CheckCircle2 className="w-4 h-4" />
-                      <span>Balance</span>
-                    </div>
-                  )}
-                  {!isSummaryBalanced && (
-                    <div className="flex items-center gap-1 mt-1 text-sm text-red-600">
-                      <AlertCircle className="w-4 h-4" />
-                      <span>Tidak Balance</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Saldo Akun Summary */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h2 className="text-lg font-semibold text-gray-800 mb-4">
-                Saldo Akun
-              </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {saldoAkunDisplay
-                  .filter((item) => item.saldo !== 0)
-                  .map((item) => (
-                    <div
-                      key={item.akun.id}
-                      className="p-3 bg-gray-50 rounded-lg border border-gray-200"
-                    >
-                      <div className="text-sm font-medium text-gray-700">
-                        {item.akun.kodeAkun}
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        {item.akun.namaAkun}
-                      </div>
-                      <div
-                        className={`text-sm font-bold mt-1 ${
-                          item.saldo >= 0 ? "text-emerald-600" : "text-red-600"
-                        }`}
-                      >
-                        {formatCurrency(item.saldo)}
-                      </div>
-                    </div>
-                  ))}
-              </div>
-            </div>
 
             {/* Jurnal Table */}
             <JurnalTable

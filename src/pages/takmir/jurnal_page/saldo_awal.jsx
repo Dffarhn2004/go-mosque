@@ -6,13 +6,10 @@ import {
   CheckCircle2,
   AlertCircle,
   Save,
-  Pencil,
-  Trash2,
 } from "lucide-react";
 
 import TakmirLayout from "../../../layouts/takmir_layout";
 import { TableSkeleton } from "../../../components/common/Skeleton";
-import SearchableSelect from "../../../components/common/SearchableSelect";
 import { getAllAccounts } from "../../../services/coaService";
 import { createJurnal, getAllJurnals, updateJurnal } from "../../../services/jurnalService";
 import { transformAccounts, transformJurnals } from "../../../utils/dataTransform";
@@ -26,10 +23,8 @@ import {
   formatAmountInput,
   getAccountType,
   getChildAccounts,
-  getFillableOpeningAccounts,
   getJurnalTanggalKey,
   getOpeningEquityAccounts,
-  getSaldoAwalUiConfig,
   getSectionRoots,
   hasVisibleDescendant,
   isNeracaAccount,
@@ -40,16 +35,6 @@ import {
   sumDescendantAmounts,
   sumLeafAmounts,
 } from "../../../utils/saldoAwal";
-
-const saldoAwalUi = getSaldoAwalUiConfig();
-
-const getAccountKindLabel = (account) => {
-  const type = getAccountType(account);
-  if (type === "ASSET") return "Aset";
-  if (type === "LIABILITY") return "Kewajiban";
-  if (type === "EQUITY") return "Aset Neto";
-  return type;
-};
 
 const AmountInput = ({ value, onChange, disabled = false }) => (
   <input
@@ -66,36 +51,6 @@ const AmountInput = ({ value, onChange, disabled = false }) => (
     }`}
   />
 );
-
-const ModeToggle = ({ value, onChange }) => {
-  const options = [
-    { id: "all", label: "Semua akun" },
-    { id: "one", label: "Per akun" },
-  ];
-
-  return (
-    <div className="grid max-w-md grid-cols-2 gap-3">
-      {options.map((option) => {
-        const isActive = value === option.id;
-
-        return (
-          <button
-            key={option.id}
-            type="button"
-            onClick={() => onChange(option.id)}
-            className={`rounded-xl border-2 px-4 py-3 text-sm font-semibold transition-all duration-200 ${
-              isActive
-                ? "border-emerald-600 bg-emerald-600 text-white shadow-md"
-                : "border-gray-300 bg-white text-gray-600 hover:border-emerald-400 hover:bg-emerald-50 hover:text-emerald-700"
-            }`}
-          >
-            {option.label}
-          </button>
-        );
-      })}
-    </div>
-  );
-};
 
 const AccountTree = ({
   accounts,
@@ -226,137 +181,6 @@ const AllAccountsWorksheet = ({
   </div>
 );
 
-const PerAccountPanel = ({
-  fillableAccounts,
-  amounts,
-  selectedId,
-  draftAmount,
-  onSelect,
-  onDraftChange,
-  onSaveOne,
-  onSkip,
-  onEditFilled,
-  onRemoveFilled,
-}) => {
-  const selectedAccount = fillableAccounts.find((account) => account.id === selectedId);
-  const filledAccounts = fillableAccounts.filter(
-    (account) => Number(amounts[account.id]) > 0
-  );
-  const remainingCount = fillableAccounts.length - filledAccounts.length;
-
-  return (
-    <div className="grid items-start gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-      <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-        <h2 className="text-lg font-semibold text-gray-800">Tambah per akun</h2>
-        <p className="mt-1 text-sm text-gray-600">
-          Pilih satu akun, isi nominalnya, lalu lanjut ke akun berikutnya.
-        </p>
-
-        <div className="mt-5 space-y-4">
-          <div>
-            <label className="mb-2 block text-sm font-medium text-gray-700">
-              Akun
-            </label>
-            <SearchableSelect
-              options={fillableAccounts}
-              value={selectedId}
-              onChange={onSelect}
-              placeholder="Pilih akun"
-              searchPlaceholder="Cari nama atau kode akun..."
-              getOptionLabel={(account) =>
-                `${account.kodeAkun} - ${account.namaAkun}`
-              }
-              getOptionValue={(account) => account.id}
-            />
-            {selectedAccount && (
-              <p className="mt-2 text-xs text-gray-500">
-                {getAccountKindLabel(selectedAccount)}
-                {isRestrictedAccount(selectedAccount) ? " · Dana terikat" : ""}
-              </p>
-            )}
-          </div>
-
-          <div>
-            <label className="mb-2 block text-sm font-medium text-gray-700">
-              Nominal
-            </label>
-            <AmountInput value={draftAmount} onChange={onDraftChange} />
-          </div>
-
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <button
-              type="button"
-              onClick={onSaveOne}
-              disabled={!selectedId || !draftAmount}
-              className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg bg-green-600 px-4 py-2.5 font-semibold text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              <Save className="h-4 w-4" />
-              Simpan & lanjut
-            </button>
-            <button
-              type="button"
-              onClick={onSkip}
-              disabled={!selectedId}
-              className="rounded-lg border border-gray-300 px-4 py-2.5 font-semibold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              Lewati
-            </button>
-          </div>
-        </div>
-      </section>
-
-      <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-        <div className="mb-4 flex items-center justify-between gap-3">
-          <h3 className="font-semibold text-gray-800">Sudah diisi</h3>
-          <span className="text-xs text-gray-500">
-            {filledAccounts.length} akun · {remainingCount} belum
-          </span>
-        </div>
-        {filledAccounts.length === 0 ? (
-          <p className="text-sm text-gray-500">Belum ada akun yang diisi.</p>
-        ) : (
-          <div className="space-y-2">
-            {filledAccounts.map((account) => (
-              <div
-                key={account.id}
-                className="flex items-center justify-between gap-3 rounded-lg border border-gray-100 bg-gray-50 px-3 py-2"
-              >
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-medium text-gray-800">
-                    {account.namaAkun}
-                  </p>
-                  <p className="text-xs text-gray-500">{account.kodeAkun}</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-semibold text-gray-900">
-                    {formatCurrency(amounts[account.id])}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => onEditFilled(account.id)}
-                    className="rounded p-1 text-blue-600 hover:bg-blue-50"
-                    title="Ubah"
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => onRemoveFilled(account.id)}
-                    className="rounded p-1 text-red-600 hover:bg-red-50"
-                    title="Hapus"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </section>
-    </div>
-  );
-};
-
 const SaldoAwalPage = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -364,14 +188,6 @@ const SaldoAwalPage = () => {
   const [accounts, setAccounts] = useState([]);
   const [existingJurnal, setExistingJurnal] = useState(null);
   const [amounts, setAmounts] = useState({});
-  const [inputMode, setInputMode] = useState(saldoAwalUi.initialInput);
-  const [selectedId, setSelectedId] = useState("");
-  const [draftAmount, setDraftAmount] = useState(0);
-
-  const fillableAccounts = useMemo(
-    () => getFillableOpeningAccounts(accounts),
-    [accounts]
-  );
 
   useEffect(() => {
     const loadData = async () => {
@@ -420,22 +236,6 @@ const SaldoAwalPage = () => {
     loadData();
   }, []);
 
-  useEffect(() => {
-    if (!fillableAccounts.length) return;
-    if (selectedId && fillableAccounts.some((account) => account.id === selectedId)) {
-      return;
-    }
-
-    const firstEmpty = fillableAccounts.find(
-      (account) => !Number(amounts[account.id])
-    );
-    setSelectedId((firstEmpty || fillableAccounts[0]).id);
-  }, [fillableAccounts, amounts, selectedId]);
-
-  useEffect(() => {
-    setDraftAmount(Number(amounts[selectedId]) || 0);
-  }, [selectedId, amounts]);
-
   const assetAccounts = useMemo(
     () => accounts.filter((account) => getAccountType(account) === "ASSET"),
     [accounts]
@@ -476,7 +276,6 @@ const SaldoAwalPage = () => {
   const selisih = Math.abs(totalAset - totalKanan);
   const isBalanced = selisih < 0.01;
   const hasAmount = totalAset > 0 || totalKewajiban > 0 || totalAsetNeto > 0;
-  const showAllAccounts = inputMode === "all";
   const unbalanceMessage =
     "Total aset belum sama dengan total kewajiban + aset neto. Saldo awal belum bisa disimpan.";
 
@@ -496,7 +295,7 @@ const SaldoAwalPage = () => {
     }
 
     if (!equityLeaves.unrestricted && !equityLeaves.restricted) {
-      if (!silent) toast.error("Akun aset neto tahun lalu tidak ditemukan di COA.");
+      if (!silent) toast.error("Akun aset neto periode lalu tidak ditemukan di COA.");
       return false;
     }
 
@@ -546,40 +345,6 @@ const SaldoAwalPage = () => {
     }));
   };
 
-  const selectNextAccount = (fromId, nextAmounts) => {
-    const currentIndex = fillableAccounts.findIndex((account) => account.id === fromId);
-    const rotated = [
-      ...fillableAccounts.slice(currentIndex + 1),
-      ...fillableAccounts.slice(0, currentIndex + 1),
-    ];
-    const nextEmpty = rotated.find((account) => !Number(nextAmounts[account.id]));
-    if (nextEmpty) setSelectedId(nextEmpty.id);
-  };
-
-  const handleSaveOne = () => {
-    if (!selectedId || !draftAmount) {
-      toast.error("Pilih akun dan isi nominal.");
-      return;
-    }
-
-    const nextAmounts = {
-      ...amounts,
-      [selectedId]: draftAmount,
-    };
-    setAmounts(nextAmounts);
-    selectNextAccount(selectedId, nextAmounts);
-  };
-
-  const handleSkip = () => {
-    selectNextAccount(selectedId, amounts);
-  };
-
-  const handleRemoveFilled = (accountId) => {
-    const nextAmounts = { ...amounts, [accountId]: 0 };
-    setAmounts(nextAmounts);
-    setSelectedId(accountId);
-  };
-
   const handleSave = async () => {
     if (!isBalanced) {
       toast.error(unbalanceMessage);
@@ -609,16 +374,12 @@ const SaldoAwalPage = () => {
           </div>
         </div>
 
-        {saldoAwalUi.isDual && (
-          <ModeToggle value={inputMode} onChange={setInputMode} />
-        )}
-
         {loading ? (
           <div className="grid gap-6 lg:grid-cols-2">
             <TableSkeleton rows={10} cols={2} />
             <TableSkeleton rows={10} cols={2} />
           </div>
-        ) : showAllAccounts ? (
+        ) : (
           <AllAccountsWorksheet
             assetAccounts={assetAccounts}
             liabilityAccounts={liabilityAccounts}
@@ -629,19 +390,6 @@ const SaldoAwalPage = () => {
             totalAsetNeto={totalAsetNeto}
             totalKanan={totalKanan}
             onAmountChange={handleAmountChange}
-          />
-        ) : (
-          <PerAccountPanel
-            fillableAccounts={fillableAccounts}
-            amounts={amounts}
-            selectedId={selectedId}
-            draftAmount={draftAmount}
-            onSelect={setSelectedId}
-            onDraftChange={setDraftAmount}
-            onSaveOne={handleSaveOne}
-            onSkip={handleSkip}
-            onEditFilled={(accountId) => setSelectedId(accountId)}
-            onRemoveFilled={handleRemoveFilled}
           />
         )}
 

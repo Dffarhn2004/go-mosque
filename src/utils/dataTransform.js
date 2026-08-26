@@ -33,12 +33,13 @@ export const transformAccount = (account) => {
 
   // Get kategori from parent name or use default
   const kategori = account.parent?.name || "Lainnya";
+  const namaAkun = String(account.name || "").replace(/Tahun Lalu/g, "Periode Lalu");
 
   const transformed = {
     id: account.id,
     masjidId: account.masjidId,
     kodeAkun: account.code,
-    namaAkun: account.name,
+    namaAkun,
     tipeAkun: typeMap[account.type] || account.type, // Frontend format (ASET, KEWAJIBAN, dll)
     type: account.type, // Backend format (ASSET, LIABILITY, dll) - untuk normal balance
     normalBalance: account.normalBalance || null, // Normal balance (DEBIT/KREDIT)
@@ -82,7 +83,7 @@ export const transformAccounts = (accounts) => {
 export const getAccountDisplayName = (account) => {
   if (!account) return "";
   
-  // Untuk akun ekuitas yang memiliki nama sama (Aset Neto Tahun Lalu/Tahun Berjalan)
+  // Untuk akun ekuitas yang memiliki nama sama (Aset Neto Periode Lalu/Tahun Berjalan)
   // Tambahkan parent name untuk membedakan
   if (account.type === "EQUITY" && account.parent) {
     const parentName = account.parent.name;

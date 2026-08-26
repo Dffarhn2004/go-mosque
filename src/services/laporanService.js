@@ -62,11 +62,14 @@ export const generateLabaRugi = async (tanggalAwal, tanggalAkhir) => {
  */
 export const generatePerubahanEkuitas = async (tahun) => {
   try {
+    const year = Number(tahun);
     const response = await axiosInstance.get(
       "/laporan-keuangan/jurnal/perubahan-aset-neto",
       {
         params: {
-          tahun,
+          tahun: year,
+          tanggalAwal: `${year}-01-01`,
+          tanggalAkhir: `${year}-12-31`,
         },
       }
     );
@@ -175,12 +178,15 @@ export const generateLabaRugiPublic = async (masjidId, tanggalAwal, tanggalAkhir
  */
 export const generatePerubahanEkuitasPublic = async (masjidId, tahun) => {
   try {
+    const year = Number(tahun);
     const response = await axiosInstance.get(
       "/laporan-keuangan/public/jurnal/perubahan-aset-neto",
       {
         params: {
           masjidId,
-          tahun,
+          tahun: year,
+          tanggalAwal: `${year}-01-01`,
+          tanggalAkhir: `${year}-12-31`,
         },
       }
     );
