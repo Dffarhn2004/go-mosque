@@ -17,6 +17,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import toast from "react-hot-toast";
 
 import ErrorAlert from "../../../components/common/Auth/ErrorAlert";
+import ForgotPasswordHelp from "../../../components/common/Auth/ForgotPasswordHelp";
 import InputField from "../../../components/common/Auth/InputField";
 import SubmitButton from "../../../components/common/Auth/SubmitButton";
 import axiosInstance from "../../../api/axiosInstance";
@@ -213,6 +214,7 @@ const AuthPage = ({ defaultMode = "login" }) => {
   const [registerStep, setRegisterStep] = useState(1);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState(emptyForm);
   const [error, setError] = useState("");
@@ -405,6 +407,7 @@ const AuthPage = ({ defaultMode = "login" }) => {
   const showMosqueFields = isTakmirRegister && registerStep === 2;
 
   return (
+    <>
     <div className="min-h-screen lg:grid lg:grid-cols-[1.05fr_0.95fr]">
       <AuthBrandPanel isLogin={isLogin} role={role} />
 
@@ -500,6 +503,18 @@ const AuthPage = ({ defaultMode = "login" }) => {
                             : undefined
                       }
                     />
+
+                    {isLogin && (
+                      <div className="-mt-1 flex justify-end">
+                        <button
+                          type="button"
+                          onClick={() => setShowForgotPassword(true)}
+                          className="text-sm font-semibold text-emerald-700 hover:text-emerald-800"
+                        >
+                          Lupa password?
+                        </button>
+                      </div>
+                    )}
 
                     {!isLogin && (
                       <InputField
@@ -646,6 +661,13 @@ const AuthPage = ({ defaultMode = "login" }) => {
         </div>
       </main>
     </div>
+
+      <ForgotPasswordHelp
+        open={showForgotPassword}
+        onClose={() => setShowForgotPassword(false)}
+        email={form.email}
+      />
+    </>
   );
 };
 

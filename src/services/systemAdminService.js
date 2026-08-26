@@ -30,6 +30,13 @@ export const updateAdminUserStatus = async (id, isActive) => {
   return data.data;
 };
 
+export const resetAdminUserPassword = async (id, newPassword) => {
+  const { data } = await axiosInstance.patch(`/system-admin/users/${id}/password`, {
+    newPassword,
+  });
+  return data.data;
+};
+
 export const getAdminMasjids = async (params = {}) => {
   const { data } = await axiosInstance.get("/system-admin/masjids", { params });
   return data.data;
