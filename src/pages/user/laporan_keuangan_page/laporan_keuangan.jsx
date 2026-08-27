@@ -313,7 +313,7 @@ const LaporanKeuanganUserPage = () => {
     };
   };
 
-  const handleExportPDF = () => {
+  const handleExportPDF = async () => {
     if (!laporanData) {
       toast.error("Tidak ada data untuk di-export");
       return;
@@ -341,7 +341,7 @@ const LaporanKeuanganUserPage = () => {
     }
 
     try {
-      exportToPDF(laporanData, laporanType, masjidName, periode);
+      await exportToPDF(laporanData, laporanType, masjidName, periode);
       toast.success("Laporan berhasil di-export ke PDF");
     } catch (error) {
       console.error("Error exporting PDF:", error);

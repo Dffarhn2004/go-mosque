@@ -329,7 +329,7 @@ const LaporanKeuanganJurnalPage = () => {
     debouncedGenerate();
   }, [debouncedGenerate]);
 
-  const handleExportPDF = () => {
+  const handleExportPDF = async () => {
     console.log("=== START EXPORT PDF ===");
     console.log("1. Checking laporanData:", laporanData);
     
@@ -376,7 +376,7 @@ const LaporanKeuanganJurnalPage = () => {
 
     try {
       console.log("6. Calling exportToPDF...");
-      exportToPDF(laporanData, laporanType, masjidName, periode);
+      await exportToPDF(laporanData, laporanType, masjidName, periode);
       console.log("✅ PDF export successful");
       toast.success("Laporan berhasil di-export ke PDF");
     } catch (error) {

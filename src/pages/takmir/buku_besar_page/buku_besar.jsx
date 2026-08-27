@@ -135,7 +135,7 @@ const BukuBesarPage = () => {
     setCurrentPage(1);
   }, [tanggalAwal, tanggalAkhir]);
 
-  const handleExportPDF = () => {
+  const handleExportPDF = async () => {
     if (sortedEntries.length === 0) {
       toast.error("Tidak ada data untuk di-export");
       return;
@@ -145,7 +145,7 @@ const BukuBesarPage = () => {
     const periode = { tanggalAwal, tanggalAkhir };
 
     try {
-      exportBukuBesarToPDF(sortedEntries, masjidName, periode, totalDebit, totalKredit);
+      await exportBukuBesarToPDF(sortedEntries, masjidName, periode, totalDebit, totalKredit);
       toast.success("Buku besar berhasil di-export ke PDF");
     } catch (error) {
       console.error("Error exporting PDF:", error);
